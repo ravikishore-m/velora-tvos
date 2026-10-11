@@ -12,6 +12,7 @@ import SwiftUI
 struct CinemaBadges: View {
 
     let item: BaseItemDto
+    var includesAudio: Bool = false
 
     var body: some View {
         HStack(spacing: CinemaTheme.Spacing.metadata) {
@@ -23,18 +24,10 @@ struct CinemaBadges: View {
             }
 
             if let mediaStreams = item.mediaStreams {
-                if mediaStreams.has4KVideo {
-                    EmptyLabel("4K")
-                        .labelStyle(.attributeBadgeFill)
-                }
-
-                if mediaStreams.hasDolbyVision {
-                    EmptyLabel("DV")
-                        .labelStyle(.attributeBadgeFill)
-                } else if mediaStreams.hasHDRVideo {
-                    EmptyLabel("HDR")
-                        .labelStyle(.attributeBadgeFill)
-                }
+                CinemaFormatBadges(
+                    streams: mediaStreams,
+                    includesAudio: includesAudio
+                )
             }
         }
         .lineLimit(1)

@@ -586,10 +586,14 @@ internal enum L10n {
   internal static let director = L10n.tr("Localizable", "director", fallback: "Director")
   /// Direct play
   internal static let directPlay = L10n.tr("Localizable", "directPlay", fallback: "Direct play")
+  /// Playing the original file. Your server is not converting anything.
+  internal static let directPlayDescription = L10n.tr("Localizable", "directPlayDescription", fallback: "Playing the original file. Your server is not converting anything.")
   /// An error occurred during direct play
   internal static let directPlayError = L10n.tr("Localizable", "directPlayError", fallback: "An error occurred during direct play")
   /// Direct Stream
   internal static let directStream = L10n.tr("Localizable", "directStream", fallback: "Direct Stream")
+  /// Original video and audio, repackaged by your server for this player.
+  internal static let directStreamDescription = L10n.tr("Localizable", "directStreamDescription", fallback: "Original video and audio, repackaged by your server for this player.")
   /// Disabled
   internal static let disabled = L10n.tr("Localizable", "disabled", fallback: "Disabled")
   /// Disc
@@ -1262,6 +1266,8 @@ internal enum L10n {
   internal static let playAndPause = L10n.tr("Localizable", "playAndPause", fallback: "Play / Pause")
   /// Playback
   internal static let playback = L10n.tr("Localizable", "playback", fallback: "Playback")
+  /// Playback Info
+  internal static let playbackInfo = L10n.tr("Localizable", "playbackInfo", fallback: "Playback Info")
   /// Playback quality
   internal static let playbackQuality = L10n.tr("Localizable", "playbackQuality", fallback: "Playback quality")
   /// Force media from the server to transcode if it exceeds the selected resolution or bitrate.
@@ -1864,6 +1870,8 @@ internal enum L10n {
   internal static let trailingValue = L10n.tr("Localizable", "trailingValue", fallback: "Trailing value")
   /// Transcode
   internal static let transcode = L10n.tr("Localizable", "transcode", fallback: "Transcode")
+  /// Your server is converting this video, which can lower quality.
+  internal static let transcodeDescription = L10n.tr("Localizable", "transcodeDescription", fallback: "Your server is converting this video, which can lower quality.")
   /// Transcode progress
   internal static let transcodeProgress = L10n.tr("Localizable", "transcodeProgress", fallback: "Transcode progress")
   /// Transcode reason(s)

@@ -82,7 +82,11 @@ extension Defaults.Keys {
     /// /// Only use for `set`, use `appearance` for `get`.
     static let appAppearance: Key<AppAppearance> = AppKey("appAppearance", default: .system)
 
+    #if os(tvOS)
+    static let backgroundSignOutInterval: Key<TimeInterval> = AppKey("backgroundSignOutInterval", default: 600)
+    #else
     static let backgroundSignOutInterval: Key<TimeInterval> = AppKey("backgroundSignOutInterval", default: 3600)
+    #endif
     static let backgroundTimeStamp: Key<Date> = AppKey("backgroundTimeStamp", default: Date.now)
     static let lastSignedInUserID: Key<UserSessionState> = AppKey("lastSignedInUserID", default: .signedOut)
     static let lastServerInformationRefreshDate: Key<Date> = AppKey("lastServerInformationRefreshDate", default: .distantPast)
@@ -94,7 +98,12 @@ extension Defaults.Keys {
     static let selectUserUseSplashscreen: Key<Bool> = AppKey("selectUserUseSplashscreen", default: true)
 
     static let signOutOnBackground: Key<Bool> = AppKey("signOutOnBackground", default: true)
+    #if os(tvOS)
+    /// Opens on the profile picker each launch
+    static let signOutOnClose: Key<Bool> = AppKey("signOutOnClose", default: true)
+    #else
     static let signOutOnClose: Key<Bool> = AppKey("signOutOnClose", default: false)
+    #endif
 }
 
 // MARK: User
@@ -299,19 +308,21 @@ extension Defaults.Keys {
         }
 
         static var supplements: Key<[VideoPlayerSupplement]> {
+            #if os(tvOS)
+            UserKey(
+                "videoPlayerSupplements",
+                default: VideoPlayerSupplement.supportedCases + [.playbackInformation]
+            )
+            #else
             UserKey(
                 "videoPlayerSupplements",
                 default: VideoPlayerSupplement.supportedCases
             )
+            #endif
         }
 
         static var videoPlayerType: Key<VideoPlayerType> {
-            #if os(tvOS)
-            // Hardware decoding with frame rate and dynamic range matching
-            UserKey("videoPlayerType", default: .avPlayer)
-            #else
             UserKey("videoPlayerType", default: .vlc)
-            #endif
         }
 
         enum Gesture {
@@ -374,7 +385,12 @@ extension Defaults.Keys {
             }
 
             static var appMaximumBitrate: Key<PlaybackBitrate> {
+                #if os(tvOS)
+                // A bandwidth estimate below the file's bitrate forces a transcode on a local network
+                UserKey("appMaximumBitrate", default: .max)
+                #else
                 UserKey("appMaximumBitrate", default: .auto)
+                #endif
             }
 
             static var appMaximumBitrateTest: Key<PlaybackBitrateTestSize> {

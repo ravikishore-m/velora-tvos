@@ -9,7 +9,7 @@
 import JellyfinAPI
 import SwiftUI
 
-/// Player header with logo, episode, stream quality, play method and end time
+/// Player header with logo, episode, stream formats and end time
 struct CinemaPlayerTitleView: View {
 
     @EnvironmentObject
@@ -17,12 +17,15 @@ struct CinemaPlayerTitleView: View {
 
     let item: BaseItemDto
 
+    /// The video plus only the selected audio track, so audio badges match what is heard
     private var streams: [MediaStream] {
-        manager.playbackItem?.mediaSource.mediaStreams ?? item.mediaStreams ?? []
-    }
+        guard let playbackItem = manager.playbackItem else { return item.mediaStreams ?? [] }
 
-    private var isTranscoding: Bool {
-        manager.playbackItem?.mediaSource.transcodingURL != nil
+        let audioStream = playbackItem.selectedAudioStreamIndex.flatMap { index in
+            playbackItem.audioStreams.first { $0.index == index }
+        } ?? playbackItem.audioStreams.first
+
+        return playbackItem.videoStreams + [audioStream].compactMap(\.self)
     }
 
     @ViewBuilder
@@ -56,37 +59,10 @@ struct CinemaPlayerTitleView: View {
     @ViewBuilder
     private var badges: some View {
         HStack(spacing: 14) {
-            if streams.has4KVideo {
-                EmptyLabel("4K")
-                    .labelStyle(.attributeBadgeFill)
-            } else if streams.hasHDVideo {
-                EmptyLabel("HD")
-                    .labelStyle(.attributeBadgeFill)
-            }
-
-            if streams.hasDolbyVision {
-                EmptyLabel("DV")
-                    .labelStyle(.attributeBadgeFill)
-            } else if streams.hasHDRVideo {
-                EmptyLabel("HDR")
-                    .labelStyle(.attributeBadgeFill)
-            }
-
-            if streams.has71AudioChannelLayout {
-                EmptyLabel("7.1")
-                    .labelStyle(.attributeBadgeFill)
-            } else if streams.has51AudioChannelLayout {
-                EmptyLabel("5.1")
-                    .labelStyle(.attributeBadgeFill)
-            }
+            CinemaFormatBadges(streams: streams)
 
             if let officialRating = item.officialRating {
                 EmptyLabel(officialRating)
-                    .labelStyle(.attributeBadgeOutline)
-            }
-
-            if manager.playbackItem != nil {
-                EmptyLabel(isTranscoding ? L10n.transcode : L10n.directPlay)
                     .labelStyle(.attributeBadgeOutline)
             }
 

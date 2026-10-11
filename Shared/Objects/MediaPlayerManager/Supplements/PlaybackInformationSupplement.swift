@@ -18,7 +18,11 @@ import SwiftUI
 
 class PlaybackInformationSupplement: ObservableObject, MediaPlayerSupplement {
 
+    #if os(tvOS)
+    let displayTitle: String = L10n.playbackInfo
+    #else
     let displayTitle: String = L10n.session
+    #endif
     let itemID: String
     let presentationStyle: MediaPlayerSupplementPresentationStyle = .expanded
     let provider: PlaybackInformationProvider
@@ -244,31 +248,55 @@ extension PlaybackInformationSupplement {
         }
 
         @ViewBuilder
+        private var columns: some View {
+            HStack(alignment: .top, spacing: 24) {
+                VStack(alignment: .leading, spacing: 4) {
+                    playbackInfoSection
+                    videoInfoSection
+                    streamingInfoSection
+                    transcodeReasonsSection
+                }
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    originalMediaInfoSection
+                }
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+            }
+        }
+
+        @ViewBuilder
         private var regularView: some View {
             ScrollView {
-                HStack(alignment: .top, spacing: 24) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        playbackInfoSection
-                        videoInfoSection
-                        streamingInfoSection
-                        transcodeReasonsSection
-                    }
-                    .frame(maxWidth: .infinity, alignment: .topLeading)
-
-                    VStack(alignment: .leading, spacing: 4) {
-                        originalMediaInfoSection
-                    }
-                    .frame(maxWidth: .infinity, alignment: .topLeading)
-                }
+                columns
             }
             .scrollIndicators(.hidden)
             .edgePadding()
         }
 
         var tvOSView: some View {
+            #if os(tvOS)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 40) {
+                    CinemaPlaybackSummary(
+                        session: viewModel.currentSession,
+                        playbackItem: manager.playbackItem,
+                        videoStream: videoStream,
+                        audioStream: audioStream
+                    )
+
+                    columns
+                }
+            }
+            .scrollIndicators(.hidden)
+            .edgePadding()
+            .labeledContentStyle(.playbackInfo)
+            .focusSection()
+            #else
             regularView
                 .labeledContentStyle(.playbackInfo)
                 .focusSection()
+            #endif
         }
     }
 }

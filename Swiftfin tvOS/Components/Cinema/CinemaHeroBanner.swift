@@ -208,7 +208,7 @@ struct CinemaHeroBanner: View {
                     .lineLimit(1)
             }
 
-            CinemaBadges(item: item)
+            CinemaBadges(item: item, includesAudio: true)
 
             if let overview = item.overview, overview.isNotEmpty {
                 Text(overview)

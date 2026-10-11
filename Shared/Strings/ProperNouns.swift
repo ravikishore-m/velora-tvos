@@ -25,6 +25,14 @@ extension L10n {
     static let hlg = "HLG"
     static let dolbyVision = "Dolby Vision"
 
+    // MARK: - Formats
+
+    static let dolbyAtmos = "Dolby Atmos"
+    static let fourK = "4K"
+    static let hd = "HD"
+    static let surround51 = "5.1"
+    static let surround71 = "7.1"
+
     // MARK: - Video codecs
 
     static let av1 = "AV1"
