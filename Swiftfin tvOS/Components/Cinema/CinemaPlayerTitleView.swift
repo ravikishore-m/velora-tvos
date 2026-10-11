@@ -28,6 +28,12 @@ struct CinemaPlayerTitleView: View {
         return playbackItem.videoStreams + [audioStream].compactMap(\.self)
     }
 
+    private var availableStreams: [MediaStream] {
+        guard let playbackItem = manager.playbackItem else { return item.mediaStreams ?? [] }
+
+        return playbackItem.audioStreams + playbackItem.subtitleStreams
+    }
+
     @ViewBuilder
     private var logo: some View {
         ImageView(
@@ -59,7 +65,7 @@ struct CinemaPlayerTitleView: View {
     @ViewBuilder
     private var badges: some View {
         HStack(spacing: 14) {
-            CinemaFormatBadges(streams: streams)
+            CinemaFormatBadges(streams: streams, availableStreams: availableStreams)
 
             if let officialRating = item.officialRating {
                 EmptyLabel(officialRating)

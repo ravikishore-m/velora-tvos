@@ -12,7 +12,7 @@ import SwiftUI
 struct CinemaBadges: View {
 
     let item: BaseItemDto
-    var formats: CinemaFormatBadges.Content = [.video, .dolbyAudio]
+    var formats: CinemaFormatBadges.Content = [.video, .audioFormat]
 
     var body: some View {
         HStack(spacing: CinemaTheme.Spacing.metadata) {

@@ -33,7 +33,7 @@ struct CinemaPlaybackSummary: View {
         case .directStream:
             (L10n.directStream, L10n.directStreamDescription, "arrow.triangle.2.circlepath.circle.fill", .yellow)
         case .transcode:
-            (L10n.transcode, L10n.transcodeDescription, "exclamationmark.triangle.fill", CinemaTheme.Colors.accent)
+            (L10n.transcode, L10n.transcodeDescription, "exclamationmark.triangle.fill", CinemaTheme.Player.warning)
         }
     }
 
@@ -78,7 +78,11 @@ struct CinemaPlaybackSummary: View {
                     .font(.title3.weight(.bold))
                     .foregroundStyle(status.color)
 
-                CinemaFormatBadges(streams: [videoStream, audioStream].compactMap(\.self))
+                CinemaFormatBadges(
+                    streams: [videoStream, audioStream].compactMap(\.self),
+                    availableStreams: playbackItem.map { $0.audioStreams + $0.subtitleStreams },
+                    content: .all
+                )
             }
 
             Text(status.description)

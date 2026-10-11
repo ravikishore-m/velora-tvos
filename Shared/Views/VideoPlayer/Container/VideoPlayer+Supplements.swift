@@ -66,6 +66,9 @@ extension VideoPlayer.UIContainerViewController {
             .environment(viewState)
             .environmentObject(viewState.focusCoordinator)
             .environmentObject(manager)
+            #if os(tvOS)
+            .tint(CinemaTheme.Player.tint)
+            #endif
             #if os(iOS)
             .background {
                 GestureView()

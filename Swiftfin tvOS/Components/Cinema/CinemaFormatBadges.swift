@@ -9,7 +9,7 @@
 import JellyfinAPI
 import SwiftUI
 
-/// Video and audio format badges in the style of the Apple TV app
+/// Video, audio and accessibility format badges in the style of the Apple TV app
 struct CinemaFormatBadges: View {
 
     enum Badge: Hashable {
@@ -19,7 +19,11 @@ struct CinemaFormatBadges: View {
         case hdr(String)
         case dolbyAtmos
         case dolbyDigital
+        case audioFormat(String)
         case surround(String)
+        case closedCaptions
+        case sdh
+        case audioDescription
     }
 
     struct Content: OptionSet {
@@ -27,35 +31,92 @@ struct CinemaFormatBadges: View {
         let rawValue: Int
 
         static let video = Content(rawValue: 1 << 0)
-        static let dolbyAudio = Content(rawValue: 1 << 1)
+        static let audioFormat = Content(rawValue: 1 << 1)
         static let channels = Content(rawValue: 1 << 2)
+        static let accessibility = Content(rawValue: 1 << 3)
 
-        static let audio: Content = [.dolbyAudio, .channels]
-        static let all: Content = [.video, .audio]
+        static let audio: Content = [.audioFormat, .channels]
+        static let all: Content = [.video, .audio, .accessibility]
     }
 
+    /// Streams describing what plays: the video and the audio track(s) to badge
     let streams: [MediaStream]
+    /// Every stream of the media source, used for caption and audio description availability
+    var availableStreams: [MediaStream]?
     var content: Content = .all
 
     private var videoStream: MediaStream? {
         streams.first { $0.type == .video }
     }
 
+    private var primaryAudioStream: MediaStream? {
+        let audioStreams = streams.filter { $0.type == .audio }
+        return audioStreams.first { $0.isDefault == true } ?? audioStreams.first
+    }
+
+    private var accessibilityStreams: [MediaStream] {
+        availableStreams ?? streams
+    }
+
+    private static func text(of stream: MediaStream) -> [String] {
+        [stream.profile, stream.displayTitle, stream.title].compactMap(\.self)
+    }
+
     private var hasAtmos: Bool {
         streams.contains { stream in
-            guard stream.type == .audio else { return false }
-
-            return [stream.profile, stream.displayTitle, stream.title]
-                .compactMap(\.self)
-                .contains { $0.localizedCaseInsensitiveContains("atmos") }
+            stream.type == .audio && Self.text(of: stream).contains { $0.localizedCaseInsensitiveContains("atmos") }
         }
     }
 
-    private var hasDolbyDigital: Bool {
-        streams.contains { stream in
-            guard stream.type == .audio, let codec = stream.codec?.lowercased() else { return false }
+    /// Non-Dolby lossless and surround formats worth calling out
+    private var audioFormatTitle: String? {
+        guard let stream = primaryAudioStream, let codec = stream.codec?.lowercased() else { return nil }
 
-            return codec == "ac3" || codec == "eac3"
+        switch codec {
+        case "dts", "dca":
+            let profile = Self.text(of: stream).joined(separator: " ")
+            if profile.localizedCaseInsensitiveContains("DTS:X") || profile.localizedCaseInsensitiveContains("DTS-X") {
+                return L10n.dtsX
+            }
+            if profile.localizedCaseInsensitiveContains("MA") || profile.localizedCaseInsensitiveContains("HD") {
+                return L10n.dtsHD
+            }
+            return L10n.dts
+
+        case "truehd", "mlp":
+            return L10n.trueHD
+
+        default:
+            return nil
+        }
+    }
+
+    private var isDolbyDigital: Bool {
+        guard let codec = primaryAudioStream?.codec?.lowercased() else { return false }
+
+        return codec == "ac3" || codec == "eac3"
+    }
+
+    private static func isSDH(_ stream: MediaStream) -> Bool {
+        stream.isHearingImpaired == true || text(of: stream).contains { $0.contains("SDH") }
+    }
+
+    private var hasSDH: Bool {
+        accessibilityStreams.contains { $0.type == .subtitle && Self.isSDH($0) }
+    }
+
+    private var hasClosedCaptions: Bool {
+        accessibilityStreams.contains { $0.type == .subtitle && $0.isForced != true && !Self.isSDH($0) }
+    }
+
+    private var hasAudioDescription: Bool {
+        accessibilityStreams.contains { stream in
+            guard stream.type == .audio else { return false }
+
+            return Self.text(of: stream).contains { text in
+                text.localizedCaseInsensitiveContains("descri")
+                    || text.range(of: #"(^|[^A-Za-z])AD([^A-Za-z]|$)"#, options: .regularExpression) != nil
+            }
         }
     }
 
@@ -85,11 +146,13 @@ struct CinemaFormatBadges: View {
             }
         }
 
-        if content.contains(.dolbyAudio) {
+        if content.contains(.audioFormat) {
             if hasAtmos {
                 badges.append(.dolbyAtmos)
-            } else if hasDolbyDigital {
+            } else if isDolbyDigital {
                 badges.append(.dolbyDigital)
+            } else if let audioFormatTitle {
+                badges.append(.audioFormat(audioFormatTitle))
             }
         }
 
@@ -101,11 +164,23 @@ struct CinemaFormatBadges: View {
             }
         }
 
+        if content.contains(.accessibility) {
+            if hasClosedCaptions {
+                badges.append(.closedCaptions)
+            }
+            if hasSDH {
+                badges.append(.sdh)
+            }
+            if hasAudioDescription {
+                badges.append(.audioDescription)
+            }
+        }
+
         return badges
     }
 
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: CinemaTheme.Badge.spacing) {
             ForEach(badges, id: \.self) { badge in
                 BadgeView(badge: badge)
             }
@@ -121,10 +196,6 @@ extension CinemaFormatBadges {
 
         let badge: Badge
 
-        private var shape: RoundedRectangle {
-            RoundedRectangle(cornerRadius: 7, style: .continuous)
-        }
-
         private func logo(_ resource: ImageResource, title: String, height: CGFloat) -> some View {
             Image(resource)
                 .renderingMode(.template)
@@ -132,68 +203,58 @@ extension CinemaFormatBadges {
                 .interpolation(.high)
                 .aspectRatio(contentMode: .fit)
                 .frame(height: height)
-                .foregroundStyle(CinemaTheme.Colors.primaryText)
+                .foregroundStyle(CinemaTheme.Badge.tint)
                 .accessibilityLabel(title)
         }
 
-        @ViewBuilder
-        private var label: some View {
-            switch badge {
-            case .uhd:
-                Text(L10n.fourK)
-                    .fontWeight(.black)
-
-            case .hd:
-                Text(L10n.hd)
-                    .fontWeight(.black)
-
-            case let .hdr(title):
-                Text(title)
-                    .fontWeight(.heavy)
-
-            case let .surround(title):
-                Label(title, systemImage: "hifispeaker.2.fill")
-                    .labelStyle(.titleAndIcon)
-                    .fontWeight(.heavy)
-
-            case .dolbyVision, .dolbyAtmos, .dolbyDigital:
-                EmptyView()
-            }
+        private func knockoutText(_ title: String) -> some View {
+            Text(title)
+                .font(.system(size: CinemaTheme.Badge.fontSize, weight: .heavy))
+                .padding(.horizontal, CinemaTheme.Badge.horizontalPadding)
+                .frame(height: CinemaTheme.Badge.height)
         }
 
-        private var isFilled: Bool {
-            badge == .uhd
+        /// A filled tag with the title cut out, as used for Apple TV app badges
+        private func knockout(_ title: String, accessibilityLabel: String? = nil) -> some View {
+            knockoutText(title)
+                .hidden()
+                .background {
+                    RoundedRectangle(cornerRadius: CinemaTheme.Badge.cornerRadius, style: .continuous)
+                        .fill(CinemaTheme.Badge.tint)
+                        .inverseMask {
+                            knockoutText(title)
+                        }
+                }
+                .lineLimit(1)
+                .accessibilityElement()
+                .accessibilityLabel(accessibilityLabel ?? title)
         }
 
         var body: some View {
             switch badge {
+            case .uhd:
+                knockout(L10n.fourK)
+            case .hd:
+                knockout(L10n.hd)
             case .dolbyVision:
-                logo(.dolbyVision, title: L10n.dolbyVision, height: 40)
+                logo(.dolbyVision, title: L10n.dolbyVision, height: CinemaTheme.Badge.stackedLogoHeight)
+            case let .hdr(title):
+                knockout(title)
             case .dolbyAtmos:
-                logo(.dolbyAtmos, title: L10n.dolbyAtmos, height: 40)
+                logo(.dolbyAtmos, title: L10n.dolbyAtmos, height: CinemaTheme.Badge.stackedLogoHeight)
             case .dolbyDigital:
-                logo(.dolbyDigital, title: L10n.dolbyDigital, height: 30)
-            default:
-                boxed
+                logo(.dolbyDigital, title: L10n.dolbyDigital, height: CinemaTheme.Badge.wideLogoHeight)
+            case let .audioFormat(title):
+                knockout(title)
+            case let .surround(title):
+                knockout(title)
+            case .closedCaptions:
+                knockout(L10n.cc, accessibilityLabel: L10n.closedCaptions)
+            case .sdh:
+                knockout(L10n.sdh, accessibilityLabel: L10n.sdhSubtitles)
+            case .audioDescription:
+                knockout(L10n.ad, accessibilityLabel: L10n.audioDescription)
             }
-        }
-
-        private var boxed: some View {
-            label
-                .font(.system(size: 20))
-                .foregroundStyle(isFilled ? Color.black : CinemaTheme.Colors.primaryText)
-                .padding(.horizontal, 10)
-                .frame(height: 34)
-                .background {
-                    if isFilled {
-                        shape.fill(CinemaTheme.Colors.primaryText)
-                    } else {
-                        shape
-                            .fill(CinemaTheme.Colors.primaryText.opacity(0.08))
-                            .strokeBorder(CinemaTheme.Colors.primaryText.opacity(0.85), lineWidth: 1.5)
-                    }
-                }
-                .lineLimit(1)
         }
     }
 }

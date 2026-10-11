@@ -113,6 +113,24 @@ enum CinemaTheme {
 
         static let logoMaxWidth: CGFloat = 520
         static let logoMaxHeight: CGFloat = 130
+
+        /// Apple TV style: white controls rather than the brand accent
+        static let tint = Color.white
+        static let warning = Color.orange
+    }
+
+    // MARK: - Badge
+
+    enum Badge {
+
+        static let height: CGFloat = 30
+        static let cornerRadius: CGFloat = 6
+        static let fontSize: CGFloat = 19
+        static let horizontalPadding: CGFloat = 8
+        static let spacing: CGFloat = 12
+        static let stackedLogoHeight: CGFloat = 38
+        static let wideLogoHeight: CGFloat = 28
+        static let tint = Color.white.opacity(0.85)
     }
 
     // MARK: - Card

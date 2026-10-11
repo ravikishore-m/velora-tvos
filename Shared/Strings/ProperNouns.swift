@@ -33,6 +33,10 @@ extension L10n {
     static let hd = "HD"
     static let surround51 = "5.1"
     static let surround71 = "7.1"
+    static let dtsX = "DTS:X"
+    static let cc = "CC"
+    static let sdh = "SDH"
+    static let ad = "AD"
 
     // MARK: - Video codecs
 

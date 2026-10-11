@@ -58,6 +58,7 @@ extension VideoPlayer {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
             .edgePadding(.horizontal)
+            .tint(CinemaTheme.Player.tint)
             .focusSection()
             .coordinatedFocus(ViewState.Focus.controls)
             .animation(.easeInOut(duration: 0.25), value: viewState.isPresentingSupplement)

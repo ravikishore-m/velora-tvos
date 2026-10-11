@@ -131,12 +131,18 @@ extension ItemView {
 
         @ViewBuilder
         private func Subtitles() -> some View {
+            #if os(tvOS)
+            if let mediaStreams = selectedMediaSource?.mediaStreams {
+                CinemaFormatBadges(streams: mediaStreams, content: .accessibility)
+            }
+            #else
             if let mediaStreams = selectedMediaSource?.mediaStreams,
                mediaStreams.hasSubtitles
             {
                 EmptyLabel("CC")
                     .labelStyle(.attributeBadgeOutline)
             }
+            #endif
         }
     }
 }

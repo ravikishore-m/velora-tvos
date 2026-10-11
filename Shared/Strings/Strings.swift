@@ -166,6 +166,8 @@ internal enum L10n {
   internal static let audioCodec = L10n.tr("Localizable", "audioCodec", fallback: "Audio codec")
   /// The audio codec is not supported
   internal static let audioCodecNotSupported = L10n.tr("Localizable", "audioCodecNotSupported", fallback: "The audio codec is not supported")
+  /// Audio description
+  internal static let audioDescription = L10n.tr("Localizable", "audioDescription", fallback: "Audio description")
   /// The audio track is external and requires transcoding
   internal static let audioIsExternal = L10n.tr("Localizable", "audioIsExternal", fallback: "The audio track is external and requires transcoding")
   /// Audio offset
@@ -312,6 +314,8 @@ internal enum L10n {
   internal static let clip = L10n.tr("Localizable", "clip", fallback: "Clip")
   /// Close
   internal static let close = L10n.tr("Localizable", "close", fallback: "Close")
+  /// Closed captions
+  internal static let closedCaptions = L10n.tr("Localizable", "closedCaptions", fallback: "Closed captions")
   /// Close player
   internal static let closePlayer = L10n.tr("Localizable", "closePlayer", fallback: "Close player")
   /// Are you sure you want to close the player?
@@ -1594,6 +1598,8 @@ internal enum L10n {
   internal static let screenshotImageDescription = L10n.tr("Localizable", "screenshotImageDescription", fallback: "A screenshot or still frame captured directly from the item\'s video content. Deprecated and no longer actively used.")
   /// Scrub
   internal static let scrub = L10n.tr("Localizable", "scrub", fallback: "Scrub")
+  /// Subtitles for the deaf and hard of hearing
+  internal static let sdhSubtitles = L10n.tr("Localizable", "sdhSubtitles", fallback: "Subtitles for the deaf and hard of hearing")
   /// Search
   internal static let search = L10n.tr("Localizable", "search", fallback: "Search")
   /// Search for missing metadata
