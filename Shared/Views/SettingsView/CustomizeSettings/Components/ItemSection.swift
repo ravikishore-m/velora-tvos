@@ -32,6 +32,8 @@ extension CustomizeSettingsView {
 
         @Default(.Customization.shouldShowRecommendations)
         private var shouldShowRecommendations
+        @Default(.Customization.shouldAutoplayTrailers)
+        private var shouldAutoplayTrailers
         @Default(.Customization.shouldShowMissingSeasons)
         private var shouldShowMissingSeasons
         @Default(.Customization.shouldShowMissingEpisodes)
@@ -52,6 +54,10 @@ extension CustomizeSettingsView {
                     PlatformPicker(L10n.enabledTrailers, selection: $enabledTrailers)
 
                     Toggle(L10n.showRecommendations, isOn: $shouldShowRecommendations)
+
+                    #if os(tvOS)
+                    Toggle(L10n.trailerAutoplay, isOn: $shouldAutoplayTrailers)
+                    #endif
                 }
 
                 Section(L10n.buttons) {

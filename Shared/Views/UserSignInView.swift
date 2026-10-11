@@ -324,16 +324,130 @@ struct UserSignInView: View {
             }
         }
         #else
-        SplitLoginWindowView(
-            isLoading: viewModel.state == .signingIn,
-            backgroundImageSource: viewModel.server.splashScreenImageSource
+        CinemaSignInView(
+            server: viewModel.server,
+            isQuickConnectEnabled: viewModel.isQuickConnectEnabled,
+            isLoading: viewModel.state == .signingIn || viewModel.background.is(.gettingPublicData),
+            onQuickConnect: { secret in
+                await viewModel.signInQuickConnect(secret: secret)
+            }
         ) {
-            signInSection
-        } trailingContentView: {
-            publicUsersSection
+            remoteSignInView
         }
         #endif
     }
+
+    #if os(tvOS)
+
+    // MARK: - Remote Sign In
+
+    @ViewBuilder
+    private var accessPolicyFooter: some View {
+        switch accessPolicy {
+        case .requireDeviceAuthentication:
+            Label(L10n.userDeviceAuthRequiredDescription, systemImage: "exclamationmark.circle.fill")
+                .foregroundStyle(.orange)
+
+        case .requirePin:
+            Label(L10n.userPinRequiredDescription, systemImage: "exclamationmark.circle.fill")
+                .foregroundStyle(.orange)
+
+        case .none:
+            EmptyView()
+        }
+    }
+
+    @ViewBuilder
+    private var remoteSignInView: some View {
+        VStack(spacing: 28) {
+            TextField(L10n.username, text: $username)
+                .autocorrectionDisabled()
+                .textContentType(.username)
+                .textInputAutocapitalization(.never)
+                .focused($focusedTextField, equals: .username)
+                .onSubmit {
+                    focusedTextField = .password
+                }
+
+            SecureField(
+                L10n.password,
+                text: $password,
+                maskToggle: .enabled
+            ) {
+                focusedTextField = nil
+
+                viewModel.signIn(
+                    username: username,
+                    password: password
+                )
+            }
+            .autocorrectionDisabled()
+            .textContentType(.password)
+            .textInputAutocapitalization(.never)
+            .focused($focusedTextField, equals: .password)
+
+            accessPolicyFooter
+                .font(.callout)
+
+            Group {
+                if case .signingIn = viewModel.state {
+                    Button(role: .cancel) {
+                        viewModel.cancel()
+                    } label: {
+                        Text(L10n.cancel)
+                            .frame(maxWidth: .infinity)
+                    }
+                } else {
+                    Button {
+                        viewModel.signIn(
+                            username: username,
+                            password: password
+                        )
+                    } label: {
+                        Text(L10n.signIn)
+                            .frame(maxWidth: .infinity)
+                    }
+                    .disabled(username.isEmpty)
+                }
+            }
+            .buttonStyle(.cinemaAction)
+
+            if viewModel.publicUsers.isNotEmpty {
+                VStack(alignment: .leading, spacing: 20) {
+                    Text(L10n.orChooseUser)
+                        .font(.headline)
+                        .foregroundStyle(CinemaTheme.Colors.secondaryText)
+
+                    ScrollView(.horizontal) {
+                        HStack(spacing: EdgeInsets.itemSpacing) {
+                            ForEach(viewModel.publicUsers) { user in
+                                UserButton(
+                                    user: user,
+                                    client: viewModel.server.client
+                                ) {
+                                    username = user.name ?? ""
+                                    password = ""
+                                    focusedTextField = .password
+                                }
+                                .frame(width: 180)
+                            }
+                        }
+                        .padding(.vertical, 30)
+                    }
+                    .scrollClipDisabled()
+                }
+                .padding(.top, 20)
+                .disabled(viewModel.state == .signingIn)
+            }
+
+            if let disclaimer = viewModel.serverDisclaimer {
+                disclaimerText(disclaimer)
+                    .font(.caption)
+                    .foregroundStyle(CinemaTheme.Colors.tertiaryText)
+            }
+        }
+    }
+    #endif
 
     // MARK: - Body
 

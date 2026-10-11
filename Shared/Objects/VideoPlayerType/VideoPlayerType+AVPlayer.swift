@@ -101,11 +101,21 @@ extension VideoPlayerType {
             protocol: MediaStreamProtocol.hls,
             type: .video
         ) {
+            /// - Note: Unsupported audio is converted to the first codec. Lossless first on tvOS keeps
+            ///   TrueHD and DTS-HD at their full channel count for home theater systems.
+            #if os(tvOS)
+            AudioCodec.flac
+            AudioCodec.alac
+            AudioCodec.eac3
+            AudioCodec.ac3
+            AudioCodec.aac
+            #else
             AudioCodec.aac
             AudioCodec.ac3
             AudioCodec.alac
             AudioCodec.eac3
             AudioCodec.flac
+            #endif
         } videoCodecs: {
 
             /// - Note: Transcode Profiles prioritizes codecs by order
@@ -185,9 +195,10 @@ extension VideoPlayerType {
                 ) {
                     avPlayerHDRProfiles
                 }
+                /// Matroska has no codec tag; remuxing to fragmented MP4 tags HEVC as hvc1/dvh1
                 ProfileCondition(
                     condition: .equalsAny,
-                    isRequired: true,
+                    isRequired: false,
                     property: .videoCodecTag
                 ) {
                     "hvc1"

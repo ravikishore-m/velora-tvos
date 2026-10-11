@@ -97,27 +97,16 @@ struct CinemaFormatBadges: View {
         return codec == "ac3" || codec == "eac3"
     }
 
-    private static func isSDH(_ stream: MediaStream) -> Bool {
-        stream.isHearingImpaired == true || text(of: stream).contains { $0.contains("SDH") }
-    }
-
     private var hasSDH: Bool {
-        accessibilityStreams.contains { $0.type == .subtitle && Self.isSDH($0) }
+        accessibilityStreams.hasSDHSubtitles
     }
 
     private var hasClosedCaptions: Bool {
-        accessibilityStreams.contains { $0.type == .subtitle && $0.isForced != true && !Self.isSDH($0) }
+        accessibilityStreams.hasClosedCaptions
     }
 
     private var hasAudioDescription: Bool {
-        accessibilityStreams.contains { stream in
-            guard stream.type == .audio else { return false }
-
-            return Self.text(of: stream).contains { text in
-                text.localizedCaseInsensitiveContains("descri")
-                    || text.range(of: #"(^|[^A-Za-z])AD([^A-Za-z]|$)"#, options: .regularExpression) != nil
-            }
-        }
+        accessibilityStreams.hasAudioDescription
     }
 
     private var hdrTitle: String {
@@ -190,9 +179,39 @@ struct CinemaFormatBadges: View {
     }
 }
 
+extension [MediaStream] {
+
+    private static func text(of stream: MediaStream) -> [String] {
+        [stream.profile, stream.displayTitle, stream.title].compactMap(\.self)
+    }
+
+    private static func isSDH(_ stream: MediaStream) -> Bool {
+        stream.isHearingImpaired == true || text(of: stream).contains { $0.contains("SDH") }
+    }
+
+    var hasSDHSubtitles: Bool {
+        contains { $0.type == .subtitle && Self.isSDH($0) }
+    }
+
+    var hasClosedCaptions: Bool {
+        contains { $0.type == .subtitle && $0.isForced != true && !Self.isSDH($0) }
+    }
+
+    var hasAudioDescription: Bool {
+        contains { stream in
+            guard stream.type == .audio else { return false }
+
+            return Self.text(of: stream).contains { text in
+                text.localizedCaseInsensitiveContains("descri")
+                    || text.range(of: #"(^|[^A-Za-z])AD([^A-Za-z]|$)"#, options: .regularExpression) != nil
+            }
+        }
+    }
+}
+
 extension CinemaFormatBadges {
 
-    private struct BadgeView: View {
+    struct BadgeView: View {
 
         let badge: Badge
 

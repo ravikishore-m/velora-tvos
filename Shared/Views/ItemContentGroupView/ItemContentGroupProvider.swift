@@ -284,6 +284,13 @@ final class ItemContentGroupProvider: ViewModel, ContentGroupProvider {
             id: "about",
             item: item
         )
+
+        #if os(tvOS)
+        CinemaItemInfoGroup(
+            id: "information",
+            item: item
+        )
+        #endif
     }
 
     @Published

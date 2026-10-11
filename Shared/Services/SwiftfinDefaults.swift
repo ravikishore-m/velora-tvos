@@ -158,6 +158,10 @@ extension Defaults.Keys {
             UserKey("shouldShowRecommendations", default: true)
         }
 
+        static var shouldAutoplayTrailers: Key<Bool> {
+            UserKey("shouldAutoplayTrailers", default: true)
+        }
+
         static var shouldShowMissingSeasons: Key<Bool> {
             UserKey("shouldShowMissingSeasons", default: true)
         }
@@ -322,7 +326,11 @@ extension Defaults.Keys {
         }
 
         static var videoPlayerType: Key<VideoPlayerType> {
+            #if os(tvOS)
+            UserKey("videoPlayerType", default: .avPlayer)
+            #else
             UserKey("videoPlayerType", default: .vlc)
+            #endif
         }
 
         enum Gesture {

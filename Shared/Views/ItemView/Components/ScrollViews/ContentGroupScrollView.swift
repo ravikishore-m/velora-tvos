@@ -78,6 +78,12 @@ extension ItemView {
                 if isEnhanced {
                     background
                         .ignoresSafeArea()
+
+                    CinemaTrailerBackdrop(
+                        trailer: provider.localTrailers.first,
+                        isActive: isHeaderFocused
+                    )
+                    .ignoresSafeArea()
                 }
                 #endif
 
