@@ -39,7 +39,6 @@ extension VideoPlayerType {
             AudioCodec.pcm_s24le
             AudioCodec.pcm_u8
             AudioCodec.speex
-            AudioCodec.truehd
             AudioCodec.vorbis
             AudioCodec.wavpack
             AudioCodec.wmalossless

@@ -6,7 +6,6 @@
 // Copyright (c) 2026 Jellyfin & Jellyfin Contributors
 //
 
-import AVKit
 import Defaults
 import Foundation
 import JellyfinAPI
@@ -35,7 +34,7 @@ class VLCMediaPlayerProxy: VideoMediaPlayerLayoutConfigurable,
     }
 
     var observers: [any MediaPlayerObserver] = [
-        NowPlayableObserver(audioSessionMode: .moviePlayback, supportsMultichannelContent: true),
+        NowPlayableObserver(),
     ]
 
     func play() {
@@ -58,10 +57,6 @@ class VLCMediaPlayerProxy: VideoMediaPlayerLayoutConfigurable,
         pendingStartTime = nil
         isBuffering.value = false
         player.stop()
-
-        #if os(tvOS)
-        displayManager?.preferredDisplayCriteria = nil
-        #endif
     }
 
     func jumpForward(_ seconds: Duration) {
@@ -181,40 +176,7 @@ class VLCMediaPlayerProxy: VideoMediaPlayerLayoutConfigurable,
         return true
     }
 
-    #if os(tvOS)
-    private var displayManager: AVDisplayManager? {
-        UIApplication.shared.keyWindow?.avDisplayManager
-    }
-
-    /// Switches the TV to the content's frame rate and dynamic range before playback
-    /// starts, when Match Content is enabled in the Apple TV settings.
-    private func matchDisplay(to item: MediaPlayerItem) async {
-        guard let displayManager,
-              displayManager.isDisplayCriteriaMatchingEnabled,
-              let criteria = item.videoStreams.first?.displayCriteria
-        else { return }
-
-        displayManager.preferredDisplayCriteria = criteria
-        isBuffering.value = true
-
-        // isDisplayModeSwitchInProgress is not populated immediately after the request
-        try? await Task.sleep(for: .milliseconds(500))
-
-        var remainingChecks = 50
-        while displayManager.isDisplayModeSwitchInProgress, remainingChecks > 0, !Task.isCancelled {
-            try? await Task.sleep(for: .milliseconds(100))
-            remainingChecks -= 1
-        }
-    }
-    #endif
-
-    private func play(_ item: MediaPlayerItem, subtitleConfiguration: SubtitleConfiguration) async {
-        #if os(tvOS)
-        await matchDisplay(to: item)
-        guard !Task.isCancelled else { return }
-
-        #endif
-
+    private func play(_ item: MediaPlayerItem, subtitleConfiguration: SubtitleConfiguration) {
         do {
             let media = try Media(url: item.url)
 
@@ -285,7 +247,7 @@ extension VLCMediaPlayerProxy {
             if let playbackItem = manager.playbackItem, manager.state != .stopped {
                 videoSurface
                     .task(id: ObjectIdentifier(playbackItem)) {
-                        await proxy.play(playbackItem, subtitleConfiguration: subtitleConfiguration)
+                        proxy.play(playbackItem, subtitleConfiguration: subtitleConfiguration)
                     }
                     .onChange(of: proxy.player.currentTime) { _, newSeconds in
                         // Ignore an initial or already superseded timestamp while
