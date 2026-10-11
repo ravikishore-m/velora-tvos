@@ -28,6 +28,7 @@ extension L10n {
     // MARK: - Formats
 
     static let dolbyAtmos = "Dolby Atmos"
+    static let dolbyDigital = "Dolby Digital"
     static let fourK = "4K"
     static let hd = "HD"
     static let surround51 = "5.1"

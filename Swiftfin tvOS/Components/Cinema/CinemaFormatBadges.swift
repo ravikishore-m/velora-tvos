@@ -18,6 +18,7 @@ struct CinemaFormatBadges: View {
         case dolbyVision
         case hdr(String)
         case dolbyAtmos
+        case dolbyDigital
         case surround(String)
     }
 
@@ -26,10 +27,10 @@ struct CinemaFormatBadges: View {
         let rawValue: Int
 
         static let video = Content(rawValue: 1 << 0)
-        static let atmos = Content(rawValue: 1 << 1)
+        static let dolbyAudio = Content(rawValue: 1 << 1)
         static let channels = Content(rawValue: 1 << 2)
 
-        static let audio: Content = [.atmos, .channels]
+        static let audio: Content = [.dolbyAudio, .channels]
         static let all: Content = [.video, .audio]
     }
 
@@ -47,6 +48,14 @@ struct CinemaFormatBadges: View {
             return [stream.profile, stream.displayTitle, stream.title]
                 .compactMap(\.self)
                 .contains { $0.localizedCaseInsensitiveContains("atmos") }
+        }
+    }
+
+    private var hasDolbyDigital: Bool {
+        streams.contains { stream in
+            guard stream.type == .audio, let codec = stream.codec?.lowercased() else { return false }
+
+            return codec == "ac3" || codec == "eac3"
         }
     }
 
@@ -76,8 +85,12 @@ struct CinemaFormatBadges: View {
             }
         }
 
-        if content.contains(.atmos), hasAtmos {
-            badges.append(.dolbyAtmos)
+        if content.contains(.dolbyAudio) {
+            if hasAtmos {
+                badges.append(.dolbyAtmos)
+            } else if hasDolbyDigital {
+                badges.append(.dolbyDigital)
+            }
         }
 
         if content.contains(.channels) {
@@ -112,20 +125,15 @@ extension CinemaFormatBadges {
             RoundedRectangle(cornerRadius: 7, style: .continuous)
         }
 
-        /// "Dolby" in a light weight followed by the product name in heavy small caps
-        private func dolby(_ title: String) -> some View {
-            let parts = title.split(separator: " ", maxSplits: 1).map(String.init)
-
-            return HStack(spacing: 6) {
-                Text(parts.first ?? title)
-                    .fontWeight(.medium)
-
-                if let product = parts.last, parts.count > 1 {
-                    Text(product.uppercased())
-                        .fontWeight(.black)
-                        .tracking(1.5)
-                }
-            }
+        private func logo(_ resource: ImageResource, title: String, height: CGFloat) -> some View {
+            Image(resource)
+                .renderingMode(.template)
+                .resizable()
+                .interpolation(.high)
+                .aspectRatio(contentMode: .fit)
+                .frame(height: height)
+                .foregroundStyle(CinemaTheme.Colors.primaryText)
+                .accessibilityLabel(title)
         }
 
         @ViewBuilder
@@ -139,20 +147,17 @@ extension CinemaFormatBadges {
                 Text(L10n.hd)
                     .fontWeight(.black)
 
-            case .dolbyVision:
-                dolby(L10n.dolbyVision)
-
             case let .hdr(title):
                 Text(title)
                     .fontWeight(.heavy)
-
-            case .dolbyAtmos:
-                dolby(L10n.dolbyAtmos)
 
             case let .surround(title):
                 Label(title, systemImage: "hifispeaker.2.fill")
                     .labelStyle(.titleAndIcon)
                     .fontWeight(.heavy)
+
+            case .dolbyVision, .dolbyAtmos, .dolbyDigital:
+                EmptyView()
             }
         }
 
@@ -161,6 +166,19 @@ extension CinemaFormatBadges {
         }
 
         var body: some View {
+            switch badge {
+            case .dolbyVision:
+                logo(.dolbyVision, title: L10n.dolbyVision, height: 40)
+            case .dolbyAtmos:
+                logo(.dolbyAtmos, title: L10n.dolbyAtmos, height: 40)
+            case .dolbyDigital:
+                logo(.dolbyDigital, title: L10n.dolbyDigital, height: 30)
+            default:
+                boxed
+            }
+        }
+
+        private var boxed: some View {
             label
                 .font(.system(size: 20))
                 .foregroundStyle(isFilled ? Color.black : CinemaTheme.Colors.primaryText)
