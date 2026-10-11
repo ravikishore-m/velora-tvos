@@ -213,6 +213,16 @@ struct SelectUserView: View {
                         }
                     }
                 } else {
+                    #if os(tvOS)
+                    CinemaProfilePicker(
+                        isEditing: $isEditing,
+                        selectedUsers: $selectedUsers,
+                        userItems: userItems,
+                        showsServer: serverSelection == .all && viewModel.servers.count > 1,
+                        action: { select(user: $0) },
+                        onDelete: { delete(user: $0) }
+                    )
+                    #else
                     switch userListDisplayType {
                     case .list:
                         ListView(
@@ -234,6 +244,7 @@ struct SelectUserView: View {
                             onDelete: { delete(user: $0) }
                         )
                     }
+                    #endif
                 }
             }
             .animation(.linear(duration: 0.1), value: userListDisplayType)

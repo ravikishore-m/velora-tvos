@@ -84,6 +84,11 @@ extension ItemView {
 
         @ViewBuilder
         private func VideoQuality() -> some View {
+            #if os(tvOS)
+            if let mediaStreams = selectedMediaSource?.mediaStreams {
+                CinemaFormatBadges(streams: mediaStreams, content: .video)
+            }
+            #else
             if let mediaStreams = selectedMediaSource?.mediaStreams {
                 if mediaStreams.has4KVideo {
                     EmptyLabel("4K")
@@ -101,10 +106,16 @@ extension ItemView {
                         .labelStyle(.attributeBadgeFill)
                 }
             }
+            #endif
         }
 
         @ViewBuilder
         private func AudioChannels() -> some View {
+            #if os(tvOS)
+            if let mediaStreams = selectedMediaSource?.mediaStreams {
+                CinemaFormatBadges(streams: mediaStreams, content: .audio)
+            }
+            #else
             if let mediaStreams = selectedMediaSource?.mediaStreams {
                 if mediaStreams.has51AudioChannelLayout {
                     EmptyLabel("5.1")
@@ -115,6 +126,7 @@ extension ItemView {
                         .labelStyle(.attributeBadgeFill)
                 }
             }
+            #endif
         }
 
         @ViewBuilder

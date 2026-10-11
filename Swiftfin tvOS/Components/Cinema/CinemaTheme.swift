@@ -88,6 +88,25 @@ enum CinemaTheme {
         )
     }
 
+    // MARK: - Profile
+
+    enum Profile {
+
+        static let size: CGFloat = 240
+        static let spacing: CGFloat = 56
+        static let cornerRadius: CGFloat = 18
+        static let focusScale: CGFloat = 1.08
+
+        static let palette: [Color] = [
+            Color(red: 0.13, green: 0.47, blue: 0.95),
+            Color(red: 0.96, green: 0.74, blue: 0.1),
+            Color(red: 0.9, green: 0.04, blue: 0.08),
+            Color(red: 0.11, green: 0.68, blue: 0.4),
+            Color(red: 0.55, green: 0.3, blue: 0.9),
+            Color(red: 0.96, green: 0.45, blue: 0.1),
+        ]
+    }
+
     // MARK: - Player
 
     enum Player {

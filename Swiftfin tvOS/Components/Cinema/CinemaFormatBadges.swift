@@ -21,8 +21,20 @@ struct CinemaFormatBadges: View {
         case surround(String)
     }
 
+    struct Content: OptionSet {
+
+        let rawValue: Int
+
+        static let video = Content(rawValue: 1 << 0)
+        static let atmos = Content(rawValue: 1 << 1)
+        static let channels = Content(rawValue: 1 << 2)
+
+        static let audio: Content = [.atmos, .channels]
+        static let all: Content = [.video, .audio]
+    }
+
     let streams: [MediaStream]
-    var includesAudio: Bool = true
+    var content: Content = .all
 
     private var videoStream: MediaStream? {
         streams.first { $0.type == .video }
@@ -50,28 +62,30 @@ struct CinemaFormatBadges: View {
     private var badges: [Badge] {
         var badges: [Badge] = []
 
-        if streams.has4KVideo {
-            badges.append(.uhd)
-        } else if streams.hasHDVideo {
-            badges.append(.hd)
+        if content.contains(.video) {
+            if streams.has4KVideo {
+                badges.append(.uhd)
+            } else if streams.hasHDVideo {
+                badges.append(.hd)
+            }
+
+            if streams.hasDolbyVision {
+                badges.append(.dolbyVision)
+            } else if streams.hasHDRVideo {
+                badges.append(.hdr(hdrTitle))
+            }
         }
 
-        if streams.hasDolbyVision {
-            badges.append(.dolbyVision)
-        } else if streams.hasHDRVideo {
-            badges.append(.hdr(hdrTitle))
-        }
-
-        guard includesAudio else { return badges }
-
-        if hasAtmos {
+        if content.contains(.atmos), hasAtmos {
             badges.append(.dolbyAtmos)
         }
 
-        if streams.has71AudioChannelLayout {
-            badges.append(.surround(L10n.surround71))
-        } else if streams.has51AudioChannelLayout {
-            badges.append(.surround(L10n.surround51))
+        if content.contains(.channels) {
+            if streams.has71AudioChannelLayout {
+                badges.append(.surround(L10n.surround71))
+            } else if streams.has51AudioChannelLayout {
+                badges.append(.surround(L10n.surround51))
+            }
         }
 
         return badges
