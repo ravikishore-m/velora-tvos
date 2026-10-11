@@ -55,21 +55,16 @@ enum CinemaTheme {
 
     enum Hero {
 
+        /// Fraction of the visible height used by the hero, leaving the first row peeking below
+        static let heightRatio: CGFloat = 0.8
+        static let minimumHeight: CGFloat = 600
         static let logoMaxWidth: CGFloat = 640
         static let logoMaxHeight: CGFloat = 200
         static let synopsisMaxWidth: CGFloat = 960
         static let synopsisLineLimit = 3
+        static let progressWidth: CGFloat = 360
         static let backdropMaxWidth: CGFloat = 1920
-
-        static let bottomScrim = LinearGradient(
-            stops: [
-                .init(color: .clear, location: 0.35),
-                .init(color: Colors.background.opacity(0.75), location: 0.75),
-                .init(color: Colors.background, location: 1),
-            ],
-            startPoint: .top,
-            endPoint: .bottom
-        )
+        static let backdropFadeStart: CGFloat = 0.6
 
         static let leadingScrim = LinearGradient(
             stops: [

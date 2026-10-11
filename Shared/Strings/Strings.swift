@@ -1076,6 +1076,8 @@ internal enum L10n {
   internal static let missingCodecValues = L10n.tr("Localizable", "missingCodecValues", fallback: "Missing codec values")
   /// Mixer
   internal static let mixer = L10n.tr("Localizable", "mixer", fallback: "Mixer")
+  /// More Info
+  internal static let moreInfo = L10n.tr("Localizable", "moreInfo", fallback: "More Info")
   /// Movie
   internal static let movie = L10n.tr("Localizable", "movie", fallback: "Movie")
   /// Movies
@@ -1418,6 +1420,10 @@ internal enum L10n {
   internal static let realFrameRate = L10n.tr("Localizable", "realFrameRate", fallback: "Real Frame Rate")
   /// Recently added
   internal static let recentlyAdded = L10n.tr("Localizable", "recentlyAdded", fallback: "Recently added")
+  /// Recently Added Episodes
+  internal static let recentlyAddedEpisodes = L10n.tr("Localizable", "recentlyAddedEpisodes", fallback: "Recently Added Episodes")
+  /// Recently Added Movies
+  internal static let recentlyAddedMovies = L10n.tr("Localizable", "recentlyAddedMovies", fallback: "Recently Added Movies")
   /// Recently played
   internal static let recentlyPlayed = L10n.tr("Localizable", "recentlyPlayed", fallback: "Recently played")
   /// Recommended
