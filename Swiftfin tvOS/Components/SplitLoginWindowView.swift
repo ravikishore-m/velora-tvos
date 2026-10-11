@@ -27,22 +27,23 @@ struct SplitLoginWindowView<Leading: View, Trailing: View>: View {
     // MARK: - Body
 
     var body: some View {
-        HStack(alignment: .top) {
+        HStack(alignment: .top, spacing: 60) {
             VStack(alignment: .leading, spacing: 22) {
                 leadingContentView
             }
-            .frame(maxWidth: .infinity)
-            .edgePadding(.vertical)
-
-            Divider()
-                .padding(.vertical, 100)
+            .padding(40)
+            .frame(maxWidth: .infinity, alignment: .top)
+            .glassEffect(.regular, in: .rect(cornerRadius: 36))
 
             VStack(alignment: .leading, spacing: 22) {
                 trailingContentView
             }
-            .frame(maxWidth: .infinity)
-            .edgePadding(.vertical)
+            .padding(40)
+            .frame(maxWidth: .infinity, alignment: .top)
+            .glassEffect(.regular, in: .rect(cornerRadius: 36))
         }
+        .edgePadding()
+        .environment(\.colorScheme, .dark)
         .toolbar {
             ToolbarItem(placement: .principal) {
                 Image(uiImage: .jellyfinBlobBlue)
@@ -57,18 +58,14 @@ struct SplitLoginWindowView<Leading: View, Trailing: View>: View {
             }
         }
         .background {
-            if let backgroundImageSource {
-                ZStack {
+            CinemaLoginBackground {
+                if let backgroundImageSource {
                     ImageView(backgroundImageSource)
                         .aspectRatio(contentMode: .fill)
                         .id(backgroundImageSource)
                         .transition(.opacity)
                         .animation(.linear, value: backgroundImageSource)
-
-                    Color.black
-                        .opacity(0.9)
                 }
-                .ignoresSafeArea()
             }
         }
     }

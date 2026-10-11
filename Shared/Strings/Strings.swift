@@ -652,6 +652,10 @@ internal enum L10n {
   internal static let endDate = L10n.tr("Localizable", "endDate", fallback: "End date")
   /// Ended
   internal static let ended = L10n.tr("Localizable", "ended", fallback: "Ended")
+  /// Ends at %@
+  internal static func endsAtTime(_ p1: Any) -> String {
+    return L10n.tr("Localizable", "endsAtTime", String(describing: p1), fallback: "Ends at %@")
+  }
   /// End time
   internal static let endTime = L10n.tr("Localizable", "endTime", fallback: "End time")
   /// Engineer
@@ -728,6 +732,8 @@ internal enum L10n {
   internal static let favorites = L10n.tr("Localizable", "favorites", fallback: "Favorites")
   /// Favorite Shows
   internal static let favoriteShows = L10n.tr("Localizable", "favoriteShows", fallback: "Favorite Shows")
+  /// Featured
+  internal static let featured = L10n.tr("Localizable", "featured", fallback: "Featured")
   /// Featurette
   internal static let featurette = L10n.tr("Localizable", "featurette", fallback: "Featurette")
   /// File
@@ -2016,6 +2022,8 @@ internal enum L10n {
   internal static let weekend = L10n.tr("Localizable", "weekend", fallback: "Weekend")
   /// Weekly
   internal static let weekly = L10n.tr("Localizable", "weekly", fallback: "Weekly")
+  /// Who's watching?
+  internal static let whosWatching = L10n.tr("Localizable", "whosWatching", fallback: "Who\'s watching?")
   /// Wi-Fi
   internal static let wifi = L10n.tr("Localizable", "wifi", fallback: "Wi-Fi")
   /// Wi-Fi Name

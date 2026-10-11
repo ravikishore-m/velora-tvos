@@ -26,7 +26,10 @@ enum CinemaTheme {
         static let focusedActionForeground = Color.black
 
         static let placeholder = Color.white.opacity(0.08)
-        static let progress = Color(red: 0.9, green: 0.04, blue: 0.08)
+        /// Netflix red, used for progress and highlights
+        static let accent = Color(red: 0.898, green: 0.035, blue: 0.078)
+        /// Cool secondary glow for backgrounds
+        static let glow = Color(red: 0.25, green: 0.4, blue: 1)
     }
 
     // MARK: - Typography
@@ -56,36 +59,41 @@ enum CinemaTheme {
 
     enum Hero {
 
-        /// Fraction of the visible height used by the hero tile, leaving the first row peeking below
-        static let heightRatio: CGFloat = 0.6
-        static let minimumHeight: CGFloat = 560
-        static let cornerRadius: CGFloat = 28
-        static let contentPadding: CGFloat = 56
-        static let logoMaxWidth: CGFloat = 560
-        static let logoMaxHeight: CGFloat = 180
+        /// Fraction of the visible height used by the hero, leaving the first row peeking below
+        static let heightRatio: CGFloat = 0.84
+        static let minimumHeight: CGFloat = 700
+        static let contentBottomPadding: CGFloat = 36
+        static let logoMaxWidth: CGFloat = 620
+        static let logoMaxHeight: CGFloat = 200
         static let synopsisMaxWidth: CGFloat = 900
         static let synopsisLineLimit = 3
         static let progressWidth: CGFloat = 360
         static let backdropMaxWidth: CGFloat = 1920
+        static let backdropFadeStart: CGFloat = 0.6
+
+        static let maximumItems = 8
+        static let rotationInterval: Duration = .seconds(8)
+        static let crossfade: Animation = .easeInOut(duration: 0.8)
+        static let zoomScale: CGFloat = 1.08
+        static let zoomDuration: TimeInterval = 20
 
         static let leadingScrim = LinearGradient(
             stops: [
-                .init(color: Colors.background.opacity(0.9), location: 0),
-                .init(color: Colors.background.opacity(0.45), location: 0.45),
-                .init(color: .clear, location: 0.75),
+                .init(color: Colors.background.opacity(0.92), location: 0),
+                .init(color: Colors.background.opacity(0.55), location: 0.4),
+                .init(color: .clear, location: 0.72),
             ],
             startPoint: .leading,
             endPoint: .trailing
         )
+    }
 
-        static let bottomScrim = LinearGradient(
-            stops: [
-                .init(color: .clear, location: 0.45),
-                .init(color: Colors.background.opacity(0.75), location: 1),
-            ],
-            startPoint: .top,
-            endPoint: .bottom
-        )
+    // MARK: - Player
+
+    enum Player {
+
+        static let logoMaxWidth: CGFloat = 520
+        static let logoMaxHeight: CGFloat = 130
     }
 
     // MARK: - Card
@@ -107,7 +115,7 @@ enum CinemaTheme {
         static let imageMaxWidth: CGFloat = 640
         static let headerSpacing: CGFloat = 20
 
-        static let expandAnimation: Animation = .easeOut(duration: 0.25)
+        static let expandAnimation: Animation = .spring(response: 0.38, dampingFraction: 0.86)
 
         static let scrim = LinearGradient(
             stops: [
@@ -128,7 +136,7 @@ enum CinemaTheme {
         static let pressedScale: CGFloat = 0.97
         static let cornerRadius: CGFloat = 14
         static let shadowRadius: CGFloat = 18
-        static let animation: Animation = .easeOut(duration: 0.18)
+        static let animation: Animation = .spring(response: 0.3, dampingFraction: 0.75)
         static let backdropTransition: Animation = .easeInOut(duration: 0.45)
     }
 }

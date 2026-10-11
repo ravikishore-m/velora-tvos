@@ -66,7 +66,11 @@ extension Defaults.Keys {
     ///
     /// This is set externally whenever the app or user accent colors change,
     /// depending on the current app state.
+    #if os(tvOS)
+    static var accentColor: Key<Color> = AppKey("accentColor", default: Color(red: 0.898, green: 0.035, blue: 0.078))
+    #else
     static var accentColor: Key<Color> = AppKey("accentColor", default: .jellyfinPurple)
+    #endif
 
     /// The _real_ appearance key to be used.
     ///
@@ -302,7 +306,12 @@ extension Defaults.Keys {
         }
 
         static var videoPlayerType: Key<VideoPlayerType> {
+            #if os(tvOS)
+            // Hardware decoding with frame rate and dynamic range matching
+            UserKey("videoPlayerType", default: .avPlayer)
+            #else
             UserKey("videoPlayerType", default: .vlc)
+            #endif
         }
 
         enum Gesture {

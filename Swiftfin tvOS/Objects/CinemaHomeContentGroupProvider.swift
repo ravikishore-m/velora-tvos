@@ -62,7 +62,6 @@ struct CinemaHomeContentGroupProvider: ContentGroupProvider {
         )
 
         CinemaHeroContentGroup(
-            resumeViewModel: continueWatching.viewModel,
             fallbackViewModel: recentlyAddedMovies.viewModel
         )
 

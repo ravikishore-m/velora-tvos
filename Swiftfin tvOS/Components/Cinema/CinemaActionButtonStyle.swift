@@ -48,13 +48,14 @@ struct CinemaActionButtonStyle: ButtonStyle {
             .foregroundStyle(foregroundColor)
             .symbolRenderingMode(.monochrome)
             .labelStyle(.titleAndIcon)
-            .padding(.horizontal, 40)
-            .padding(.vertical, 18)
+            .padding(.horizontal, 44)
+            .padding(.vertical, 20)
             .background(
-                backgroundColor,
-                in: RoundedRectangle(cornerRadius: CinemaTheme.Focus.cornerRadius, style: .continuous)
+                isHighlighted ? backgroundColor : .clear,
+                in: Capsule()
             )
-            .contentShape(RoundedRectangle(cornerRadius: CinemaTheme.Focus.cornerRadius, style: .continuous))
+            .glassEffect(isHighlighted ? .identity : .regular, in: Capsule())
+            .contentShape(Capsule())
             .scaleEffect(scale(isPressed: configuration.isPressed))
             .opacity(isEnabled ? 1 : 0.5)
             .shadow(
@@ -63,6 +64,6 @@ struct CinemaActionButtonStyle: ButtonStyle {
                 y: isHighlighted ? 8 : 0
             )
             .animation(CinemaTheme.Focus.animation, value: isHighlighted)
-            .animation(.easeOut(duration: 0.1), value: configuration.isPressed)
+            .animation(CinemaTheme.Focus.animation, value: configuration.isPressed)
     }
 }

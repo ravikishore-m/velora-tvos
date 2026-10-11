@@ -6,34 +6,46 @@
 // Copyright (c) 2026 Jellyfin & Jellyfin Contributors
 //
 
+import JellyfinAPI
 import SwiftUI
 
-/// Features the first Continue Watching item, falling back to the newest movie.
+/// Rotates through a random selection of unwatched movies and shows,
+/// falling back to the newest movies when everything has been watched.
 ///
-/// Both view models are shared with their rows so the hero does not issue its own requests.
-/// The fallback view model is owned here so it is still refreshed when its row is hidden.
+/// The fallback view model is shared with its row so it does not issue its own request.
 struct CinemaHeroContentGroup: ContentGroup {
 
     let id = "cinema-hero"
-    let resumeViewModel: PagingLibraryViewModel<ResumeItemsLibrary>
+    let fallbackViewModel: PagingLibraryViewModel<ItemLibrary>
     let viewModel: PagingLibraryViewModel<ItemLibrary>
 
     var _shouldBeResolved: Bool {
-        resumeViewModel.elements.isNotEmpty || viewModel.elements.isNotEmpty
+        viewModel.elements.isNotEmpty || fallbackViewModel.elements.isNotEmpty
     }
 
-    init(
-        resumeViewModel: PagingLibraryViewModel<ResumeItemsLibrary>,
-        fallbackViewModel: PagingLibraryViewModel<ItemLibrary>
-    ) {
-        self.resumeViewModel = resumeViewModel
-        self.viewModel = fallbackViewModel
+    init(fallbackViewModel: PagingLibraryViewModel<ItemLibrary>) {
+        self.fallbackViewModel = fallbackViewModel
+        self.viewModel = .init(
+            library: ItemLibrary(
+                parent: BaseItemDto(name: L10n.featured),
+                filters: .init(
+                    itemTypes: [.movie, .series],
+                    sortBy: [.random],
+                    traits: [.isUnplayed]
+                )
+            ),
+            pageSize: 20
+        )
     }
 
     func body(with viewModel: PagingLibraryViewModel<ItemLibrary>) -> some View {
         CinemaHeroBanner(
-            resumeViewModel: resumeViewModel,
-            fallbackViewModel: viewModel
+            featuredViewModel: viewModel,
+            fallbackViewModel: fallbackViewModel
+        )
+        .preference(
+            key: ContentGroupCustomizationKey.self,
+            value: .ignoreSafeAreaTop
         )
     }
 }

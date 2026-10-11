@@ -151,6 +151,16 @@ struct SelectUserView: View {
 
     @ViewBuilder
     private var splashScreenBackground: some View {
+        #if os(tvOS)
+        CinemaLoginBackground {
+            if selectUserUseSplashscreen, splashScreenImageSources.isNotEmpty {
+                ImageView(splashScreenImageSources)
+                    .pipeline(.Swiftfin.local)
+                    .aspectRatio(contentMode: .fill)
+                    .id(splashScreenImageSources)
+            }
+        }
+        #else
         if selectUserUseSplashscreen, splashScreenImageSources.isNotEmpty {
             AlternateLayoutView {
                 Color.clear
@@ -165,11 +175,22 @@ struct SelectUserView: View {
                     .opacity(0.9)
             }
         }
+        #endif
     }
 
     @ViewBuilder
     private var contentView: some View {
         VStack(spacing: 0) {
+            #if os(tvOS)
+            if userItems.isNotEmpty {
+                Text(L10n.whosWatching)
+                    .font(.title.weight(.bold))
+                    .foregroundStyle(.white)
+                    .padding(.top, 60)
+                    .accessibilityAddTraits(.isHeader)
+            }
+            #endif
+
             ZStack {
                 if userItems.isEmpty {
                     EmptyUserView {

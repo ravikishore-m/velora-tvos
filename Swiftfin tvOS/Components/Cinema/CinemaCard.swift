@@ -57,7 +57,7 @@ struct CinemaCard: View {
                         .fill(CinemaTheme.Colors.actionBackground)
 
                     Rectangle()
-                        .fill(CinemaTheme.Colors.progress)
+                        .fill(CinemaTheme.Colors.accent)
                         .frame(width: proxy.size.width * percentage)
                 }
             }
@@ -95,24 +95,28 @@ struct CinemaCard: View {
         .accessibilityLabel(item.cinemaTitle)
     }
 
+    /// Always loaded so expanding only crossfades instead of waiting on the network
+    @ViewBuilder
+    private func landscapeImage(for item: BaseItemDto) -> some View {
+        ImageView(item.cinemaLandscapeSources(maxWidth: CinemaTheme.Card.imageMaxWidth))
+            .image { (image: Image) in
+                image
+                    .aspectRatio(contentMode: .fill)
+            }
+            .failure {
+                CinemaTheme.Colors.placeholder
+            }
+            .frame(
+                width: CinemaTheme.Card.expandedWidth,
+                height: CinemaTheme.Card.height
+            )
+            .clipped()
+            .accessibilityHidden(true)
+    }
+
     @ViewBuilder
     private func billboard(for item: BaseItemDto) -> some View {
         ZStack(alignment: .bottomLeading) {
-            ImageView(item.cinemaLandscapeSources(maxWidth: CinemaTheme.Card.imageMaxWidth))
-                .image { (image: Image) in
-                    image
-                        .aspectRatio(contentMode: .fill)
-                }
-                .failure {
-                    CinemaTheme.Colors.placeholder
-                }
-                .frame(
-                    width: CinemaTheme.Card.expandedWidth,
-                    height: CinemaTheme.Card.height
-                )
-                .clipped()
-                .accessibilityHidden(true)
-
             CinemaTheme.Card.scrim
 
             VStack(alignment: .leading, spacing: CinemaTheme.Card.contentSpacing) {
@@ -153,6 +157,9 @@ struct CinemaCard: View {
         let item = entry.snapshot
 
         ZStack(alignment: .topLeading) {
+            landscapeImage(for: item)
+                .opacity(isExpanded ? 1 : 0)
+
             poster
                 .overlay(alignment: .bottom) {
                     progressBar(for: item)
@@ -161,7 +168,7 @@ struct CinemaCard: View {
 
             if isExpanded {
                 billboard(for: item)
-                    .transition(.opacity)
+                    .transition(.opacity.combined(with: .offset(y: 12)))
             }
         }
         .frame(
@@ -171,6 +178,10 @@ struct CinemaCard: View {
         )
         .background(CinemaTheme.Colors.placeholder)
         .clipShape(shape)
+        .overlay {
+            shape
+                .strokeBorder(CinemaTheme.Colors.primaryText.opacity(isExpanded ? 0.35 : 0), lineWidth: 2)
+        }
         .shadow(
             color: .black.opacity(isExpanded ? 0.6 : 0),
             radius: CinemaTheme.Focus.shadowRadius,

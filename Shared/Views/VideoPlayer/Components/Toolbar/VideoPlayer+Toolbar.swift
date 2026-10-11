@@ -119,6 +119,9 @@ extension VideoPlayer.PlaybackControls.Toolbar {
         }
 
         var tvOSView: some View {
+            #if os(tvOS)
+            CinemaPlayerTitleView(item: item)
+            #else
             VStack(alignment: .leading) {
                 if let subtitle = _titleSubtitle.subtitle {
                     Text(subtitle)
@@ -131,6 +134,7 @@ extension VideoPlayer.PlaybackControls.Toolbar {
                     .fontWeight(.semibold)
             }
             .lineLimit(1)
+            #endif
         }
     }
 }
