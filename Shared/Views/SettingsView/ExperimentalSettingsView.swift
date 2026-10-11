@@ -28,7 +28,9 @@ struct ExperimentalSettingsView: View {
     var body: some View {
         Form(systemImage: "flask") {
             // swiftlint:disable hard_coded_display_string
+            #if !os(tvOS)
             Toggle("MPV engine", isOn: $isMPVEnabled)
+            #endif
 
             Toggle("Live TV EPG", isOn: $isVideoPlayerEPGEnabled)
 

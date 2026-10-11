@@ -15,7 +15,15 @@ struct CustomDeviceProfilesView: View {
     @Default(.VideoPlayer.Playback.customDeviceProfileAction)
     private var customDeviceProfileAction
     @Default(.VideoPlayer.videoPlayerType)
-    private var videoPlayerType
+    private var storedVideoPlayerType
+
+    private var videoPlayerType: VideoPlayerType {
+        #if os(tvOS)
+        VideoPlayerType.current
+        #else
+        storedVideoPlayerType
+        #endif
+    }
 
     @StoredValue(.User.customDeviceProfiles)
     private var customProfiles: [CustomDeviceProfile]

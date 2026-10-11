@@ -168,6 +168,10 @@ internal enum L10n {
   internal static let audioCodec = L10n.tr("Localizable", "audioCodec", fallback: "Audio codec")
   /// The audio codec is not supported
   internal static let audioCodecNotSupported = L10n.tr("Localizable", "audioCodecNotSupported", fallback: "The audio codec is not supported")
+  /// Audio Converted
+  internal static let audioConverted = L10n.tr("Localizable", "audioConverted", fallback: "Audio Converted")
+  /// The video is untouched. Only the audio is converted because Apple TV cannot play this audio format, such as Dolby TrueHD or DTS.
+  internal static let audioConvertedDescription = L10n.tr("Localizable", "audioConvertedDescription", fallback: "The video is untouched. Only the audio is converted because Apple TV cannot play this audio format, such as Dolby TrueHD or DTS.")
   /// Audio description
   internal static let audioDescription = L10n.tr("Localizable", "audioDescription", fallback: "Audio description")
   /// Audio descriptions (AD) refer to a narration track describing what is happening on screen, to provide context for those who are blind or have low vision.
@@ -1516,6 +1520,8 @@ internal enum L10n {
   internal static let removeFromFavorites = L10n.tr("Localizable", "removeFromFavorites", fallback: "Remove from favorites")
   /// Remux
   internal static let remux = L10n.tr("Localizable", "remux", fallback: "Remux")
+  /// The video and audio are untouched. Only the file container is repackaged for Apple TV.
+  internal static let remuxDescription = L10n.tr("Localizable", "remuxDescription", fallback: "The video and audio are untouched. Only the file container is repackaged for Apple TV.")
   /// Reorder
   internal static let reorder = L10n.tr("Localizable", "reorder", fallback: "Reorder")
   /// Replace

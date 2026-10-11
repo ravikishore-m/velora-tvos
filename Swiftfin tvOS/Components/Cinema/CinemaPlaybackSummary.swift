@@ -18,20 +18,47 @@ struct CinemaPlaybackSummary: View {
     let videoStream: MediaStream?
     let audioStream: MediaStream?
 
-    private var playMethod: PlayMethod {
-        if let playMethod = session?.playState?.playMethod {
-            return playMethod
+    private enum Method {
+        case directPlay
+        case remux
+        case audioConverted
+        case transcode
+    }
+
+    /// Clients report a repackaged stream as a transcode, so prefer the server's per-stream details
+    private var method: Method {
+        if let transcodingInfo = session?.transcodingInfo {
+            let isVideoDirect = transcodingInfo.isVideoDirect ?? false
+            let isAudioDirect = transcodingInfo.isAudioDirect ?? false
+
+            if isVideoDirect, isAudioDirect {
+                return .remux
+            } else if isVideoDirect {
+                return .audioConverted
+            }
+            return .transcode
         }
 
-        return playbackItem?.mediaSource.transcodingURL == nil ? .directPlay : .transcode
+        switch session?.playState?.playMethod {
+        case .directPlay:
+            return .directPlay
+        case .directStream:
+            return .remux
+        case .transcode:
+            return .transcode
+        case nil:
+            return playbackItem?.mediaSource.transcodingURL == nil ? .directPlay : .transcode
+        }
     }
 
     private var status: (title: String, description: String, systemImage: String, color: Color) {
-        switch playMethod {
+        switch method {
         case .directPlay:
             (L10n.directPlay, L10n.directPlayDescription, "checkmark.circle.fill", .green)
-        case .directStream:
-            (L10n.directStream, L10n.directStreamDescription, "arrow.triangle.2.circlepath.circle.fill", .yellow)
+        case .remux:
+            (L10n.remux, L10n.remuxDescription, "checkmark.circle.fill", .green)
+        case .audioConverted:
+            (L10n.audioConverted, L10n.audioConvertedDescription, "speaker.wave.2.circle.fill", .yellow)
         case .transcode:
             (L10n.transcode, L10n.transcodeDescription, "exclamationmark.triangle.fill", CinemaTheme.Player.warning)
         }
@@ -46,6 +73,23 @@ struct CinemaPlaybackSummary: View {
         ]
             .compactMap(\.self)
             .joined(separator: " · ")
+    }
+
+    private var audioDescription: String? {
+        guard let source = audioStream?.displayTitle else { return nil }
+        guard let transcodingInfo = session?.transcodingInfo,
+              transcodingInfo.isAudioDirect != true,
+              let codec = transcodingInfo.audioCodec
+        else { return source }
+
+        let channels: String = switch transcodingInfo.audioChannels {
+        case 8: L10n.surround71
+        case 6: L10n.surround51
+        case let .some(count): "\(count)ch"
+        case nil: ""
+        }
+
+        return "\(source) → \(codec.uppercased()) \(channels)".trimmingCharacters(in: .whitespaces)
     }
 
     private var transcodeReasons: String? {
@@ -91,8 +135,8 @@ struct CinemaPlaybackSummary: View {
 
             VStack(alignment: .leading, spacing: 12) {
                 row(L10n.video, value: videoDescription)
-                row(L10n.audio, value: audioStream?.displayTitle)
-                row(L10n.videoPlayer, value: Defaults[.VideoPlayer.videoPlayerType].displayTitle)
+                row(L10n.audio, value: audioDescription)
+                row(L10n.videoPlayer, value: VideoPlayerType.current.displayTitle)
                 row(L10n.container, value: playbackItem?.mediaSource.container?.uppercased())
                 row(L10n.transcodeReasons, value: transcodeReasons)
             }

@@ -53,13 +53,25 @@ enum VideoPlayerType: String, CaseIterable, Displayable, SupportedCaseIterable, 
         }
     }
 
+    /// The player used for playback. tvOS always uses the native player.
+    static var current: VideoPlayerType {
+        #if os(tvOS)
+        .avPlayer
+        #else
+        Defaults[.VideoPlayer.videoPlayerType]
+        #endif
+    }
+
     @ArrayBuilder<VideoPlayerType>
     static var supportedCases: [VideoPlayerType] {
         VideoPlayerType.avPlayer
+
+        #if !os(tvOS)
         VideoPlayerType.vlc
 
         if Defaults[.Experimental.mpvPlayer] {
             VideoPlayerType.mpv
         }
+        #endif
     }
 }

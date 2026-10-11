@@ -326,7 +326,11 @@ extension Defaults.Keys {
         }
 
         static var videoPlayerType: Key<VideoPlayerType> {
+            #if os(tvOS)
+            UserKey("videoPlayerType", default: .avPlayer)
+            #else
             UserKey("videoPlayerType", default: .vlc)
+            #endif
         }
 
         enum Gesture {
