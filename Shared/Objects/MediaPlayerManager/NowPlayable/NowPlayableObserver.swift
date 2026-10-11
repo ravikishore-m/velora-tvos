@@ -316,7 +316,19 @@ class NowPlayableObserver: ViewModel, MediaPlayerObserver {
                 try audioSession.setSupportsMultichannelContent(supportsMultichannelContent)
             }
             try audioSession.setActive(true)
-            logger.trace("Started AVAudioSession")
+
+            #if os(tvOS)
+            // Preferred channel count can only be set on an active session
+            if supportsMultichannelContent == true,
+               audioSession.maximumOutputNumberOfChannels > audioSession.outputNumberOfChannels
+            {
+                try audioSession.setPreferredOutputNumberOfChannels(audioSession.maximumOutputNumberOfChannels)
+            }
+            #endif
+
+            logger.trace(
+                "Started AVAudioSession with \(audioSession.outputNumberOfChannels) of \(audioSession.maximumOutputNumberOfChannels) output channels"
+            )
         } catch {
             logger.critical("Unable to activate AVAudioSession instance: \(error.localizedDescription)")
             throw error
