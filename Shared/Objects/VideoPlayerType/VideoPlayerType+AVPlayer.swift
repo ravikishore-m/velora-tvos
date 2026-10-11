@@ -187,7 +187,7 @@ extension VideoPlayerType {
                 }
                 ProfileCondition(
                     condition: .equalsAny,
-                    isRequired: avPlayerRequiresHEVCCodecTag,
+                    isRequired: true,
                     property: .videoCodecTag
                 ) {
                     "hvc1"
@@ -227,16 +227,6 @@ extension VideoPlayerType {
                 }
             }
         )
-    }
-
-    /// Matroska sources have no codec tag. tvOS allows them so the server remuxes HEVC into
-    /// fragmented MP4, which is tagged hvc1/dvh1, instead of transcoding the video.
-    private static var avPlayerRequiresHEVCCodecTag: Bool {
-        #if os(tvOS)
-        false
-        #else
-        true
-        #endif
     }
 
     @ArrayBuilder<VideoRangeType>

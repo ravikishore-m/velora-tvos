@@ -143,16 +143,16 @@ struct VideoPlayerSettingsView: View {
                 router.route(to: .playbackQualitySettings)
             }
         } learnMore: {
-            #if !os(tvOS)
             LabeledContent(
                 L10n.vlc,
                 value: L10n.playerVlcDescription
             )
-            #endif
+            #if !os(tvOS)
             LabeledContent(
                 L10n.avPlayer,
                 value: L10n.playerNativeDescription
             )
+            #endif
         }
     }
 
