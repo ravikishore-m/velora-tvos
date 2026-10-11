@@ -11,12 +11,27 @@ import SwiftUI
 extension TabItem {
 
     static var cinemaHome: TabItem {
-        let provider = CinemaHomeContentGroupProvider()
+        cinema(
+            provider: CinemaHomeContentGroupProvider(),
+            systemImage: "house.fill"
+        )
+    }
 
-        return TabItem(
+    static var cinemaMyList: TabItem {
+        cinema(
+            provider: CinemaMyListContentGroupProvider(),
+            systemImage: "plus.rectangle.on.rectangle"
+        )
+    }
+
+    private static func cinema(
+        provider: some ContentGroupProvider,
+        systemImage: String
+    ) -> TabItem {
+        TabItem(
             id: provider.id,
             title: provider.displayTitle,
-            systemImage: "house.fill"
+            systemImage: systemImage
         ) {
             ContentGroupView(provider: provider)
                 .background {

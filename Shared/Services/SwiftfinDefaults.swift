@@ -163,7 +163,11 @@ extension Defaults.Keys {
         }
 
         static var tabBarPlacement: Key<TabBarPlacement> {
+            #if os(tvOS)
+            UserKey("tabBarPlacement", default: .tabBar)
+            #else
             UserKey("tabBarPlacement", default: .sidebar)
+            #endif
         }
 
         enum Poster {

@@ -722,8 +722,12 @@ internal enum L10n {
   internal static let favorite = L10n.tr("Localizable", "favorite", fallback: "Favorite")
   /// Favorited
   internal static let favorited = L10n.tr("Localizable", "favorited", fallback: "Favorited")
+  /// Favorite Movies
+  internal static let favoriteMovies = L10n.tr("Localizable", "favoriteMovies", fallback: "Favorite Movies")
   /// Favorites
   internal static let favorites = L10n.tr("Localizable", "favorites", fallback: "Favorites")
+  /// Favorite Shows
+  internal static let favoriteShows = L10n.tr("Localizable", "favoriteShows", fallback: "Favorite Shows")
   /// Featurette
   internal static let featurette = L10n.tr("Localizable", "featurette", fallback: "Featurette")
   /// File
@@ -1094,6 +1098,8 @@ internal enum L10n {
   internal static let musicVideos = L10n.tr("Localizable", "musicVideos", fallback: "Music videos")
   /// MVC
   internal static let mvc = L10n.tr("Localizable", "mvc", fallback: "MVC")
+  /// My List
+  internal static let myList = L10n.tr("Localizable", "myList", fallback: "My List")
   /// Name
   internal static let name = L10n.tr("Localizable", "name", fallback: "Name")
   /// Narrator

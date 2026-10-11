@@ -21,7 +21,12 @@ enum PosterSubtitleField: String, CaseIterable, Displayable, Storable {
     case year
 
     // Fetch these with poster collections so changing labels needs no per-item requests.
+    #if os(tvOS)
+    // tvOS cards show a synopsis when focused.
+    static let itemFields: [ItemFields] = [.mediaStreams, .genres, .studios, .overview]
+    #else
     static let itemFields: [ItemFields] = [.mediaStreams, .genres, .studios]
+    #endif
 
     var displayTitle: String {
         switch self {

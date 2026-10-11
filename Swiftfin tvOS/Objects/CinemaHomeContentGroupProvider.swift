@@ -44,15 +44,12 @@ struct CinemaHomeContentGroupProvider: ContentGroupProvider {
     @ContentGroupBuilder
     private func _makeGroups(otherVideoLibraries: [BaseItemDto]) -> [any ContentGroup] {
 
-        let continueWatching = PosterGroup(
+        let continueWatching = CinemaRowContentGroup(
             id: "cinema-continue-watching",
-            library: ResumeItemsLibrary(mediaTypes: [.video]),
-            posterDisplayType: .landscape,
-            posterSize: .medium,
-            _viewContext: .isInResume
+            library: ResumeItemsLibrary(mediaTypes: [.video])
         )
 
-        let recentlyAddedMovies = PosterGroup(
+        let recentlyAddedMovies = CinemaRowContentGroup(
             id: "cinema-recently-added-movies",
             library: ItemLibrary(
                 parent: BaseItemDto(name: L10n.recentlyAddedMovies),
@@ -71,17 +68,15 @@ struct CinemaHomeContentGroupProvider: ContentGroupProvider {
 
         continueWatching
 
-        PosterGroup(
+        CinemaRowContentGroup(
             id: "cinema-next-up",
-            library: NextUpLibrary(),
-            posterDisplayType: .landscape,
-            posterSize: .medium
+            library: NextUpLibrary()
         )
 
         if Defaults[.Customization.Home.showRecentlyAdded] {
             recentlyAddedMovies
 
-            PosterGroup(
+            CinemaRowContentGroup(
                 id: "cinema-recently-added-episodes",
                 library: ItemLibrary(
                     parent: BaseItemDto(name: L10n.recentlyAddedEpisodes),
@@ -90,14 +85,12 @@ struct CinemaHomeContentGroupProvider: ContentGroupProvider {
                         sortBy: [.dateCreated],
                         sortOrder: [.descending]
                     )
-                ),
-                posterDisplayType: .landscape,
-                posterSize: .medium
+                )
             )
         }
 
         if Defaults[.Customization.Home.showRecentlyPlayed] {
-            PosterGroup(
+            CinemaRowContentGroup(
                 id: "cinema-recently-played",
                 library: ItemLibrary(
                     parent: BaseItemDto(name: L10n.recentlyPlayed.localizedCapitalized),
@@ -111,7 +104,7 @@ struct CinemaHomeContentGroupProvider: ContentGroupProvider {
             )
         }
 
-        PosterGroup(
+        CinemaRowContentGroup(
             id: "cinema-movies",
             library: ItemLibrary(
                 parent: BaseItemDto(name: L10n.movies),
@@ -123,7 +116,7 @@ struct CinemaHomeContentGroupProvider: ContentGroupProvider {
             )
         )
 
-        PosterGroup(
+        CinemaRowContentGroup(
             id: "cinema-tv-shows",
             library: ItemLibrary(
                 parent: BaseItemDto(name: L10n.tvShowsCapitalized),

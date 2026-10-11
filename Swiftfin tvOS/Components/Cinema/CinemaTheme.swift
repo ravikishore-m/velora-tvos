@@ -26,6 +26,7 @@ enum CinemaTheme {
         static let focusedActionForeground = Color.black
 
         static let placeholder = Color.white.opacity(0.08)
+        static let progress = Color(red: 0.9, green: 0.04, blue: 0.08)
     }
 
     // MARK: - Typography
@@ -55,25 +56,67 @@ enum CinemaTheme {
 
     enum Hero {
 
-        /// Fraction of the visible height used by the hero, leaving the first row peeking below
-        static let heightRatio: CGFloat = 0.8
-        static let minimumHeight: CGFloat = 600
-        static let logoMaxWidth: CGFloat = 640
-        static let logoMaxHeight: CGFloat = 200
-        static let synopsisMaxWidth: CGFloat = 960
+        /// Fraction of the visible height used by the hero tile, leaving the first row peeking below
+        static let heightRatio: CGFloat = 0.6
+        static let minimumHeight: CGFloat = 560
+        static let cornerRadius: CGFloat = 28
+        static let contentPadding: CGFloat = 56
+        static let logoMaxWidth: CGFloat = 560
+        static let logoMaxHeight: CGFloat = 180
+        static let synopsisMaxWidth: CGFloat = 900
         static let synopsisLineLimit = 3
         static let progressWidth: CGFloat = 360
         static let backdropMaxWidth: CGFloat = 1920
-        static let backdropFadeStart: CGFloat = 0.6
 
         static let leadingScrim = LinearGradient(
             stops: [
-                .init(color: Colors.background.opacity(0.85), location: 0),
-                .init(color: Colors.background.opacity(0.4), location: 0.45),
-                .init(color: .clear, location: 0.7),
+                .init(color: Colors.background.opacity(0.9), location: 0),
+                .init(color: Colors.background.opacity(0.45), location: 0.45),
+                .init(color: .clear, location: 0.75),
             ],
             startPoint: .leading,
             endPoint: .trailing
+        )
+
+        static let bottomScrim = LinearGradient(
+            stops: [
+                .init(color: .clear, location: 0.45),
+                .init(color: Colors.background.opacity(0.75), location: 1),
+            ],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+    }
+
+    // MARK: - Card
+
+    enum Card {
+
+        static let height: CGFloat = 360
+        static let portraitWidth: CGFloat = 240
+        /// 16:9 billboard shown while a card has focus
+        static let expandedWidth: CGFloat = 640
+        static let spacing: CGFloat = 24
+        static let cornerRadius: CGFloat = 12
+        static let contentPadding: CGFloat = 24
+        static let contentSpacing: CGFloat = 10
+        static let logoMaxWidth: CGFloat = 360
+        static let logoMaxHeight: CGFloat = 90
+        static let synopsisLineLimit = 2
+        static let progressHeight: CGFloat = 6
+        static let imageMaxWidth: CGFloat = 640
+        static let headerSpacing: CGFloat = 20
+
+        static let expandAnimation: Animation = .easeOut(duration: 0.25)
+
+        static let scrim = LinearGradient(
+            stops: [
+                .init(color: .clear, location: 0.2),
+                .init(color: Colors.background.opacity(0.65), location: 0.55),
+                .init(color: Colors.background.opacity(0.95), location: 1),
+            ],
+            startPoint: .top,
+            endPoint: .bottom
         )
     }
 

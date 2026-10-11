@@ -79,45 +79,11 @@ struct CinemaHeroBanner: View {
         scrollView.setContentOffset(topOffset, animated: true)
     }
 
-    // MARK: - Image Sources
-
-    private func backdropSources(for item: BaseItemDto) -> [ImageSource] {
-        item.imageSources(
-            for: .landscape,
-            environment: .init(
-                maxWidth: CinemaTheme.Hero.backdropMaxWidth,
-                viewContext: .isBackdrop
-            )
-        )
-    }
-
-    private func logoSource(for item: BaseItemDto) -> ImageSource? {
-        let environment = ImageSourceOptions(
-            maxWidth: CinemaTheme.Hero.logoMaxWidth,
-            maxHeight: CinemaTheme.Hero.logoMaxHeight
-        )
-
-        if item.type == .episode {
-            return item.imageSource(
-                .logo,
-                itemID: item.parentLogoItemID,
-                tag: item.parentLogoImageTag,
-                environment: environment
-            )
-        }
-
-        return item.imageSource(
-            .logo,
-            itemID: item.id,
-            environment: environment
-        )
-    }
-
     // MARK: - Views
 
     @ViewBuilder
     private func backdrop(for item: BaseItemDto) -> some View {
-        ImageView(backdropSources(for: item))
+        ImageView(item.cinemaLandscapeSources(maxWidth: CinemaTheme.Hero.backdropMaxWidth))
             .image { (image: Image) in
                 image
                     .aspectRatio(contentMode: .fill)
@@ -130,38 +96,40 @@ struct CinemaHeroBanner: View {
             .overlay {
                 CinemaTheme.Hero.leadingScrim
             }
-            .mask(gradient: .linear) {
-                (location: CinemaTheme.Hero.backdropFadeStart, opacity: 1)
-                (location: 1, opacity: 0)
+            .overlay {
+                CinemaTheme.Hero.bottomScrim
             }
             .accessibilityHidden(true)
     }
 
     @ViewBuilder
     private func title(for item: BaseItemDto) -> some View {
-        let displayTitle = item.type == .episode ? item.seriesName ?? item.displayTitle : item.displayTitle
-
-        ImageView(logoSource(for: item))
-            .image { (image: Image) in
-                image
-                    .aspectRatio(contentMode: .fit)
-            }
-            .placeholder { _ in
-                EmptyView()
-            }
-            .failure {
-                Text(displayTitle)
-                    .font(CinemaTheme.Typography.heroTitle)
-                    .foregroundStyle(CinemaTheme.Colors.primaryText)
-                    .lineLimit(2)
-                    .multilineTextAlignment(.leading)
-            }
-            .frame(
+        ImageView(
+            item.cinemaLogoSource(
                 maxWidth: CinemaTheme.Hero.logoMaxWidth,
-                maxHeight: CinemaTheme.Hero.logoMaxHeight,
-                alignment: .bottomLeading
+                maxHeight: CinemaTheme.Hero.logoMaxHeight
             )
-            .accessibilityLabel(displayTitle)
+        )
+        .image { (image: Image) in
+            image
+                .aspectRatio(contentMode: .fit)
+        }
+        .placeholder { _ in
+            EmptyView()
+        }
+        .failure {
+            Text(item.cinemaTitle)
+                .font(CinemaTheme.Typography.heroTitle)
+                .foregroundStyle(CinemaTheme.Colors.primaryText)
+                .lineLimit(2)
+                .multilineTextAlignment(.leading)
+        }
+        .frame(
+            maxWidth: CinemaTheme.Hero.logoMaxWidth,
+            maxHeight: CinemaTheme.Hero.logoMaxHeight,
+            alignment: .bottomLeading
+        )
+        .accessibilityLabel(item.cinemaTitle)
     }
 
     @ViewBuilder
@@ -170,7 +138,7 @@ struct CinemaHeroBanner: View {
             HStack(spacing: CinemaTheme.Spacing.metadata) {
                 ProgressView(value: percentage)
                     .progressViewStyle(.linear)
-                    .tint(CinemaTheme.Colors.primaryText)
+                    .tint(CinemaTheme.Colors.progress)
                     .frame(width: CinemaTheme.Hero.progressWidth)
 
                 if let progressLabel = item.progressLabel {
@@ -223,7 +191,7 @@ struct CinemaHeroBanner: View {
                         .lineLimit(1)
                 }
 
-                ItemView.MetadataHStack(item: item)
+                CinemaBadges(item: item)
 
                 if let overview = item.overview, overview.isNotEmpty {
                     Text(overview)
@@ -248,11 +216,14 @@ struct CinemaHeroBanner: View {
                 backdrop(for: item)
 
                 details(for: item)
-                    .padding(.horizontal, CinemaTheme.Spacing.edge)
-                    .padding(.bottom, CinemaTheme.Spacing.heroContent)
+                    .padding(CinemaTheme.Hero.contentPadding)
             }
             .frame(maxWidth: .infinity)
             .frame(height: heroHeight)
+            .background(CinemaTheme.Colors.placeholder)
+            .clipShape(RoundedRectangle(cornerRadius: CinemaTheme.Hero.cornerRadius))
+            .shadow(color: .black.opacity(0.5), radius: CinemaTheme.Focus.shadowRadius, y: 12)
+            .padding(.horizontal, CinemaTheme.Spacing.edge)
             .environment(\.colorScheme, .dark)
             .animation(CinemaTheme.Focus.backdropTransition, value: item.id)
             .introspect(.scrollView, on: .tvOS(.v26...), scope: .ancestor) { scrollView in

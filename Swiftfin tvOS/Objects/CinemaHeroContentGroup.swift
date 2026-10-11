@@ -35,9 +35,5 @@ struct CinemaHeroContentGroup: ContentGroup {
             resumeViewModel: resumeViewModel,
             fallbackViewModel: viewModel
         )
-        .preference(
-            key: ContentGroupCustomizationKey.self,
-            value: .ignoreSafeAreaTop
-        )
     }
 }
