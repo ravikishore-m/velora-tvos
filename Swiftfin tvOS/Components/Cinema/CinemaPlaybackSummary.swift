@@ -25,12 +25,47 @@ struct CinemaPlaybackSummary: View {
         case transcode
     }
 
+    private static let nonVideoReasons: Set<TranscodeReason> = [
+        .containerNotSupported,
+        .audioCodecNotSupported,
+        .audioIsExternal,
+        .secondaryAudioNotSupported,
+        .audioChannelsNotSupported,
+        .audioProfileNotSupported,
+        .audioSampleRateNotSupported,
+        .audioBitDepthNotSupported,
+        .audioBitrateNotSupported,
+        .unknownAudioStreamInfo,
+    ]
+
+    private static let audioReasons: Set<TranscodeReason> = nonVideoReasons.subtracting([.containerNotSupported])
+
+    private var transcodingQuery: [URLQueryItem] {
+        guard let url = playbackItem?.mediaSource.transcodingURL else { return [] }
+
+        return URLComponents(string: url)?.queryItems ?? []
+    }
+
+    private func queryValue(_ name: String) -> String? {
+        transcodingQuery.first { $0.name.caseInsensitiveCompare(name) == .orderedSame }?.value
+    }
+
+    private var reasons: [TranscodeReason] {
+        if let reasons = session?.transcodingInfo?.transcodeReasons, reasons.isNotEmpty {
+            return reasons
+        }
+
+        return (queryValue("TranscodeReasons") ?? "")
+            .split(separator: ",")
+            .compactMap { TranscodeReason(rawValue: String($0)) }
+    }
+
     /// Clients report a repackaged stream as a transcode, so prefer the server's per-stream details
     private var method: Method {
-        if let transcodingInfo = session?.transcodingInfo {
-            let isVideoDirect = transcodingInfo.isVideoDirect ?? false
-            let isAudioDirect = transcodingInfo.isAudioDirect ?? false
-
+        if let transcodingInfo = session?.transcodingInfo,
+           let isVideoDirect = transcodingInfo.isVideoDirect,
+           let isAudioDirect = transcodingInfo.isAudioDirect
+        {
             if isVideoDirect, isAudioDirect {
                 return .remux
             } else if isVideoDirect {
@@ -39,16 +74,18 @@ struct CinemaPlaybackSummary: View {
             return .transcode
         }
 
-        switch session?.playState?.playMethod {
-        case .directPlay:
-            return .directPlay
-        case .directStream:
-            return .remux
-        case .transcode:
-            return .transcode
-        case nil:
-            return playbackItem?.mediaSource.transcodingURL == nil ? .directPlay : .transcode
+        guard playbackItem?.mediaSource.transcodingURL != nil else {
+            return session?.playState?.playMethod == .transcode ? .transcode : .directPlay
         }
+
+        let reasons = Set(reasons)
+
+        if reasons.isEmpty || !reasons.isSubset(of: Self.nonVideoReasons) {
+            return .transcode
+        } else if reasons.isDisjoint(with: Self.audioReasons) {
+            return .remux
+        }
+        return .audioConverted
     }
 
     private var status: (title: String, description: String, systemImage: String, color: Color) {
@@ -77,12 +114,23 @@ struct CinemaPlaybackSummary: View {
 
     private var audioDescription: String? {
         guard let source = audioStream?.displayTitle else { return nil }
-        guard let transcodingInfo = session?.transcodingInfo,
-              transcodingInfo.isAudioDirect != true,
-              let codec = transcodingInfo.audioCodec
-        else { return source }
+        guard method == .audioConverted || method == .transcode else { return source }
 
-        let channels: String = switch transcodingInfo.audioChannels {
+        let codec: String?
+        let channelCount: Int?
+
+        if let transcodingInfo = session?.transcodingInfo, transcodingInfo.isAudioDirect != true {
+            codec = transcodingInfo.audioCodec
+            channelCount = transcodingInfo.audioChannels
+        } else {
+            codec = queryValue("AudioCodec")?.split(separator: ",").first.map(String.init)
+            let maxChannels = queryValue("TranscodingMaxAudioChannels").flatMap(Int.init)
+            channelCount = [audioStream?.channels, maxChannels].compactMap(\.self).min()
+        }
+
+        guard let codec else { return source }
+
+        let channels: String = switch channelCount {
         case 8: L10n.surround71
         case 6: L10n.surround51
         case let .some(count): "\(count)ch"
@@ -93,7 +141,7 @@ struct CinemaPlaybackSummary: View {
     }
 
     private var transcodeReasons: String? {
-        guard let reasons = session?.transcodingInfo?.transcodeReasons, reasons.isNotEmpty else { return nil }
+        guard reasons.isNotEmpty else { return nil }
 
         return reasons.map(\.displayTitle).joined(separator: ", ")
     }
