@@ -38,22 +38,37 @@ struct CinemaContentLine: View {
     }
 }
 
-/// Apple TV app metadata line: "2024 · 46m    ✓ 14+    4K    Dolby Vision    Dolby Atmos    CC  SDH  AD"
-struct CinemaBadges: View {
+/// Netflix's plain summary line for posters and the home hero: "Movie · Romance · 2026 · 2h 26m · A"
+struct CinemaFactsLine: View {
 
     let item: BaseItemDto
-    /// Streams of the selected version, falling back to the item's own streams
-    var mediaStreams: [MediaStream]?
-    var formats: CinemaFormatBadges.Content = [.video, .audioFormat]
-    /// Shrinks the row to the available width. Full-screen rows keep their natural size.
-    var fitsContainer: Bool = false
 
-    private var streams: [MediaStream] {
-        mediaStreams ?? item.mediaStreams ?? []
+    private var facts: [String] {
+        [
+            item.type == .episode ? item.seasonEpisodeLabel : item.type?.displayTitle,
+            item.genres?.first,
+            item.premiereDateYear,
+            item.runtime.map(BaseItemDto.compactRuntime),
+            item.officialRating,
+        ]
+            .compactMap(\.self)
+            .filter(\.isNotEmpty)
     }
 
+    var body: some View {
+        if facts.isNotEmpty {
+            Text(facts.joined(separator: " · "))
+                .font(CinemaTheme.Typography.metadata)
+                .foregroundStyle(CinemaTheme.Colors.primaryText.opacity(0.9))
+                .lineLimit(1)
+        }
+    }
+}
+
+extension BaseItemDto {
+
     /// "2h 6m" and "46m", rather than the locale's "2 hrs, 6 min"
-    private func compactRuntime(_ runtime: Duration) -> String {
+    static func compactRuntime(_ runtime: Duration) -> String {
         let totalMinutes = max(Int(runtime.seconds.rounded() / 60), 0)
         let hours = totalMinutes / 60
         let minutes = totalMinutes % 60
@@ -66,6 +81,19 @@ struct CinemaBadges: View {
         }
         return "\(minutes)m"
     }
+}
+
+/// Apple TV app metadata line: "2024 · 46m    ✓ 14+    4K    Dolby Vision    Dolby Atmos    CC  SDH  AD"
+struct CinemaBadges: View {
+
+    let item: BaseItemDto
+    /// Streams of the selected version, falling back to the item's own streams
+    var mediaStreams: [MediaStream]?
+    var formats: CinemaFormatBadges.Content = [.video, .audioFormat]
+
+    private var streams: [MediaStream] {
+        mediaStreams ?? item.mediaStreams ?? []
+    }
 
     @ViewBuilder
     private var facts: some View {
@@ -75,7 +103,7 @@ struct CinemaBadges: View {
             }
 
             if let runtime = item.runtime {
-                Text(compactRuntime(runtime))
+                Text(BaseItemDto.compactRuntime(runtime))
             } else if let firstGenre = item.genres?.first {
                 Text(firstGenre)
             }
@@ -122,24 +150,6 @@ struct CinemaBadges: View {
         }
         .font(CinemaTheme.Typography.metadata)
         .lineLimit(1)
-        .modifier(CinemaBadgeRowLayout(fitsContainer: fitsContainer))
-    }
-}
-
-/// Keeps the Apple TV badge row at its natural size, or scales it down inside a card
-private struct CinemaBadgeRowLayout: ViewModifier {
-
-    let fitsContainer: Bool
-
-    @ViewBuilder
-    func body(content: Content) -> some View {
-        if fitsContainer {
-            content
-                .minimumScaleFactor(0.7)
-                .frame(maxWidth: .infinity, alignment: .leading)
-        } else {
-            content
-                .fixedSize(horizontal: true, vertical: true)
-        }
+        .fixedSize(horizontal: true, vertical: true)
     }
 }

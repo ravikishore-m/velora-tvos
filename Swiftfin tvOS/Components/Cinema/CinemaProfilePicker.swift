@@ -6,12 +6,20 @@
 // Copyright (c) 2026 Jellyfin & Jellyfin Contributors
 //
 
+import Defaults
 import OrderedCollections
 import SwiftUI
 
-/// Netflix-style "Who's watching?" screen. Profiles cascade in, and the chosen profile glides
-/// to the centre with a spinner while the others fade away.
+/// Netflix-style "Choose a profile" screen: the wordmark and a column of profiles on the left,
+/// with artwork from the library rotating behind. The RKPlex ident plays each time it opens,
+/// and the chosen profile glides to the centre with a spinner while the others fade away.
 struct CinemaProfilePicker: View {
+
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
+
+    @Default(.cinemaFeaturedArtwork)
+    private var featuredArtwork
 
     @Binding
     var isEditing: Bool
@@ -36,6 +44,8 @@ struct CinemaProfilePicker: View {
     @State
     private var hasAppeared = false
     @State
+    private var isShowingIntro = true
+    @State
     private var chosenID: String?
     @State
     private var isPresentingServerChoice = false
@@ -48,8 +58,14 @@ struct CinemaProfilePicker: View {
         chosenID != nil
     }
 
+    /// Only artwork from servers that are still added
+    private var artwork: [CinemaFeaturedArtwork] {
+        let serverIDs = Set(servers.map(\.id))
+        return featuredArtwork.filter { serverIDs.contains($0.serverID) }
+    }
+
     private func choose(_ item: SelectUserView.UserItem) {
-        guard !isChoosing else { return }
+        guard !isChoosing, !isShowingIntro else { return }
 
         withAnimation(CinemaTheme.Profile.chooseAnimation) {
             chosenID = item.user.id
@@ -84,17 +100,10 @@ struct CinemaProfilePicker: View {
         }
     }
 
-    // MARK: - Header
+    // MARK: - Controls
 
-    private var header: some View {
+    private var controls: some View {
         HStack(spacing: 24) {
-            Text(L10n.swiftfin.uppercased())
-                .font(.system(size: 48, weight: .black))
-                .tracking(-1)
-                .foregroundStyle(CinemaTheme.Colors.accent)
-
-            Spacer()
-
             if servers.count > 1 {
                 SelectUserView.ServerMenu(servers: servers)
                     .frame(width: 480, height: 66)
@@ -113,15 +122,13 @@ struct CinemaProfilePicker: View {
             .menuOrder(.fixed)
             .buttonBorderShape(.circle)
         }
-        .padding(.top, 10)
-        .edgePadding(.horizontal)
         .focusSection()
     }
 
     // MARK: - Profiles
 
     private var profiles: some View {
-        HStack(alignment: .top, spacing: CinemaTheme.Profile.spacing) {
+        VStack(alignment: .leading, spacing: CinemaTheme.Profile.spacing) {
             ForEach(Array(userItems.enumerated()), id: \.element.user.id) { index, item in
                 profileButton(item)
                     .modifier(EntranceModifier(index: index, isVisible: hasAppeared))
@@ -138,10 +145,8 @@ struct CinemaProfilePicker: View {
                 .transition(.opacity.combined(with: .scale(scale: 0.85)))
             }
         }
-        .padding(.vertical, 40)
-        .edgePadding(.horizontal)
-        .frame(maxWidth: .infinity)
-        .scrollIfLargerThanContainer(axes: .horizontal)
+        .padding(24)
+        .scrollIfLargerThanContainer(axes: .vertical, alignment: .topLeading)
         .scrollClipDisabled()
         .focusSection()
         .animation(CinemaTheme.Profile.chooseAnimation, value: isEditing)
@@ -212,6 +217,36 @@ struct CinemaProfilePicker: View {
         .focusSection()
     }
 
+    // MARK: - Column
+
+    private var column: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            RKPlexWordmark(size: CinemaTheme.Profile.wordmarkSize, isShimmering: hasAppeared && !isChoosing)
+                .modifier(EntranceModifier(index: -2, isVisible: hasAppeared))
+                .opacity(isChoosing ? 0 : 1)
+
+            Text(isEditing ? L10n.manageProfiles : L10n.chooseProfile)
+                .font(.title3.weight(.semibold))
+                .foregroundStyle(CinemaTheme.Colors.secondaryText)
+                .contentTransition(.opacity)
+                .accessibilityAddTraits(.isHeader)
+                .padding(.top, 50)
+                .modifier(EntranceModifier(index: -1, isVisible: hasAppeared))
+                .opacity(isChoosing ? 0 : 1)
+
+            profiles
+                .padding(.top, 16)
+                .padding(.horizontal, -24)
+
+            footer
+                .padding(.top, 24)
+                .modifier(EntranceModifier(index: userItems.count + 1, isVisible: hasAppeared))
+                .opacity(isChoosing ? 0 : 1)
+        }
+        .frame(width: CinemaTheme.Profile.columnWidth, alignment: .leading)
+        .frame(maxHeight: .infinity, alignment: .topLeading)
+    }
+
     // MARK: - Chosen
 
     @ViewBuilder
@@ -233,36 +268,38 @@ struct CinemaProfilePicker: View {
 
     var body: some View {
         ZStack {
-            VStack(spacing: 0) {
-                header
-                    .opacity(isChoosing ? 0 : 1)
+            FeaturedArtworkBackground(artwork: artwork)
+                .opacity(isChoosing ? 0.25 : 1)
+                .animation(CinemaTheme.Profile.chooseAnimation, value: isChoosing)
+
+            HStack(alignment: .top, spacing: 0) {
+                column
 
                 Spacer(minLength: 0)
 
-                Text(isEditing ? L10n.manageProfiles : L10n.whosWatching)
-                    .font(.system(size: 64, weight: .bold))
-                    .foregroundStyle(.white)
-                    .contentTransition(.opacity)
-                    .accessibilityAddTraits(.isHeader)
-                    .modifier(EntranceModifier(index: -1, isVisible: hasAppeared))
+                controls
+                    .modifier(EntranceModifier(index: -2, isVisible: hasAppeared))
                     .opacity(isChoosing ? 0 : 1)
-
-                profiles
-                    .padding(.top, 40)
-
-                footer
-                    .padding(.top, 40)
-                    .modifier(EntranceModifier(index: userItems.count + 1, isVisible: hasAppeared))
-                    .opacity(isChoosing ? 0 : 1)
-
-                Spacer(minLength: 0)
             }
+            .padding(.vertical, 20)
+            .edgePadding(.horizontal)
 
             chosenOverlay
+
+            if isShowingIntro {
+                RKPlexIntro {
+                    hasAppeared = true
+                } onFinished: {
+                    isShowingIntro = false
+                }
+            }
         }
         .disabled(isChoosing)
         .defaultFocus($focusedID, userItems.first?.user.id, priority: .userInitiated)
         .onAppear {
+            guard reduceMotion, !hasAppeared else { return }
+
+            isShowingIntro = false
             hasAppeared = true
         }
         .onChange(of: hasError) {
@@ -282,7 +319,7 @@ struct CinemaProfilePicker: View {
 
 // MARK: - Background
 
-/// Deep red glow with faint concentric rings, after the Netflix profile screen
+/// Deep red glow with faint concentric rings, shown behind the picker until the library artwork is known
 struct CinemaProfilesBackground: View {
 
     @State
@@ -339,6 +376,108 @@ struct CinemaProfilesBackground: View {
 
 extension CinemaProfilePicker {
 
+    /// Rotates through the last featured titles, with the title logo and genres bottom-right
+    private struct FeaturedArtworkBackground: View {
+
+        let artwork: [CinemaFeaturedArtwork]
+
+        @State
+        private var index = 0
+
+        private var current: CinemaFeaturedArtwork? {
+            artwork[safe: index] ?? artwork.first
+        }
+
+        @ViewBuilder
+        private func title(_ artwork: CinemaFeaturedArtwork) -> some View {
+            Text(artwork.title)
+                .font(.system(size: 64, weight: .bold))
+                .foregroundStyle(.white)
+                .multilineTextAlignment(.trailing)
+                .lineLimit(2)
+        }
+
+        @ViewBuilder
+        private func details(_ artwork: CinemaFeaturedArtwork) -> some View {
+            VStack(alignment: .trailing, spacing: 18) {
+                if let logoURL = artwork.logoURL {
+                    ImageView(ImageSource(url: logoURL))
+                        .image { image in
+                            image.aspectRatio(contentMode: .fit)
+                        }
+                        .placeholder { _ in
+                            Color.clear
+                        }
+                        .failure {
+                            title(artwork)
+                        }
+                        .frame(
+                            maxWidth: CinemaTheme.Profile.artworkLogoMaxWidth,
+                            maxHeight: CinemaTheme.Profile.artworkLogoMaxHeight,
+                            alignment: .bottomTrailing
+                        )
+                } else {
+                    title(artwork)
+                }
+
+                if artwork.genres.isNotEmpty {
+                    Text(artwork.genres.joined(separator: " · "))
+                        .font(CinemaTheme.Typography.metadata)
+                        .foregroundStyle(CinemaTheme.Colors.secondaryText)
+                }
+            }
+            .shadow(color: .black.opacity(0.6), radius: 16)
+        }
+
+        var body: some View {
+            ZStack(alignment: .bottomTrailing) {
+                if let current {
+                    ZStack {
+                        ImageView(ImageSource(url: current.backdropURL))
+                            .image { image in
+                                image.aspectRatio(contentMode: .fill)
+                            }
+                            .placeholder { _ in
+                                Color.clear
+                            }
+                            .failure {
+                                Color.clear
+                            }
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .clipped()
+                            .id(current.backdropURL)
+                            .transition(.opacity)
+
+                        CinemaTheme.Profile.columnScrim
+
+                        CinemaTheme.Hero.bottomScrim
+                    }
+                    .ignoresSafeArea()
+
+                    details(current)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                        .padding(.bottom, 40)
+                        .edgePadding(.horizontal)
+                        .id(current.backdropURL)
+                        .transition(.opacity)
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .animation(CinemaTheme.Profile.artworkCrossfade, value: index)
+            .accessibilityHidden(true)
+            .task(id: artwork.count) {
+                guard artwork.count > 1 else { return }
+
+                while !Task.isCancelled {
+                    try? await Task.sleep(for: CinemaTheme.Profile.artworkRotation)
+                    guard !Task.isCancelled else { return }
+
+                    index = (index + 1) % artwork.count
+                }
+            }
+        }
+    }
+
     /// Cascades content in on first appearance, ordered by `index`
     private struct EntranceModifier: ViewModifier {
 
@@ -349,7 +488,7 @@ extension CinemaProfilePicker {
             content
                 .opacity(isVisible ? 1 : 0)
                 .scaleEffect(isVisible ? 1 : 0.86)
-                .offset(y: isVisible ? 0 : 40)
+                .offset(x: isVisible ? 0 : -40)
                 .animation(
                     .spring(response: 0.6, dampingFraction: 0.8)
                         .delay(0.2 + Double(index + 1) * 0.07),
@@ -386,7 +525,8 @@ extension CinemaProfilePicker {
                 Text(initial)
                     .font(.system(size: 110, weight: .bold, design: .rounded))
                     .foregroundStyle(.white)
-                    .minimumScaleFactor(0.5)
+                    .minimumScaleFactor(0.3)
+                    .padding(12)
 
                 ImageView(user.profileImageSource(client: server.client))
                     .pipeline(.Swiftfin.local)
@@ -404,6 +544,7 @@ extension CinemaProfilePicker {
         }
     }
 
+    /// Avatar with the name beside it, shown for the focused profile as in the Netflix picker
     private struct ProfileLabel: View {
 
         @Environment(\.isFocused)
@@ -422,6 +563,10 @@ extension CinemaProfilePicker {
             RoundedRectangle(cornerRadius: CinemaTheme.Profile.cornerRadius, style: .continuous)
         }
 
+        private var showsName: Bool {
+            (isFocused || isEditing) && !isHidden
+        }
+
         @ViewBuilder
         private var avatar: some View {
             if isHidden {
@@ -433,7 +578,7 @@ extension CinemaProfilePicker {
         }
 
         var body: some View {
-            VStack(spacing: 24) {
+            HStack(spacing: CinemaTheme.Profile.nameSpacing) {
                 avatar
                     .frame(width: CinemaTheme.Profile.size, height: CinemaTheme.Profile.size)
                     .overlay {
@@ -442,14 +587,14 @@ extension CinemaProfilePicker {
                                 shape.fill(.black.opacity(isSelected ? 0.3 : 0.5))
 
                                 Image(systemName: isSelected ? "checkmark.circle.fill" : "pencil")
-                                    .font(.system(size: 64, weight: .semibold))
+                                    .font(.system(size: 54, weight: .semibold))
                                     .symbolRenderingMode(.palette)
                                     .foregroundStyle(.white, CinemaTheme.Colors.accent)
                             }
                         }
                     }
                     .overlay {
-                        shape.strokeBorder(.white, lineWidth: isFocused && !isHidden ? 6 : 0)
+                        shape.strokeBorder(.white, lineWidth: isFocused && !isHidden ? 5 : 0)
                     }
                     .scaleEffect(isFocused ? CinemaTheme.Profile.focusScale : 1)
                     .shadow(
@@ -458,24 +603,25 @@ extension CinemaProfilePicker {
                         y: isFocused ? 16 : 6
                     )
 
-                VStack(spacing: 6) {
+                VStack(alignment: .leading, spacing: 6) {
                     Text(user.username)
-                        .font(.title3.weight(isFocused ? .semibold : .regular))
-                        .foregroundStyle(isFocused ? CinemaTheme.Colors.primaryText : CinemaTheme.Colors.tertiaryText)
-                        .lineLimit(1)
+                        .font(.title2.weight(.semibold))
+                        .foregroundStyle(isFocused ? CinemaTheme.Colors.primaryText : CinemaTheme.Colors.secondaryText)
 
                     if showsServer {
                         Text(server.name)
                             .font(.footnote)
                             .foregroundStyle(CinemaTheme.Colors.tertiaryText)
-                            .lineLimit(1)
                     }
                 }
-                .frame(width: CinemaTheme.Profile.size)
-                .opacity(isHidden ? 0 : 1)
+                .lineLimit(1)
+                .frame(width: CinemaTheme.Profile.nameWidth, alignment: .leading)
+                .opacity(showsName ? 1 : 0)
+                .offset(x: showsName ? 0 : -20)
             }
             .animation(CinemaTheme.Focus.animation, value: isFocused)
-            .accessibilityElement(children: .combine)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(user.username)
         }
     }
 
@@ -489,28 +635,31 @@ extension CinemaProfilePicker {
         }
 
         var body: some View {
-            VStack(spacing: 24) {
+            HStack(spacing: CinemaTheme.Profile.nameSpacing) {
                 ZStack {
                     shape.fill(.white.opacity(isFocused ? 0.2 : 0.08))
 
                     Image(systemName: "plus")
-                        .font(.system(size: 90, weight: .light))
+                        .font(.system(size: 64, weight: .light))
                         .foregroundStyle(.white.opacity(isFocused ? 1 : 0.7))
                 }
                 .frame(width: CinemaTheme.Profile.size, height: CinemaTheme.Profile.size)
                 .overlay {
-                    shape.strokeBorder(.white, lineWidth: isFocused ? 6 : 0)
+                    shape.strokeBorder(.white, lineWidth: isFocused ? 5 : 0)
                 }
                 .scaleEffect(isFocused ? CinemaTheme.Profile.focusScale : 1)
 
                 Text(L10n.addProfile)
-                    .font(.title3.weight(isFocused ? .semibold : .regular))
-                    .foregroundStyle(isFocused ? CinemaTheme.Colors.primaryText : CinemaTheme.Colors.tertiaryText)
+                    .font(.title2.weight(.semibold))
+                    .foregroundStyle(CinemaTheme.Colors.primaryText)
                     .lineLimit(1)
-                    .frame(width: CinemaTheme.Profile.size)
+                    .frame(width: CinemaTheme.Profile.nameWidth, alignment: .leading)
+                    .opacity(isFocused ? 1 : 0)
+                    .offset(x: isFocused ? 0 : -20)
             }
             .animation(CinemaTheme.Focus.animation, value: isFocused)
-            .accessibilityElement(children: .combine)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(L10n.addProfile)
         }
     }
 

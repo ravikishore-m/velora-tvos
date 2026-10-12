@@ -12,6 +12,10 @@ import Foundation
 /// These live on `L10n` so every display string flows through a single namespace
 extension L10n {
 
+    // MARK: - Brand
+
+    static let rkPlex = "RKPlex"
+
     // MARK: - Licenses
 
     static let mlp2 = "MLP 2.0"

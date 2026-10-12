@@ -38,6 +38,7 @@ final class UserSessionManager: ObservableObject {
 
     enum SignOutReason {
 
+        case appReopened
         case backgroundTimeout
         case explicit
     }
@@ -86,7 +87,7 @@ final class UserSessionManager: ObservableObject {
         guard state == .initial else { return }
 
         do {
-            if Defaults[.signOutOnClose], !Self.isRelaunchAfterRecentBackground {
+            if Defaults[.signOutOnClose] {
                 Defaults[.lastSignedInUserID] = .signedOut
             }
 
@@ -101,15 +102,8 @@ final class UserSessionManager: ObservableObject {
         }
     }
 
-    /// tvOS terminates suspended apps without notice, so a launch shortly after leaving the app
-    /// resumes the previous user instead of appearing to restart.
-    private static var isRelaunchAfterRecentBackground: Bool {
-        #if os(tvOS)
-        Date.now.timeIntervalSince(Defaults[.backgroundTimeStamp]) < Defaults[.backgroundSignOutInterval]
-        #else
-        false
-        #endif
-    }
+    /// Returning within this window, such as after a brief trip to the Home screen, keeps the current profile
+    private static let reopenGraceInterval: TimeInterval = 30
 
     @MainActor
     private func refreshCurrentSession() async {
@@ -222,10 +216,20 @@ final class UserSessionManager: ObservableObject {
         }
 
         guard currentSession != nil else { return }
-        guard Defaults[.signOutOnBackground] else { return }
         guard !hasActivePlayback else { return }
 
         let backgroundedInterval = Date.now.timeIntervalSince(Defaults[.backgroundTimeStamp])
+
+        #if os(tvOS)
+        // Like Netflix, reopening the app asks who's watching
+        if Defaults[.signOutOnClose], backgroundedInterval > Self.reopenGraceInterval {
+            await signOut(reason: .appReopened)
+            return
+        }
+        #endif
+
+        guard Defaults[.signOutOnBackground] else { return }
+
         if backgroundedInterval > Defaults[.backgroundSignOutInterval] {
             await signOut(reason: .backgroundTimeout)
         }

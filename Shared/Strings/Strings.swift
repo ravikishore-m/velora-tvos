@@ -338,6 +338,8 @@ internal enum L10n {
   internal static let chapters = L10n.tr("Localizable", "chapters", fallback: "Chapters")
   /// Chapter slider
   internal static let chapterSlider = L10n.tr("Localizable", "chapterSlider", fallback: "Chapter slider")
+  /// Choose a profile
+  internal static let chooseProfile = L10n.tr("Localizable", "chooseProfile", fallback: "Choose a profile")
   /// Client
   internal static let client = L10n.tr("Localizable", "client", fallback: "Client")
   /// Clip
@@ -918,6 +920,10 @@ internal enum L10n {
   internal static let information = L10n.tr("Localizable", "information", fallback: "Information")
   /// Inker
   internal static let inker = L10n.tr("Localizable", "inker", fallback: "Inker")
+  /// In %@
+  internal static func inLanguages(_ p1: Any) -> String {
+    return L10n.tr("Localizable", "inLanguages", String(describing: p1), fallback: "In %@")
+  }
   /// In progress
   internal static let inProgress = L10n.tr("Localizable", "inProgress", fallback: "In progress")
   /// Interlaced
@@ -1504,6 +1510,14 @@ internal enum L10n {
   internal static let randomImage = L10n.tr("Localizable", "randomImage", fallback: "Random image")
   /// Range - color range of a video stream
   internal static let range = L10n.tr("Localizable", "range", fallback: "Range")
+  /// #%@ in Movies
+  internal static func rankInMovies(_ p1: Any) -> String {
+    return L10n.tr("Localizable", "rankInMovies", String(describing: p1), fallback: "#%@ in Movies")
+  }
+  /// #%@ in TV Shows
+  internal static func rankInShows(_ p1: Any) -> String {
+    return L10n.tr("Localizable", "rankInShows", String(describing: p1), fallback: "#%@ in TV Shows")
+  }
   /// Rating
   internal static let rating = L10n.tr("Localizable", "rating", fallback: "Rating")
   /// Ratings

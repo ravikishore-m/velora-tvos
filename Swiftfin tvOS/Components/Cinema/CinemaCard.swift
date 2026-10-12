@@ -160,6 +160,9 @@ struct CinemaCard: View {
                     }
                 }
 
+                CinemaFactsLine(item: item)
+                    .minimumScaleFactor(0.8)
+
                 if let overview = item.overview, overview.isNotEmpty {
                     Text(overview)
                         .font(.caption)
@@ -167,8 +170,6 @@ struct CinemaCard: View {
                         .lineLimit(CinemaTheme.Card.synopsisLineLimit)
                         .multilineTextAlignment(.leading)
                 }
-
-                CinemaBadges(item: item, formats: .summary, fitsContainer: true)
 
                 progressBar(for: item)
             }

@@ -62,14 +62,27 @@ enum CinemaTheme {
         /// Fraction of the visible height used by the hero, leaving the first row peeking below
         static let heightRatio: CGFloat = 0.84
         static let minimumHeight: CGFloat = 700
-        static let contentBottomPadding: CGFloat = 36
+        /// Clears the tab bar, which floats over the hero
+        static let cardTopInset: CGFloat = 150
+        static let cardCornerRadius: CGFloat = 36
+        static let cardContentPadding: CGFloat = 56
+        static let indicatorSpacing: CGFloat = 18
+        static let indicatorHeight: CGFloat = 10
+
+        static let chipFont = Font.callout.weight(.semibold)
+        static let chipSpacing: CGFloat = 14
+        static let chipPadding: CGFloat = 16
+        static let chipIconSpacing: CGFloat = 12
+        static let chipIconSize: CGFloat = 18
+        static let chipIconTile: CGFloat = 34
+        static let maximumChipLanguages = 5
+
         static let logoMaxWidth: CGFloat = 620
         static let logoMaxHeight: CGFloat = 200
         static let synopsisMaxWidth: CGFloat = 920
         static let synopsisLineLimit = 2
         static let progressWidth: CGFloat = 360
         static let backdropMaxWidth: CGFloat = 1920
-        static let backdropFadeStart: CGFloat = 0.6
 
         static let maximumItems = 8
         static let rotationInterval: Duration = .seconds(8)
@@ -91,16 +104,77 @@ enum CinemaTheme {
             startPoint: .leading,
             endPoint: .trailing
         )
+
+        static let bottomScrim = LinearGradient(
+            stops: [
+                .init(color: .clear, location: 0.5),
+                .init(color: .black.opacity(0.55), location: 1),
+            ],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+    }
+
+    // MARK: - Brand
+
+    enum Brand {
+
+        /// Netflix-style wordmark: deep red falling to a darker base
+        static let fill = LinearGradient(
+            colors: [
+                Color(red: 0.93, green: 0.06, blue: 0.1),
+                Color(red: 0.62, green: 0.02, blue: 0.05),
+            ],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+        /// How much taller the outer letters are than the centre ones, giving the wordmark its curve
+        static let archDepth: CGFloat = 0.16
+        static let letterSpacing: CGFloat = -0.03
+        static let shimmerInterval: Duration = .seconds(7)
+        static let shimmerDuration: TimeInterval = 1.2
+
+        static let introSize: CGFloat = 190
+        static let introRibbonCount = 44
+        static let ribbonPalette: [Color] = [
+            Colors.accent,
+            Color(red: 0.55, green: 0.02, blue: 0.05),
+            Color(red: 1, green: 0.3, blue: 0.45),
+            Color(red: 0.85, green: 0.1, blue: 0.55),
+            Color(red: 0.5, green: 0.2, blue: 0.95),
+            Color(red: 0.2, green: 0.45, blue: 1),
+            Color(red: 0.2, green: 0.85, blue: 0.95),
+            Color(red: 1, green: 0.55, blue: 0.15),
+        ]
     }
 
     // MARK: - Profile
 
     enum Profile {
 
-        static let size: CGFloat = 230
-        static let spacing: CGFloat = 60
+        static let size: CGFloat = 150
+        static let spacing: CGFloat = 30
         static let cornerRadius: CGFloat = 12
         static let focusScale: CGFloat = 1.1
+        static let wordmarkSize: CGFloat = 76
+        static let columnWidth: CGFloat = 720
+        static let nameSpacing: CGFloat = 36
+        static let nameWidth: CGFloat = 420
+        static let artworkRotation: Duration = .seconds(8)
+        static let artworkCrossfade: Animation = .easeInOut(duration: 1.2)
+        static let artworkLogoMaxWidth: CGFloat = 520
+        static let artworkLogoMaxHeight: CGFloat = 180
+
+        static let columnScrim = LinearGradient(
+            stops: [
+                .init(color: .black, location: 0),
+                .init(color: .black, location: 0.3),
+                .init(color: .black.opacity(0.7), location: 0.45),
+                .init(color: .clear, location: 0.68),
+            ],
+            startPoint: .leading,
+            endPoint: .trailing
+        )
         /// The chosen profile grows as it moves to the centre
         static let chosenSize: CGFloat = 300
         static let chooseAnimation: Animation = .spring(response: 0.55, dampingFraction: 0.85)

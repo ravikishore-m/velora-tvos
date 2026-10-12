@@ -38,6 +38,9 @@ struct CinemaHeroBanner: View {
     private var scrollViewReference = ScrollViewReference()
 
     @ObservedObject
+    private var topTenStore = CinemaTopTenStore.shared
+
+    @ObservedObject
     var featuredViewModel: PagingLibraryViewModel<ItemLibrary>
     @ObservedObject
     var fallbackViewModel: PagingLibraryViewModel<ItemLibrary>
@@ -62,10 +65,15 @@ struct CinemaHeroBanner: View {
         max(parentSize.height * CinemaTheme.Hero.heightRatio, CinemaTheme.Hero.minimumHeight)
     }
 
-    /// Backdrops are drawn at their native 16:9 so nothing is cropped
-    private var backdropSize: CGSize {
-        let width = max(parentSize.width, 1)
-        return CGSize(width: width, height: width * 9 / 16)
+    /// Netflix's inset, rounded billboard below the tab bar
+    private var cardSize: CGSize {
+        CGSize(
+            width: max(parentSize.width - CinemaTheme.Spacing.edge * 2, 1),
+            height: max(
+                heroHeight - CinemaTheme.Hero.cardTopInset - CinemaTheme.Hero.indicatorSpacing - CinemaTheme.Hero.indicatorHeight,
+                1
+            )
+        )
     }
 
     // MARK: - Actions
@@ -135,14 +143,10 @@ struct CinemaHeroBanner: View {
     private func backdrop(for item: BaseItemDto) -> some View {
         KenBurnsImage(
             sources: item.cinemaLandscapeSources(maxWidth: CinemaTheme.Hero.backdropMaxWidth),
-            size: backdropSize
+            size: cardSize
         )
         .overlay {
             CinemaTheme.Hero.leadingScrim
-        }
-        .mask(gradient: .linear) {
-            (location: CinemaTheme.Hero.backdropFadeStart, opacity: 1)
-            (location: 1, opacity: 0)
         }
         .accessibilityHidden(true)
     }
@@ -210,7 +214,7 @@ struct CinemaHeroBanner: View {
                     .lineLimit(1)
             }
 
-            CinemaContentLine(item: item)
+            CinemaFactsLine(item: item)
 
             if let overview = item.overview, overview.isNotEmpty {
                 Text(overview)
@@ -221,11 +225,87 @@ struct CinemaHeroBanner: View {
                     .frame(maxWidth: CinemaTheme.Hero.synopsisMaxWidth, alignment: .leading)
             }
 
-            CinemaBadges(item: item, formats: .summary)
-
             progress(for: item)
         }
         .frame(maxWidth: .infinity, alignment: .bottomLeading)
+    }
+
+    /// Netflix's corner chips: the audio languages on offer and the title's Top 10 position
+    @ViewBuilder
+    private func chips(for item: BaseItemDto) -> some View {
+        let languages = item.cinemaAudioLanguageCodes
+        let ranking = topTenStore.ranking(of: item)
+
+        HStack(spacing: CinemaTheme.Hero.chipSpacing) {
+            if languages.count > 1 {
+                HeroChip(
+                    systemImage: "speaker.wave.2.fill",
+                    title: L10n.inLanguages(
+                        languages
+                            .prefix(CinemaTheme.Hero.maximumChipLanguages)
+                            .map(\.localizedCapitalized)
+                            .joined(separator: ", ")
+                    )
+                )
+            }
+
+            if let ranking {
+                HeroChip(
+                    systemImage: "chart.bar.fill",
+                    title: ranking.rowID == CinemaTopTenStore.showsRowID ?
+                        L10n.rankInShows(ranking.rank) :
+                        L10n.rankInMovies(ranking.rank)
+                )
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func card(for item: BaseItemDto, warming nextItem: BaseItemDto) -> some View {
+        ZStack(alignment: .bottomLeading) {
+            ZStack {
+                // Warms the image cache so the next crossfade is instant
+                if nextItem.id != item.id {
+                    backdrop(for: nextItem)
+                        .opacity(0)
+                }
+
+                backdrop(for: item)
+                    .id(item.id)
+                    .transition(.opacity)
+            }
+            .frame(width: cardSize.width, height: cardSize.height)
+            .clipped()
+            .allowsHitTesting(false)
+
+            CinemaTheme.Hero.bottomScrim
+                .allowsHitTesting(false)
+
+            VStack(alignment: .leading, spacing: CinemaTheme.Spacing.heroContent) {
+                // Outgoing and incoming titles share one slot instead of stacking during the swap
+                ZStack(alignment: .bottomLeading) {
+                    details(for: item)
+                        .id(item.id)
+                        .transition(CinemaTheme.Hero.detailsTransition)
+                }
+
+                // Labels swap instantly so "Play" and "Resume" never blend together
+                actions(for: item)
+                    .animation(nil, value: item.id)
+            }
+            .padding(CinemaTheme.Hero.cardContentPadding)
+
+            ZStack(alignment: .bottomTrailing) {
+                chips(for: item)
+                    .id(item.id)
+                    .transition(CinemaTheme.Hero.detailsTransition)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+            .padding(CinemaTheme.Hero.cardContentPadding)
+        }
+        .frame(width: cardSize.width, height: cardSize.height)
+        .clipShape(RoundedRectangle(cornerRadius: CinemaTheme.Hero.cardCornerRadius, style: .continuous))
+        .shadow(color: .black.opacity(0.5), radius: 30, y: 16)
     }
 
     @ViewBuilder
@@ -280,42 +360,20 @@ struct CinemaHeroBanner: View {
             let item = items[min(index, items.count - 1)]
             let nextItem = items[(min(index, items.count - 1) + 1) % items.count]
 
-            VStack(alignment: .leading, spacing: CinemaTheme.Spacing.heroContent) {
-                Spacer(minLength: 0)
-
-                // Outgoing and incoming titles share one slot instead of stacking during the swap
-                ZStack(alignment: .bottomLeading) {
-                    details(for: item)
-                        .id(item.id)
-                        .transition(CinemaTheme.Hero.detailsTransition)
-                }
-
-                // Labels swap instantly so "Play" and "Resume" never blend together
-                actions(for: item)
-                    .animation(nil, value: item.id)
+            VStack(alignment: .leading, spacing: CinemaTheme.Hero.indicatorSpacing) {
+                card(for: item, warming: nextItem)
 
                 pageIndicator
+                    .padding(.leading, CinemaTheme.Hero.cardContentPadding)
             }
+            .padding(.top, CinemaTheme.Hero.cardTopInset)
             .padding(.horizontal, CinemaTheme.Spacing.edge)
-            .padding(.bottom, CinemaTheme.Hero.contentBottomPadding)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .frame(height: heroHeight)
-            .background(alignment: .top) {
-                ZStack {
-                    // Warms the image cache so the next crossfade is instant
-                    if nextItem.id != item.id {
-                        backdrop(for: nextItem)
-                            .opacity(0)
-                    }
-
-                    backdrop(for: item)
-                        .id(item.id)
-                        .transition(.opacity)
-                }
-                .frame(width: backdropSize.width, height: backdropSize.height, alignment: .top)
-                .allowsHitTesting(false)
-            }
+            .frame(maxWidth: .infinity, alignment: .topLeading)
+            .frame(height: heroHeight, alignment: .top)
             .environment(\.colorScheme, .dark)
+            .onChange(of: items.map(\.id), initial: true) {
+                CinemaFeaturedArtwork.remember(items)
+            }
             .animation(CinemaTheme.Hero.crossfade, value: item.id)
             .task(id: [index, items.count]) {
                 try? await Task.sleep(for: CinemaTheme.Hero.rotationInterval)
@@ -344,6 +402,33 @@ struct CinemaHeroBanner: View {
 }
 
 extension CinemaHeroBanner {
+
+    /// A dark translucent capsule with a red icon tile
+    private struct HeroChip: View {
+
+        let systemImage: String
+        let title: String
+
+        var body: some View {
+            HStack(spacing: CinemaTheme.Hero.chipIconSpacing) {
+                Image(systemName: systemImage)
+                    .font(.system(size: CinemaTheme.Hero.chipIconSize, weight: .bold))
+                    .foregroundStyle(CinemaTheme.Colors.primaryText)
+                    .frame(width: CinemaTheme.Hero.chipIconTile, height: CinemaTheme.Hero.chipIconTile)
+                    .background(CinemaTheme.Colors.accent, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+
+                Text(title)
+                    .font(CinemaTheme.Hero.chipFont)
+                    .foregroundStyle(CinemaTheme.Colors.primaryText)
+                    .lineLimit(1)
+            }
+            .padding(.leading, CinemaTheme.Hero.chipPadding / 2)
+            .padding(.trailing, CinemaTheme.Hero.chipPadding)
+            .padding(.vertical, CinemaTheme.Hero.chipPadding / 2)
+            .background(.black.opacity(0.55), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .accessibilityElement(children: .combine)
+        }
+    }
 
     /// Slowly zooms the backdrop while it is on screen
     private struct KenBurnsImage: View {

@@ -46,10 +46,7 @@ struct CinemaSignInView<RemoteContent: View>: View {
     }
 
     private var wordmark: some View {
-        Text(L10n.swiftfin.uppercased())
-            .font(.system(size: 56, weight: .black))
-            .tracking(-1)
-            .foregroundStyle(CinemaTheme.Colors.accent)
+        RKPlexWordmark(size: 64, isShimmering: true)
     }
 
     @ViewBuilder

@@ -67,18 +67,38 @@ final class CinemaTopTenStore: ObservableObject {
 
     static let shared = CinemaTopTenStore()
 
+    static let moviesRowID = "cinema-top-ten-movies"
+    static let showsRowID = "cinema-top-ten-shows"
+
     @Published
     private(set) var itemIDs: Set<String> = []
 
-    private var rankings: [String: Set<String>] = [:]
+    /// Ranked item IDs for each Top 10 row
+    @Published
+    private var rankings: [String: [String]] = [:]
 
     func update(_ ids: [String], for rowID: String) {
-        rankings[rowID] = Set(ids)
+        guard rankings[rowID] != ids else { return }
+
+        rankings[rowID] = ids
 
         let newIDs = rankings.values.reduce(into: Set<String>()) { $0.formUnion($1) }
-        guard newIDs != itemIDs else { return }
+        if newIDs != itemIDs {
+            itemIDs = newIDs
+        }
+    }
 
-        itemIDs = newIDs
+    /// The title's position and the Top 10 row it appears in
+    func ranking(of item: BaseItemDto) -> (rank: Int, rowID: String)? {
+        let ids = [item.id, item.seriesID].compactMap(\.self)
+
+        for rowID in [Self.moviesRowID, Self.showsRowID] {
+            if let index = rankings[rowID]?.firstIndex(where: ids.contains) {
+                return (index + 1, rowID)
+            }
+        }
+
+        return nil
     }
 
     func contains(_ item: BaseItemDto) -> Bool {

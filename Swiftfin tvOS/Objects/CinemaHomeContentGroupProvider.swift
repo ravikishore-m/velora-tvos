@@ -137,7 +137,7 @@ struct CinemaHomeContentGroupProvider: ContentGroupProvider {
         )
 
         CinemaRowContentGroup(
-            id: "cinema-top-ten-movies",
+            id: CinemaTopTenStore.moviesRowID,
             library: CinemaTopTenLibrary(
                 itemType: .movie,
                 displayTitle: L10n.topTenMoviesOn(serverName)
@@ -160,7 +160,7 @@ struct CinemaHomeContentGroupProvider: ContentGroupProvider {
         }
 
         CinemaRowContentGroup(
-            id: "cinema-top-ten-shows",
+            id: CinemaTopTenStore.showsRowID,
             library: CinemaTopTenLibrary(
                 itemType: .series,
                 displayTitle: L10n.topTenShowsOn(serverName)
