@@ -86,7 +86,7 @@ final class UserSessionManager: ObservableObject {
         guard state == .initial else { return }
 
         do {
-            if Defaults[.signOutOnClose] {
+            if Defaults[.signOutOnClose], !Self.isRelaunchAfterRecentBackground {
                 Defaults[.lastSignedInUserID] = .signedOut
             }
 
@@ -101,10 +101,30 @@ final class UserSessionManager: ObservableObject {
         }
     }
 
+    /// tvOS terminates suspended apps without notice, so a launch shortly after leaving the app
+    /// resumes the previous user instead of appearing to restart.
+    private static var isRelaunchAfterRecentBackground: Bool {
+        #if os(tvOS)
+        Date.now.timeIntervalSince(Defaults[.backgroundTimeStamp]) < Defaults[.backgroundSignOutInterval]
+        #else
+        false
+        #endif
+    }
+
     @MainActor
     private func refreshCurrentSession() async {
         do {
-            try await updateCurrentSession(with: resolveStoredSession())
+            let storedSession = try resolveStoredSession()
+
+            // Rebuilding an identical session stops playback and reloads every view
+            if let currentSession, let storedSession,
+               currentSession.user.id == storedSession.user.id,
+               currentSession.server.id == storedSession.server.id
+            {
+                return
+            }
+
+            await updateCurrentSession(with: storedSession)
         } catch {
             logger.error(
                 "Unable to refresh current user session",

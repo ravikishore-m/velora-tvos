@@ -92,10 +92,15 @@ enum CinemaTheme {
 
     enum Profile {
 
-        static let size: CGFloat = 240
-        static let spacing: CGFloat = 56
-        static let cornerRadius: CGFloat = 18
-        static let focusScale: CGFloat = 1.08
+        static let size: CGFloat = 230
+        static let spacing: CGFloat = 60
+        static let cornerRadius: CGFloat = 12
+        static let focusScale: CGFloat = 1.1
+        /// The chosen profile grows as it moves to the centre
+        static let chosenSize: CGFloat = 300
+        static let chooseAnimation: Animation = .spring(response: 0.55, dampingFraction: 0.85)
+        /// Lets the chosen profile settle before sign in begins
+        static let chooseDelay: Duration = .milliseconds(550)
 
         static let palette: [Color] = [
             Color(red: 0.13, green: 0.47, blue: 0.95),

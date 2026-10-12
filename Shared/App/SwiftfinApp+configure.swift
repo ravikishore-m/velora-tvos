@@ -28,7 +28,12 @@ extension SwiftfinApp {
                 #endif
 
             var multiplexHandler = MultiplexLogHandler(handlers)
+            #if DEBUG
             multiplexHandler.logLevel = .trace
+            #else
+            // Socket and playback events log every few seconds, which adds up to heavy disk writes
+            multiplexHandler.logLevel = .info
+            #endif
             return multiplexHandler
         }
 

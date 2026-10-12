@@ -130,36 +130,36 @@ struct SelectUserView: View {
 
     private func select(user: UserState) {
         Task { @MainActor in
+            _ = await signIn(user: user)
+        }
+    }
 
-            do {
-                guard let authenticationAction else { return }
+    /// Returns whether sign in started without being cancelled or failing
+    @MainActor
+    private func signIn(user: UserState) async -> Bool {
+        do {
+            guard let authenticationAction else { return false }
 
-                let evaluatedPolicy = try await authenticationAction(
-                    policy: user.accessPolicy,
-                    reason: user.accessPolicy.authenticateReason(user: user)
-                )
-                let pin = (evaluatedPolicy as? PinEvaluatedUserAccessPolicy)?.pin ?? ""
+            let evaluatedPolicy = try await authenticationAction(
+                policy: user.accessPolicy,
+                reason: user.accessPolicy.authenticateReason(user: user)
+            )
+            let pin = (evaluatedPolicy as? PinEvaluatedUserAccessPolicy)?.pin ?? ""
 
-                await viewModel.signIn(user, pin: pin)
-            } catch is CancellationError {
-                return
-            } catch {
-                await viewModel.error(error)
-            }
+            await viewModel.signIn(user, pin: pin)
+            return viewModel.error == nil
+        } catch is CancellationError {
+            return false
+        } catch {
+            await viewModel.error(error)
+            return false
         }
     }
 
     @ViewBuilder
     private var splashScreenBackground: some View {
         #if os(tvOS)
-        CinemaLoginBackground {
-            if selectUserUseSplashscreen, splashScreenImageSources.isNotEmpty {
-                ImageView(splashScreenImageSources)
-                    .pipeline(.Swiftfin.local)
-                    .aspectRatio(contentMode: .fill)
-                    .id(splashScreenImageSources)
-            }
-        }
+        CinemaProfilesBackground()
         #else
         if selectUserUseSplashscreen, splashScreenImageSources.isNotEmpty {
             AlternateLayoutView {
@@ -180,17 +180,36 @@ struct SelectUserView: View {
 
     @ViewBuilder
     private var contentView: some View {
-        VStack(spacing: 0) {
-            #if os(tvOS)
-            if userItems.isNotEmpty {
-                Text(L10n.whosWatching)
-                    .font(.title.weight(.bold))
-                    .foregroundStyle(.white)
-                    .padding(.top, 60)
-                    .accessibilityAddTraits(.isHeader)
-            }
-            #endif
+        #if os(tvOS)
+        if userItems.isNotEmpty {
+            CinemaProfilePicker(
+                isEditing: $isEditing,
+                selectedUsers: $selectedUsers,
+                userItems: userItems,
+                servers: viewModel.servers.keys,
+                showsServer: serverSelection == .all && viewModel.servers.count > 1,
+                hasError: viewModel.error != nil,
+                onSelect: { await signIn(user: $0) },
+                onAddUser: { addUser(server: $0) },
+                onDelete: { user in
+                    if let user {
+                        delete(user: user)
+                    } else {
+                        isPresentingConfirmDeleteUsers = true
+                    }
+                }
+            )
+        } else {
+            userListView
+        }
+        #else
+        userListView
+        #endif
+    }
 
+    @ViewBuilder
+    private var userListView: some View {
+        VStack(spacing: 0) {
             ZStack {
                 if userItems.isEmpty {
                     EmptyUserView {
@@ -213,16 +232,6 @@ struct SelectUserView: View {
                         }
                     }
                 } else {
-                    #if os(tvOS)
-                    CinemaProfilePicker(
-                        isEditing: $isEditing,
-                        selectedUsers: $selectedUsers,
-                        userItems: userItems,
-                        showsServer: serverSelection == .all && viewModel.servers.count > 1,
-                        action: { select(user: $0) },
-                        onDelete: { delete(user: $0) }
-                    )
-                    #else
                     switch userListDisplayType {
                     case .list:
                         ListView(
@@ -244,7 +253,6 @@ struct SelectUserView: View {
                             onDelete: { delete(user: $0) }
                         )
                     }
-                    #endif
                 }
             }
             .animation(.linear(duration: 0.1), value: userListDisplayType)
@@ -315,6 +323,7 @@ struct SelectUserView: View {
             viewModel.getServers()
         }
         .toolbar {
+            #if os(iOS)
             ToolbarItem(placement: .principal) {
                 Image(.jellyfinBlobBlue)
                     .resizable()
@@ -322,7 +331,6 @@ struct SelectUserView: View {
                     .frame(width: UIDevice.isTV ? 100 : 30)
             }
 
-            #if os(iOS)
             if horizontalSizeClass == .compact {
                 ToolbarItem(placement: .topBarLeading) {
                     if isEditing {

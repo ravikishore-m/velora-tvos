@@ -276,6 +276,11 @@ class PagingLibraryViewModel<Library: PagingLibrary>: ViewModel, Identifiable {
         let delay = max(0.35, 5 - Date.now.timeIntervalSince(lastStoreRefresh))
         storeRefreshTask = Task { @MainActor [weak self] in
             try? await Task.sleep(for: .seconds(delay))
+
+            // Playback reports progress every few seconds, so defer to a single refresh once it stops
+            while !Task.isCancelled, Container.shared.userSessionManager().hasActivePlayback {
+                try? await Task.sleep(for: .seconds(2))
+            }
             guard !Task.isCancelled, let self, !self.isInvalidated else { return }
 
             self.hasPendingStoreRefresh = false

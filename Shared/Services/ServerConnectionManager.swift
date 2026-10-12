@@ -63,6 +63,8 @@ final class ServerConnectionManager: ObservableObject {
     private var monitor: NWPathMonitor?
     private var isStarted = false
     private var context: NetworkConnectionContext = .unavailable
+    private var stableContext: NetworkConnectionContext?
+    private var contextChangeTask: Task<Void, Never>?
     private var evaluationTask: Task<Void, Never>?
     private var cancellables = Set<AnyCancellable>()
 
@@ -183,10 +185,13 @@ final class ServerConnectionManager: ObservableObject {
         isStarted = false
         evaluationTask?.cancel()
         evaluationTask = nil
+        contextChangeTask?.cancel()
+        contextChangeTask = nil
         cancellables.removeAll()
         monitor?.cancel()
         monitor = nil
         context = .unavailable
+        stableContext = nil
     }
 
     @Function(\Action.Cases.scheduleConnectionResolution)
@@ -232,15 +237,33 @@ final class ServerConnectionManager: ObservableObject {
         // no-op, just for state transition
     }
 
+    /// Path updates also fire for momentary drops and unrelated interfaces, such as VPN tunnels.
+    /// Announcing each one reconnects the socket and reloads every view, so only a network that
+    /// settles into a different state than before is announced.
     private func contextDidUpdate(_ context: NetworkConnectionContext) {
-        let didChange = context != self.context && context.isSatisfied
         self.context = context
+        contextChangeTask?.cancel()
 
-        if didChange, let connection = userSession?.server.activeServerConnection {
-            Notifications[.didChangeServerConnection].post(connection)
+        if context.isSatisfied {
+            contextChangeTask = Task { [weak self] in
+                try? await Task.sleep(for: .seconds(2))
+                guard !Task.isCancelled else { return }
+
+                self?.contextDidSettle(context)
+            }
         }
 
         scheduleConnectionResolution()
+    }
+
+    private func contextDidSettle(_ context: NetworkConnectionContext) {
+        defer { stableContext = context }
+
+        guard let stableContext, stableContext != context,
+              let connection = userSession?.server.activeServerConnection
+        else { return }
+
+        Notifications[.didChangeServerConnection].post(connection)
     }
 
     private var isAutoSwitchEnabled: Bool {

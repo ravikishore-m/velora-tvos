@@ -48,6 +48,8 @@ internal enum L10n {
   internal static let additionalParts = L10n.tr("Localizable", "additionalParts", fallback: "Additional parts")
   /// Additional security access for users signed in to this device. This does not change any Jellyfin server user settings.
   internal static let additionalSecurityAccessDescription = L10n.tr("Localizable", "additionalSecurityAccessDescription", fallback: "Additional security access for users signed in to this device. This does not change any Jellyfin server user settings.")
+  /// Add Profile
+  internal static let addProfile = L10n.tr("Localizable", "addProfile", fallback: "Add Profile")
   /// Add server
   internal static let addServer = L10n.tr("Localizable", "addServer", fallback: "Add server")
   /// Add to favorites
@@ -1032,6 +1034,8 @@ internal enum L10n {
   internal static let lyrics = L10n.tr("Localizable", "lyrics", fallback: "Lyrics")
   /// Management
   internal static let management = L10n.tr("Localizable", "management", fallback: "Management")
+  /// Manage Profiles
+  internal static let manageProfiles = L10n.tr("Localizable", "manageProfiles", fallback: "Manage Profiles")
   /// Delete, upload, or search for external subtitles.
   internal static let manageSubtitlesDescription = L10n.tr("Localizable", "manageSubtitlesDescription", fallback: "Delete, upload, or search for external subtitles.")
   /// Manual playlists folder

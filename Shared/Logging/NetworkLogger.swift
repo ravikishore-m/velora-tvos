@@ -17,6 +17,14 @@ extension NetworkLogger {
     static func swiftfin() -> NetworkLogger {
         var configuration = NetworkLogger.Configuration()
 
+        // Images and periodic progress reports are high volume and rarely useful for diagnosis
+        configuration.excludedURLs = [
+            "*/Items/*/Images/*",
+            "*/Videos/*/Trickplay/*",
+            "*/UserImage*",
+            "*/Sessions/Playing/Progress*",
+        ]
+
         configuration.willHandleEvent = { event -> LoggerStore.Event? in
             if case var LoggerStore.Event.networkTaskCompleted(task) = event {
                 guard let url = task.originalRequest.url,
