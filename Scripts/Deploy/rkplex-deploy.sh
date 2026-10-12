@@ -10,7 +10,8 @@
 # and re-signs before a free Apple ID's 7-day provisioning profile lapses.
 # Builds in its own worktree, so the working copy is never touched.
 #
-# Run by launchd (see install-launch-agent.sh), or by hand. `--force` deploys regardless.
+# Run by launchd (see install-launch-agent.sh), or by hand. `--force`, or a `force` file in
+# ~/Library/Caches/RKPlexDeploy/requests, deploys regardless.
 #
 # Environment:
 #   RKPLEX_BRANCH         branch to deploy; follows its upstream when it has one
@@ -61,6 +62,12 @@ fail() {
 
 force=0
 [[ ${1:-} == --force ]] && force=1
+
+# Requests come from the push hook, or `touch requests/force` over SSH; clearing them re-runs this once, harmlessly
+REQUESTS="$CACHE_DIR/requests"
+mkdir -p "$REQUESTS"
+[[ -e $REQUESTS/force ]] && force=1
+rm -f "$REQUESTS"/*(N)
 
 # Desired state: the upstream tip when the branch tracks one, otherwise the local branch
 upstream=$(git -C "$REPO" rev-parse --abbrev-ref "$BRANCH@{upstream}" 2>/dev/null || true)

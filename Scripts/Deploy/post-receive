@@ -1,0 +1,16 @@
+#!/bin/sh
+#
+# Swiftfin is subject to the terms of the Mozilla Public
+# License, v2.0. If a copy of the MPL was not distributed with this
+# file, you can obtain one at https://mozilla.org/MPL/2.0/.
+#
+# Copyright (c) 2026 Jellyfin & Jellyfin Contributors
+#
+# Hook for the deploy repository: a push wakes the deploy LaunchAgent, which watches the requests folder.
+# The build runs in the logged-in session rather than this SSH session, which cannot reach the signing keychain.
+
+mkdir -p "$HOME/Library/Caches/RKPlexDeploy/requests"
+date >"$HOME/Library/Caches/RKPlexDeploy/requests/push"
+
+echo "RKPlex: deploy queued. The Apple TV updates when the build finishes;"
+echo "        check with: tail -f ~/Library/Logs/RKPlexDeploy/deploy.log"

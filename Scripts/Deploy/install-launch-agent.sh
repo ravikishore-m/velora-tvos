@@ -6,8 +6,10 @@
 #
 # Copyright (c) 2026 Jellyfin & Jellyfin Contributors
 #
-# Installs a LaunchAgent that runs rkplex-deploy.sh every hour while you are logged in.
-# Most runs only check the branch and exit; a build happens on a new commit or before the profile lapses.
+# Installs a LaunchAgent that runs rkplex-deploy.sh every hour, and at once when the deploy repository
+# (~/rkplex-deploy.git) receives a push. Most runs only check the branch and exit; a build happens
+# on a new commit or before the profile lapses. The branch is pushed to that repository and tracks it,
+# so from another machine on the tailnet: git push ssh://<user>@<mac>/~/rkplex-deploy.git <branch>
 #
 # Usage: install-launch-agent.sh <devicectl device id> <xcodebuild device udid> [branch]
 #        install-launch-agent.sh --uninstall
@@ -18,6 +20,9 @@ LABEL="com.rkplex.deploy"
 PLIST="$HOME/Library/LaunchAgents/$LABEL.plist"
 LOG_DIR="$HOME/Library/Logs/RKPlexDeploy"
 SCRIPT="${0:A:h}/rkplex-deploy.sh"
+REPO="${0:A:h:h:h}"
+DEPLOY_REPO="$HOME/rkplex-deploy.git"
+REQUESTS="$HOME/Library/Caches/RKPlexDeploy/requests"
 
 if [[ ${1:-} == --uninstall ]]; then
     launchctl bootout "gui/$UID/$LABEL" 2>/dev/null || true
@@ -28,10 +33,13 @@ fi
 
 device=${1:?devicectl device id, from: xcrun devicectl list devices}
 destination=${2:?xcodebuild device UDID, from: xcrun xctrace list devices}
-branch=${3:-$(git -C "${0:A:h:h:h}" branch --show-current)}
+branch=${3:-$(git -C "$REPO" branch --show-current)}
 
-mkdir -p "$LOG_DIR" "${PLIST:h}"
+mkdir -p "$LOG_DIR" "${PLIST:h}" "$REQUESTS"
 chmod +x "$SCRIPT"
+
+[[ -d $DEPLOY_REPO ]] || git init --quiet --bare "$DEPLOY_REPO"
+install -m 755 "${0:A:h}/post-receive" "$DEPLOY_REPO/hooks/post-receive"
 
 cat >"$PLIST" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -56,6 +64,10 @@ cat >"$PLIST" <<EOF
     </dict>
     <key>StartInterval</key>
     <integer>3600</integer>
+    <key>WatchPaths</key>
+    <array>
+        <string>$REQUESTS</string>
+    </array>
     <key>ProcessType</key>
     <string>Background</string>
     <key>StandardOutPath</key>
@@ -69,4 +81,7 @@ EOF
 launchctl bootout "gui/$UID/$LABEL" 2>/dev/null || true
 launchctl bootstrap "gui/$UID" "$PLIST"
 
-print "Installed $LABEL: checks $branch every hour, log at $LOG_DIR/deploy.log"
+git -C "$REPO" remote get-url tv >/dev/null 2>&1 || git -C "$REPO" remote add tv "$DEPLOY_REPO"
+git -C "$REPO" push --quiet --set-upstream tv "$branch"
+
+print "Installed $LABEL: deploys $branch from $DEPLOY_REPO on push and checks hourly, log at $LOG_DIR/deploy.log"
