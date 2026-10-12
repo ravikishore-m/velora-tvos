@@ -242,6 +242,17 @@ extension CinemaFormatBadges {
             .accessibilityLabel(title)
         }
 
+        private func logo(_ resource: ImageResource, title: String, height: CGFloat) -> some View {
+            Image(resource)
+                .renderingMode(.template)
+                .resizable()
+                .interpolation(.high)
+                .aspectRatio(contentMode: .fit)
+                .frame(height: height)
+                .foregroundStyle(CinemaTheme.Badge.tint)
+                .accessibilityLabel(title)
+        }
+
         /// Accessibility features read as plain outlined glass, apart from the picture and sound formats
         private func outline(_ title: String, accessibilityLabel: String) -> some View {
             Text(title)
@@ -266,13 +277,13 @@ extension CinemaFormatBadges {
             case .hd:
                 pill(.resolution, L10n.hd)
             case .dolbyVision:
-                pill(.vision, L10n.dolbyVision)
+                logo(.dolbyVision, title: L10n.dolbyVision, height: CinemaTheme.Badge.stackedLogoHeight)
             case let .hdr(title):
                 pill(.range, title)
             case .dolbyAtmos:
-                pill(.spatial, L10n.dolbyAtmos)
+                logo(.dolbyAtmos, title: L10n.dolbyAtmos, height: CinemaTheme.Badge.stackedLogoHeight)
             case .dolbyDigital:
-                pill(.sound, L10n.dolbyDigital)
+                logo(.dolbyDigital, title: L10n.dolbyDigital, height: CinemaTheme.Badge.wideLogoHeight)
             case let .audioFormat(title):
                 pill(title == L10n.dtsX ? .spatial : .sound, title)
             case let .surround(title):

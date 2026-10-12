@@ -35,7 +35,7 @@ struct CinemaHomeTopBar: View {
 
             Spacer()
 
-            VeloraWordmark(size: CinemaTheme.Brand.homeSize, isShimmering: true)
+            VeloraLogo(size: CinemaTheme.Brand.homeSize, isShimmering: true)
         }
         .focusSection()
     }

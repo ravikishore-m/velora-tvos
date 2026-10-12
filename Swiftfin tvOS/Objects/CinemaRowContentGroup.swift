@@ -13,21 +13,25 @@ struct CinemaRowContentGroup<Library: PagingLibrary>: ContentGroup where Library
     let displayTitle: String
     let id: String
     let isRanked: Bool
+    /// Rows with fewer titles are hidden rather than shown half-empty
+    let minimumCount: Int
     let viewModel: PagingLibraryViewModel<Library>
 
     var _shouldBeResolved: Bool {
-        viewModel.elements.isNotEmpty
+        viewModel.elements.count >= max(1, minimumCount)
     }
 
     init(
         id: String,
         library: Library,
         displayTitle: String? = nil,
-        isRanked: Bool = false
+        isRanked: Bool = false,
+        minimumCount: Int = 1
     ) {
         self.displayTitle = displayTitle ?? library.parent.displayTitle
         self.id = id
         self.isRanked = isRanked
+        self.minimumCount = minimumCount
         self.viewModel = .init(library: library, pageSize: 20)
     }
 

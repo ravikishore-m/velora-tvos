@@ -7,7 +7,6 @@
 //
 
 import AppKit
-import CoreText
 import Foundation
 
 let brandAssets = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
@@ -25,17 +24,33 @@ func color(_ red: CGFloat, _ green: CGFloat, _ blue: CGFloat, _ alpha: CGFloat =
     CGColor(colorSpace: sRGB, components: [red, green, blue, alpha])!
 }
 
-let violet = color(0.43, 0.33, 1)
-let sky = color(0.25, 0.66, 0.98)
-let mint = color(0.2, 0.88, 0.72)
-let night = color(0.02, 0.024, 0.06)
-let fold = color(0.12, 0.16, 0.48)
-let foldLight = color(0.19, 0.44, 0.76)
+let red = color(0.9, 0.04, 0.08)
+let garnet = color(0.5, 0.01, 0.05)
+let night = color(0.02, 0.012, 0.014)
+let tip = color(1, 0.16, 0.14)
 
-/// Facet corners in a unit square, y down; the same as VeloraMark in the app
-let leadingArm: [(CGFloat, CGFloat)] = [(0.05, 0.1), (0.32, 0.1), (0.635, 0.9), (0.365, 0.9)]
-let trailingArm: [(CGFloat, CGFloat)] = [(0.68, 0.1), (0.95, 0.1), (0.635, 0.9), (0.365, 0.9)]
-let facetRadius: CGFloat = 0.035
+/// A face of the mark: corners in a unit square, y down, and its colour on the left edge;
+/// the same as VeloraMark in the app
+struct Face {
+    let corners: [(CGFloat, CGFloat)]
+    let color: CGColor
+}
+
+let faces = [
+    Face(corners: [(0.06, 0.66), (0.39, 0.5), (0.96, 0.5), (0.06, 0.8)], color: color(0.3, 0, 0.03)),
+    Face(corners: [(0.06, 0.8), (0.96, 0.5), (0.06, 0.94)], color: color(0.58, 0.01, 0.05)),
+    Face(corners: [(0.06, 0.06), (0.96, 0.5), (0.06, 0.2)], color: color(1, 0.24, 0.22)),
+    Face(corners: [(0.06, 0.2), (0.96, 0.5), (0.39, 0.5), (0.06, 0.34)], color: color(0.74, 0.02, 0.07)),
+]
+
+func mix(_ from: CGColor, _ to: CGColor, by amount: CGFloat) -> CGColor {
+    let a = from.components!, b = to.components!
+    return color(
+        a[0] + (b[0] - a[0]) * amount,
+        a[1] + (b[1] - a[1]) * amount,
+        a[2] + (b[2] - a[2]) * amount
+    )
+}
 
 func makeContext(width: Int, height: Int) -> CGContext {
     let context = CGContext(
@@ -67,141 +82,75 @@ func glow(_ context: CGContext, _ glowColor: CGColor, at center: CGPoint, radius
     context.drawRadialGradient(gradient, startCenter: center, startRadius: 0, endCenter: center, endRadius: radius, options: [])
 }
 
-/// Night sky with violet, sky and mint light pooling behind the centre
+/// Deep black with a soft red light behind the centre
 func drawAurora(_ context: CGContext, size: CGSize, strength: CGFloat = 1) {
     context.setFillColor(night)
     context.fill(CGRect(origin: .zero, size: size))
 
     let reach = max(size.width, size.height)
-    glow(context, violet, at: CGPoint(x: size.width * 0.28, y: size.height * 0.7), radius: reach * 0.55, strength: 0.75 * strength)
-    glow(context, mint, at: CGPoint(x: size.width * 0.78, y: size.height * 0.25), radius: reach * 0.45, strength: 0.45 * strength)
-    glow(context, sky, at: CGPoint(x: size.width * 0.5, y: size.height * 0.45), radius: reach * 0.35, strength: 0.35 * strength)
+    glow(context, garnet, at: CGPoint(x: size.width * 0.5, y: size.height * 0.5), radius: reach * 0.5, strength: 0.4 * strength)
+    glow(context, red, at: CGPoint(x: size.width * 0.56, y: size.height * 0.5), radius: reach * 0.22, strength: 0.22 * strength)
 }
 
-/// The folded-ribbon V in a square of `side` with its bottom-left at `origin`
+/// The sideways, bevelled V in a square of `side` with its bottom-left at `origin`
 func drawMark(_ context: CGContext, origin: CGPoint, side: CGFloat) {
     func point(_ x: CGFloat, _ y: CGFloat) -> CGPoint {
         CGPoint(x: origin.x + x * side, y: origin.y + (1 - y) * side)
     }
 
-    func facet(_ corners: [(CGFloat, CGFloat)]) -> CGPath {
-        let points = corners.map { point($0.0, $0.1) }
-        let path = CGMutablePath()
-        path.move(to: CGPoint(x: (points[0].x + points[3].x) / 2, y: (points[0].y + points[3].y) / 2))
-        for index in points.indices {
-            path.addArc(tangent1End: points[index], tangent2End: points[(index + 1) % points.count], radius: facetRadius * side)
-        }
-        path.closeSubpath()
-        return path
-    }
-
-    func fill(_ clips: [CGPath], _ colors: [CGColor], from start: CGPoint, to end: CGPoint) {
-        context.saveGState()
-        for clip in clips {
-            context.addPath(clip)
-            context.clip()
-        }
-        let gradient = CGGradient(colorsSpace: sRGB, colors: colors as CFArray, locations: [0, 1])!
-        context.drawLinearGradient(gradient, start: start, end: end, options: [.drawsBeforeStartLocation, .drawsAfterEndLocation])
-        context.restoreGState()
-    }
-
-    let leading = facet(leadingArm)
-    let trailing = facet(trailingArm)
-    let sheen = [color(1, 1, 1, 0.32), color(1, 1, 1, 0)]
-
     context.saveGState()
     context.setShadow(offset: CGSize(width: 0, height: -side * 0.02), blur: side * 0.08, color: color(0, 0, 0, 0.45))
     context.beginTransparencyLayer(auxiliaryInfo: nil)
 
-    fill([leading], [violet, sky], from: point(0.5, 0), to: point(0.5, 1))
-    fill([leading], sheen, from: point(0.5, 0), to: point(0.5, 0.5))
-    fill([trailing], [mint, sky], from: point(0.5, 0), to: point(0.5, 1))
-    fill([trailing], sheen, from: point(0.5, 0), to: point(0.5, 0.5))
-    // The ribbon's underside, where the arms overlap at the fold
-    fill([leading, trailing], [fold, foldLight], from: point(0.5, 1), to: point(0.5, 0.5))
+    for face in faces {
+        context.saveGState()
+        context.addLines(between: face.corners.map { point($0.0, $0.1) })
+        context.closePath()
+        context.clip()
+        let gradient = CGGradient(colorsSpace: sRGB, colors: [face.color, mix(face.color, tip, by: 0.4)] as CFArray, locations: [0, 1])!
+        context.drawLinearGradient(
+            gradient,
+            start: point(0, 0.5),
+            end: point(1, 0.5),
+            options: [.drawsBeforeStartLocation, .drawsAfterEndLocation]
+        )
+        context.restoreGState()
+    }
+
+    // Light catching the top edge
+    context.setStrokeColor(color(1, 1, 1, 0.6))
+    context.setLineWidth(max(1, side * 0.008))
+    context.move(to: point(0.06, 0.06))
+    context.addLine(to: point(0.96, 0.5))
+    context.strokePath()
 
     context.endTransparencyLayer()
     context.restoreGState()
 }
 
-/// The app icon: the mark alone, centred, `fraction` of the canvas height
-func drawIconMark(_ context: CGContext, size: CGSize, fraction: CGFloat) {
-    let side = size.height * fraction
-    drawMark(context, origin: CGPoint(x: (size.width - side) / 2, y: (size.height - side) / 2), side: side)
-}
-
-/// Lowercase "velora" in rounded bold, as glyph outlines `height` tall from x-height to baseline
-func namePath(height: CGFloat) -> CGPath {
-    let base: CGFloat = 1000
-    let descriptor = NSFont.systemFont(ofSize: base, weight: .bold).fontDescriptor.withDesign(.rounded)!
-    let font = NSFont(descriptor: descriptor, size: base)! as CTFont
-    let tracking = base * 0.02
-    let scale = height / CTFontGetXHeight(font)
-
-    let combined = CGMutablePath()
-    var x: CGFloat = 0
-    for character in "velora".utf16 {
-        var unichar = character
-        var glyph = CGGlyph()
-        CTFontGetGlyphsForCharacters(font, &unichar, &glyph, 1)
-        var advance = CGSize.zero
-        CTFontGetAdvancesForGlyphs(font, .horizontal, &glyph, &advance, 1)
-
-        var transform = CGAffineTransform(scaleX: scale, y: scale).translatedBy(x: x, y: 0)
-        if let glyphPath = CTFontCreatePathForGlyph(font, glyph, &transform) {
-            combined.addPath(glyphPath)
-        }
-        x += advance.width + tracking
-    }
-    return combined
-}
-
-/// The mark beside the name, centred in `rect`, fitted to `width`
-func drawLockup(_ context: CGContext, center: CGPoint, width: CGFloat) {
-    let probeName = namePath(height: 100)
-    let probeMark: CGFloat = 100 * 1.9
-    let probeGap: CGFloat = 100 * 0.45
-    let probeWidth = probeMark + probeGap + probeName.boundingBox.maxX
-    let unit = width / probeWidth * 100
-
-    let markSide = unit * 1.9
-    let gap = unit * 0.45
-    let name = namePath(height: unit)
-    let total = markSide + gap + name.boundingBox.maxX
-    let left = center.x - total / 2
-
-    drawMark(context, origin: CGPoint(x: left, y: center.y - markSide / 2), side: markSide)
-
-    var place = CGAffineTransform(translationX: left + markSide + gap, y: center.y - name.boundingBox.midY)
-    let placed = name.copy(using: &place)!
-
-    context.saveGState()
-    context.setShadow(offset: CGSize(width: 0, height: -unit * 0.04), blur: unit * 0.15, color: color(0, 0, 0, 0.5))
-    context.addPath(placed)
-    context.setFillColor(color(1, 1, 1))
-    context.fillPath()
-    context.restoreGState()
+/// The mark alone, centred on `center`, `height` tall
+func drawCentredMark(_ context: CGContext, center: CGPoint, height: CGFloat) {
+    // The faces span 0.88 of the mark's square vertically and sit slightly left of centre
+    let side = height / 0.88
+    drawMark(context, origin: CGPoint(x: center.x - side * 0.51, y: center.y - side / 2), side: side)
 }
 
 enum Layer {
-    /// The icon's dimmer aurora, so the mark carries the colour
+    /// The icon's dimmer glow, so the mark carries the colour
     case iconBackground
     case iconMark
     case shelf
 }
-
-let iconMarkFraction: CGFloat = 0.68
 
 func draw(_ layer: Layer, in context: CGContext, size: CGSize) {
     switch layer {
     case .iconBackground:
         drawAurora(context, size: size, strength: 0.6)
     case .iconMark:
-        drawIconMark(context, size: size, fraction: iconMarkFraction)
+        drawCentredMark(context, center: CGPoint(x: size.width / 2, y: size.height / 2), height: size.height * 0.56)
     case .shelf:
         drawAurora(context, size: size)
-        drawLockup(context, center: CGPoint(x: size.width / 2, y: size.height / 2), width: size.height * 1.3)
+        drawCentredMark(context, center: CGPoint(x: size.width / 2, y: size.height / 2), height: size.height * 0.5)
     }
 }
 

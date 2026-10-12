@@ -314,7 +314,7 @@ struct CinemaHeroBanner: View {
             RoundedRectangle(cornerRadius: CinemaTheme.Hero.cardCornerRadius, style: .continuous)
                 .strokeBorder(.white.opacity(0.14), lineWidth: 1.5)
         }
-        .shadow(color: CinemaTheme.Brand.violet.opacity(0.25), radius: 40, y: 16)
+        .shadow(color: CinemaTheme.Brand.red.opacity(0.25), radius: 40, y: 16)
     }
 
     @ViewBuilder

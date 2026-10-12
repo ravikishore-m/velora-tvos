@@ -55,7 +55,7 @@ struct CinemaCreditsSummary: View {
     }
 }
 
-/// "Recently added" and "New episodes" in a glass pill, led by a mint dot
+/// "Recently added" and "New episodes" in a glass pill, led by an ember dot
 struct CinemaNewContentPill: View {
 
     let label: String
@@ -64,9 +64,9 @@ struct CinemaNewContentPill: View {
     var body: some View {
         HStack(spacing: 8) {
             Circle()
-                .fill(CinemaTheme.Brand.mint)
+                .fill(CinemaTheme.Brand.ember)
                 .frame(width: CinemaTheme.NewContent.dotSize, height: CinemaTheme.NewContent.dotSize)
-                .shadow(color: CinemaTheme.Brand.mint, radius: 4)
+                .shadow(color: CinemaTheme.Brand.ember, radius: 4)
 
             Text(label)
                 .font(font)

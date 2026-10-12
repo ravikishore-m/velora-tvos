@@ -14,8 +14,8 @@ enum CinemaTheme {
 
     enum Colors {
 
-        /// Blue-black, so glass and artwork pick up the brand's cool cast
-        static let background = Color(red: 0.03, green: 0.035, blue: 0.075)
+        /// A deep, warm black, so glass and artwork carry a hint of the brand red
+        static let background = Color(red: 0.035, green: 0.028, blue: 0.03)
 
         static let primaryText = Color.white
         static let secondaryText = Color.white.opacity(0.72)
@@ -24,10 +24,10 @@ enum CinemaTheme {
         static let track = Color.white.opacity(0.18)
 
         static let placeholder = Color.white.opacity(0.08)
-        /// Velora violet, used for focus, progress and highlights
-        static let accent = Color.veloraViolet
-        /// Cool secondary glow for backgrounds
-        static let glow = Color(red: 0.25, green: 0.4, blue: 1)
+        /// Velora red, used for focus, progress and highlights
+        static let accent = Color.veloraRed
+        /// Warm secondary glow for backgrounds
+        static let glow = Color(red: 0.6, green: 0.02, blue: 0.06)
     }
 
     // MARK: - Typography
@@ -116,31 +116,34 @@ enum CinemaTheme {
 
     enum Brand {
 
-        static let violet = Color(red: 0.43, green: 0.33, blue: 1)
-        static let sky = Color(red: 0.25, green: 0.66, blue: 0.98)
-        static let mint = Color(red: 0.2, green: 0.88, blue: 0.72)
-        /// The deep blue-black behind the launch ident
-        static let night = Color(red: 0.02, green: 0.024, blue: 0.06)
-        /// The underside of the ribbon where the V folds
-        static let fold = Color(red: 0.12, green: 0.16, blue: 0.48)
+        /// Velora red, with a deep garnet and a bright ember either side of it
+        static let red = Color(red: 0.9, green: 0.04, blue: 0.08)
+        static let garnet = Color(red: 0.5, green: 0.01, blue: 0.05)
+        static let ember = Color(red: 1, green: 0.34, blue: 0.24)
+        /// The near-black behind the launch ident
+        static let night = Color(red: 0.02, green: 0.012, blue: 0.014)
 
-        /// Violet through sky to mint, for progress, focus and the format glyphs
-        static let gradient = LinearGradient(colors: [violet, sky, mint], startPoint: .leading, endPoint: .trailing)
+        /// The mark's four faces, lit from above like a cut ruby
+        static let upperLit = Color(red: 1, green: 0.24, blue: 0.22)
+        static let upperShade = Color(red: 0.74, green: 0.02, blue: 0.07)
+        static let lowerShade = Color(red: 0.3, green: 0, blue: 0.03)
+        static let lowerLit = Color(red: 0.58, green: 0.01, blue: 0.05)
+        /// Where the faces meet at the tip
+        static let tip = Color(red: 1, green: 0.16, blue: 0.14)
+
+        /// Garnet through red to ember, for progress, focus and the format glyphs
+        static let gradient = LinearGradient(colors: [garnet, red, ember], startPoint: .leading, endPoint: .trailing)
         static let diagonalGradient = LinearGradient(
-            colors: [violet, sky, mint],
+            colors: [red, ember],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
 
-        /// Corner rounding of the mark's facets, as a fraction of its size
-        static let facetRadius: CGFloat = 0.035
-        static let letterSpacing: CGFloat = 0.02
         static let shimmerInterval: Duration = .seconds(7)
         static let shimmerDuration: TimeInterval = 1.2
 
-        static let homeSize: CGFloat = 44
-        static let introMarkSize: CGFloat = 300
-        static let introNameSize: CGFloat = 120
+        static let homeSize: CGFloat = 52
+        static let introSize: CGFloat = 320
     }
 
     // MARK: - Profile
@@ -154,7 +157,7 @@ enum CinemaTheme {
         static let focusRingWidth: CGFloat = 5
         static let panelCornerRadius: CGFloat = 48
         static let panelPadding: CGFloat = 48
-        static let wordmarkSize: CGFloat = 64
+        static let logoSize: CGFloat = 104
         static let columnWidth: CGFloat = 720
         static let nameSpacing: CGFloat = 36
         static let nameWidth: CGFloat = 420
@@ -246,6 +249,8 @@ enum CinemaTheme {
         static let groupSpacing: CGFloat = 18
         static let iconSpacing: CGFloat = 10
         static let outlineWidth: CGFloat = 2
+        static let stackedLogoHeight: CGFloat = 44
+        static let wideLogoHeight: CGFloat = 30
         static let tint = Color.white.opacity(0.92)
     }
 

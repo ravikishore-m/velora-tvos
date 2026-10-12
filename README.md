@@ -17,27 +17,31 @@
 
 ### Profiles
 - **Who's watching, every time.** Velora asks who's watching each time it opens or returns from the background.
-- **Launch ident.** An aurora rises, and the Velora ribbon runs down, folds and rises into the V before the profiles appear.
-- **Profile column on glass.** Profiles sit on a glass panel over artwork from your own library. The chosen profile glides to the centre while it signs in.
+- **Launch ident.** A red glow rises out of black, the two arms of the Velora mark cut in and meet at the point, and a glint crosses it before the profiles appear.
+- **Profile column on glass.** The Velora mark heads a glass panel of profiles over artwork from your own library. The chosen profile glides to the centre while it signs in.
 - **32 avatars.** There are 16 original Velora characters: otter, koala, axolotl, sloth, hedgehog, raccoon, narwhal, capybara, chameleon, bunny, octopus, lion cub, frog, bee, unicorn and whale. The 16 classic characters are kept as well. Long-press a profile to choose one.
 - **Sign in with your phone.** Use Quick Connect by scanning a QR code, or sign in with the remote.
 
 ### Home
-- **Tabs.** Home, Movies, TV Shows, **My Velora** (your list), Search and Settings.
+- **Tabs.** Home, Movies, TV Shows, **My Velora** (your favourites and watch history), Search and Settings.
 - **Featured banner.** Rotates through titles with backdrop art, with Play / Resume and More Info buttons.
 - **Rows built from your library:**
-  - Continue Watching and Recently Added.
+  - Continue Watching, Recently Added Movies, Next Up and, if turned on in Settings, New Episodes.
   - **Top 10** charts for movies and shows.
-  - Category rows such as Sci-Fi, Thrillers, Romance, Animation, Documentaries, Kids, Reality, Made in Korea and South Indian Cinema. A row only appears when your server has titles for it.
+  - New Releases, Critically Acclaimed Movies, Highly Rated Shows, Watch Again and "Because you watched" picks.
+  - A **My Velora** row with your favourite movies and shows.
+  - Genre rows such as Sci-Fi Movies, Thrillers, Romantic Movies, Animated Movies, Documentaries, Drama Series, Kids' TV and Reality TV.
+  - Language rows such as Indian Movies, South Indian Cinema, Telugu Movies and Made in Korea. These only include films made in that region, so a Hollywood film with a dubbed Hindi track stays out of the Indian rows.
+  - A category row only appears when your server has at least four titles for it.
 - **Posters that open up.** The focused poster expands into a wide card with the title's logo and progress.
 - **Chart positions.** A title's position appears in a glass tile on its artwork, and titles in a chart get a small Top 10 pill in other rows.
 
 <sub>Jellyfin has no server-wide popularity data, so the Top 10 charts rank recent titles by community and critic ratings.</sub>
 
 ### Details
-- **Metadata line.** Year, runtime and the content rating, followed by **Velora format pills**:
-  - picture: 4K/HD, Dolby Vision, HDR10, HDR10+ and HLG;
-  - sound: Dolby Atmos, Dolby Digital, DTS, DTS-HD, DTS:X, TrueHD, 5.1 and 7.1;
+- **Metadata line.** Year, runtime and the content rating, followed by the title's formats:
+  - picture: the Dolby Vision logo, and glass pills for 4K/HD, HDR10, HDR10+ and HLG;
+  - sound: the Dolby Atmos and Dolby Digital logos, and glass pills for DTS, DTS-HD, DTS:X, TrueHD, 5.1 and 7.1;
   - accessibility: CC, SDH and AD.
 - **Info panel.** Information, Languages and Accessibility on a glass panel, plus cast and director credits.
 
@@ -56,21 +60,21 @@
 - **Playback info.** Shows the player in use and whether the stream is direct, remuxed or transcoded.
 
 ### Design
-- **Liquid Glass** on buttons, chips, badges, panels and the profile bar. Focused buttons fill with Velora violet.
-- **One palette.** Violet `#6E54FF`, sky `#40A8FA` and mint `#33E0B8` on a blue-black night. The default accent everywhere is Velora violet, and you can change it in Settings.
+- **Liquid Glass** on buttons, chips, badges, panels and the profile bar. Focused buttons fill with Velora red.
+- **One palette.** Velora red `#E60A14`, garnet `#80030D` and ember `#FF573D` on a deep black. The default accent everywhere is Velora red, and you can change it in Settings.
 - **Gradient details.** Focus rings, progress bars and the player timeline use the brand gradient.
 
 ## 🎨 Brand
 
 <img alt="Velora app icon" src="./Resources/Velora/icon.png" width="420">
 
-The Velora mark is a single ribbon folded into a V. It runs down the violet arm, folds at the base, where its darker underside shows, and rises again as the mint arm. The app icon is the mark alone, and the Top Shelf image pairs it with the lowercase name.
+The Velora mark is a V laid on its side, so it also reads as play. Each arm is cut like a ruby into two sharp, bevelled faces lit from above, bright red on top and deep garnet below, meeting in a single point. The mark stands alone, without the name, on the app icon, the Top Shelf image, the launch ident, the Who's watching screen and the home bar.
 
 All brand art is drawn in code, so it is original and free to change:
 
 | What | Where |
 |---|---|
-| Mark, wordmark and launch ident | `Swiftfin tvOS/Components/Cinema/VeloraWordmark.swift` |
+| Mark and launch ident | `Swiftfin tvOS/Components/Cinema/VeloraLogo.swift` |
 | Format glyphs | `Swiftfin tvOS/Components/Cinema/VeloraFormatGlyph.swift` |
 | Colours, glass and sizes | `Swiftfin tvOS/Components/Cinema/CinemaTheme.swift` |
 | App icon and Top Shelf images | `Scripts/Brand/render-brand.swift` |
@@ -179,6 +183,6 @@ swift Scripts/Translations/GenerateStrings.swift
 
 Velora is released under the **Mozilla Public License 2.0**, the same license as Swiftfin. See [LICENSE.md](./LICENSE.md). It is a modified version of [Swiftfin](https://github.com/jellyfin/Swiftfin) by Jellyfin & Jellyfin Contributors. Their source headers are kept, and the original source is available upstream.
 
-- **Brand.** The Velora name, mark, icon, intro and format glyphs are original to this project and drawn in code.
+- **Brand.** The Velora mark, icon, intro and format glyphs are original to this project and drawn in code.
 - **Avatars.** The 16 Velora avatars are original illustrations generated for this project.
-- **Trademarks.** Velora is not affiliated with or endorsed by Jellyfin, Apple, Dolby, DTS, Netflix or any streaming service. Dolby, Dolby Vision, Dolby Atmos and Dolby Digital are trademarks of Dolby Laboratories, and DTS and DTS:X are trademarks of DTS, Inc. Velora uses these names only as text to describe the formats a title has, and shows no third-party logos. Apple TV and tvOS are trademarks of Apple Inc.
+- **Trademarks.** Velora is not affiliated with or endorsed by Jellyfin, Apple, Dolby, DTS, Netflix or any streaming service. Dolby, Dolby Vision, Dolby Atmos and Dolby Digital are trademarks of Dolby Laboratories, and DTS and DTS:X are trademarks of DTS, Inc. Velora shows the Dolby logos only to describe the formats a title has, for personal use; remove them from `Swiftfin tvOS/Resources/Assets.xcassets` before distributing the app. Apple TV and tvOS are trademarks of Apple Inc.

@@ -46,7 +46,7 @@ struct CinemaSignInView<RemoteContent: View>: View {
     }
 
     private var wordmark: some View {
-        VeloraWordmark(size: 64, isShimmering: true)
+        VeloraLogo(size: 120, isShimmering: true)
     }
 
     @ViewBuilder

@@ -120,9 +120,6 @@ struct CinemaProfilePicker: View {
             }
             .menuOrder(.fixed)
             .buttonBorderShape(.circle)
-
-            VeloraWordmark(size: CinemaTheme.Profile.wordmarkSize, isShimmering: hasAppeared && !isChoosing)
-                .padding(.leading, 16)
         }
         .focusSection()
     }
@@ -217,12 +214,16 @@ struct CinemaProfilePicker: View {
 
     private var column: some View {
         VStack(alignment: .leading, spacing: 0) {
+            VeloraLogo(size: CinemaTheme.Profile.logoSize, isShimmering: hasAppeared && !isChoosing)
+                .modifier(EntranceModifier(index: -2, isVisible: hasAppeared))
+                .opacity(isChoosing ? 0 : 1)
+
             Text(isEditing ? L10n.manageProfiles : L10n.chooseProfile)
                 .font(.title2.weight(.bold))
                 .foregroundStyle(CinemaTheme.Colors.primaryText)
                 .contentTransition(.opacity)
                 .accessibilityAddTraits(.isHeader)
-                .padding(.top, 30)
+                .padding(.top, 28)
                 .modifier(EntranceModifier(index: -1, isVisible: hasAppeared))
                 .opacity(isChoosing ? 0 : 1)
 
@@ -344,7 +345,7 @@ struct CinemaProfilePicker: View {
 
 // MARK: - Background
 
-/// The Velora aurora: violet, sky and mint light drifting over the night,
+/// The Velora aurora: red, garnet and ember light drifting over the black,
 /// shown behind the picker until the library artwork is known
 struct CinemaProfilesBackground: View {
 
@@ -357,17 +358,17 @@ struct CinemaProfilesBackground: View {
 
             ZStack {
                 Ellipse()
-                    .fill(CinemaTheme.Brand.violet)
+                    .fill(CinemaTheme.Brand.red)
                     .frame(width: 1300, height: 640)
                     .offset(x: isDrifting ? -380 : -520, y: isDrifting ? -260 : -180)
 
                 Ellipse()
-                    .fill(CinemaTheme.Brand.mint)
+                    .fill(CinemaTheme.Brand.garnet)
                     .frame(width: 1000, height: 480)
                     .offset(x: isDrifting ? 520 : 380, y: isDrifting ? 300 : 360)
 
                 Ellipse()
-                    .fill(CinemaTheme.Brand.sky)
+                    .fill(CinemaTheme.Brand.ember)
                     .frame(width: 800, height: 420)
                     .offset(x: isDrifting ? 120 : -60, y: 40)
                     .opacity(0.7)
@@ -729,7 +730,7 @@ extension CinemaProfilePicker {
                 .trim(from: 0.05, to: 0.8)
                 .stroke(
                     AngularGradient(
-                        colors: [CinemaTheme.Brand.violet, CinemaTheme.Brand.sky, CinemaTheme.Brand.mint],
+                        colors: [CinemaTheme.Brand.red, CinemaTheme.Brand.ember, CinemaTheme.Brand.garnet],
                         center: .center
                     ),
                     style: StrokeStyle(lineWidth: 8, lineCap: .round)

@@ -238,8 +238,6 @@ internal enum L10n {
   internal static let behavior = L10n.tr("Localizable", "behavior", fallback: "Behavior")
   /// Behind the scenes
   internal static let behindTheScenes = L10n.tr("Localizable", "behindTheScenes", fallback: "Behind the scenes")
-  /// Bingeworthy TV Shows
-  internal static let bingeworthyTVShows = L10n.tr("Localizable", "bingeworthyTVShows", fallback: "Bingeworthy TV Shows")
   /// Tests your server connection to assess internet speed and adjust bandwidth automatically.
   internal static let birateAutoDescription = L10n.tr("Localizable", "birateAutoDescription", fallback: "Tests your server connection to assess internet speed and adjust bandwidth automatically.")
   /// Birthday
@@ -286,8 +284,6 @@ internal enum L10n {
   internal static let boxRearImageDescription = L10n.tr("Localizable", "boxRearImageDescription", fallback: "Rear box art representing the back of the item\'s physical packaging, often showing descriptions or track listings.")
   /// Brightness
   internal static let brightness = L10n.tr("Localizable", "brightness", fallback: "Brightness")
-  /// Bring the Drama
-  internal static let bringTheDrama = L10n.tr("Localizable", "bringTheDrama", fallback: "Bring the Drama")
   /// Bugs and features
   internal static let bugsAndFeatures = L10n.tr("Localizable", "bugsAndFeatures", fallback: "Bugs and features")
   /// Buttons
@@ -440,10 +436,8 @@ internal enum L10n {
   internal static let containers = L10n.tr("Localizable", "containers", fallback: "Containers")
   /// Continue
   internal static let `continue` = L10n.tr("Localizable", "continue", fallback: "Continue")
-  /// Continue Watching for %@
-  internal static func continueWatchingFor(_ p1: Any) -> String {
-    return L10n.tr("Localizable", "continueWatchingFor", String(describing: p1), fallback: "Continue Watching for %@")
-  }
+  /// Continue Watching
+  internal static let continueWatching = L10n.tr("Localizable", "continueWatching", fallback: "Continue Watching")
   /// Continuing
   internal static let continuing = L10n.tr("Localizable", "continuing", fallback: "Continuing")
   /// Control other users
@@ -666,6 +660,8 @@ internal enum L10n {
   internal static let download = L10n.tr("Localizable", "download", fallback: "Download")
   /// Downloads
   internal static let downloads = L10n.tr("Localizable", "downloads", fallback: "Downloads")
+  /// Drama Series
+  internal static let dramaSeries = L10n.tr("Localizable", "dramaSeries", fallback: "Drama Series")
   /// Dropped frames
   internal static let droppedFrames = L10n.tr("Localizable", "droppedFrames", fallback: "Dropped frames")
   /// This saves the URL as another connection for the existing server and makes it active.
@@ -872,6 +868,8 @@ internal enum L10n {
   internal static let hidden = L10n.tr("Localizable", "hidden", fallback: "Hidden")
   /// Hide user from login screen
   internal static let hideUserFromLoginScreen = L10n.tr("Localizable", "hideUserFromLoginScreen", fallback: "Hide user from login screen")
+  /// Highly Rated Shows
+  internal static let highlyRatedShows = L10n.tr("Localizable", "highlyRatedShows", fallback: "Highly Rated Shows")
   /// Hint
   internal static let hint = L10n.tr("Localizable", "hint", fallback: "Hint")
   /// Home
@@ -1176,8 +1174,6 @@ internal enum L10n {
   internal static let musicVideos = L10n.tr("Localizable", "musicVideos", fallback: "Music videos")
   /// MVC
   internal static let mvc = L10n.tr("Localizable", "mvc", fallback: "MVC")
-  /// My List
-  internal static let myList = L10n.tr("Localizable", "myList", fallback: "My List")
   /// My Velora
   internal static let myVelora = L10n.tr("Localizable", "myVelora", fallback: "My Velora")
   /// Name
@@ -2164,8 +2160,8 @@ internal enum L10n {
   internal static let votes = L10n.tr("Localizable", "votes", fallback: "Votes")
   /// Waiting for approval…
   internal static let waitingForApproval = L10n.tr("Localizable", "waitingForApproval", fallback: "Waiting for approval…")
-  /// Watch It Again
-  internal static let watchItAgain = L10n.tr("Localizable", "watchItAgain", fallback: "Watch It Again")
+  /// Watch Again
+  internal static let watchAgain = L10n.tr("Localizable", "watchAgain", fallback: "Watch Again")
   /// Weekday
   internal static let weekday = L10n.tr("Localizable", "weekday", fallback: "Weekday")
   /// Weekend

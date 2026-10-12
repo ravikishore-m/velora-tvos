@@ -15,7 +15,7 @@ extension ButtonStyle where Self == CinemaActionButtonStyle {
     }
 }
 
-/// Clear glass at rest; focus floods the glass with Velora violet
+/// Clear glass at rest; focus floods the glass with Velora red
 struct CinemaActionButtonStyle: ButtonStyle {
 
     @Environment(\.isEnabled)

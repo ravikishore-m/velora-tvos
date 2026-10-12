@@ -20,6 +20,22 @@ struct CinemaHomeContentGroupProvider: ContentGroupProvider {
         let filters: ItemFilterCollection
     }
 
+    /// Movies in a region's languages, made in one of its countries
+    private struct RegionalCategory {
+        let id: String
+        let title: String
+        let audioLanguages: [String]
+        let countries: Set<String>
+    }
+
+    /// A language as Jellyfin may spell it, with the countries whose films belong in its row
+    private struct Region {
+        let id: String
+        /// ISO 639-2 codes as reported for audio streams, including bibliographic and terminology variants
+        let codes: [String]
+        let countries: Set<String>
+    }
+
     private struct WatchedTitle {
         let id: String
         let name: String
@@ -32,6 +48,8 @@ struct CinemaHomeContentGroupProvider: ContentGroupProvider {
         static let indianLanguages = 3
         static let worldLanguages = 2
         static let recentlyWatched = 2
+        /// Category rows with fewer titles are hidden
+        static let categoryTitles = 4
     }
 
     /// Genres in order of prominence
@@ -45,10 +63,26 @@ struct CinemaHomeContentGroupProvider: ContentGroupProvider {
         "Mystery", "Animation", "Documentary", "Reality", "Kids",
     ]
 
-    /// ISO 639-2 codes, as reported by Jellyfin for audio streams
-    private static let indianLanguages = ["hin", "tel", "tam", "mal", "kan", "ben", "mar", "pan", "guj"]
+    private static let india: Set = ["india"]
+
+    private static let indianRegions = ["hin", "tel", "tam", "mal", "kan", "ben", "mar", "pan", "guj"]
+        .map { Region(id: $0, codes: [$0], countries: india) }
     private static let southIndianLanguages: Set = ["tel", "tam", "mal", "kan"]
-    private static let worldLanguages = ["kor", "jpn", "spa", "fra", "fre", "deu", "ger", "ita", "zho", "chi", "tha"]
+
+    private static let worldRegions = [
+        Region(id: "kor", codes: ["kor"], countries: ["south korea", "korea", "republic of korea", "korea, republic of"]),
+        Region(id: "jpn", codes: ["jpn"], countries: ["japan"]),
+        Region(
+            id: "spa",
+            codes: ["spa"],
+            countries: ["spain", "mexico", "argentina", "colombia", "chile", "peru", "uruguay", "venezuela", "cuba"]
+        ),
+        Region(id: "fra", codes: ["fra", "fre"], countries: ["france", "belgium", "switzerland", "luxembourg"]),
+        Region(id: "deu", codes: ["deu", "ger"], countries: ["germany", "austria", "switzerland"]),
+        Region(id: "ita", codes: ["ita"], countries: ["italy"]),
+        Region(id: "zho", codes: ["zho", "chi", "cmn", "yue"], countries: ["china", "hong kong", "taiwan"]),
+        Region(id: "tha", codes: ["tha"], countries: ["thailand"]),
+    ]
 
     @Injected(\.currentUserSession)
     var userSession: UserSession?
@@ -83,7 +117,6 @@ struct CinemaHomeContentGroupProvider: ContentGroupProvider {
         let seriesQueryFilters = await seriesFilters
 
         return await _makeGroups(
-            userName: userSession.user.username,
             serverName: userSession.server.name,
             recentlyWatched: recentlyWatched,
             movieGenres: movieGenreCategories(from: movieQueryFilters),
@@ -97,12 +130,11 @@ struct CinemaHomeContentGroupProvider: ContentGroupProvider {
 
     @ContentGroupBuilder
     private func _makeGroups(
-        userName: String,
         serverName: String,
         recentlyWatched: [WatchedTitle],
         movieGenres: [Category],
         tvGenres: [Category],
-        languages: [Category],
+        languages: [RegionalCategory],
         otherVideoLibraries: [BaseItemDto]
     ) -> [any ContentGroup] {
 
@@ -128,7 +160,7 @@ struct CinemaHomeContentGroupProvider: ContentGroupProvider {
         CinemaRowContentGroup(
             id: "cinema-continue-watching",
             library: ResumeItemsLibrary(mediaTypes: [.video]),
-            displayTitle: L10n.continueWatchingFor(userName)
+            displayTitle: L10n.continueWatching
         )
 
         recentlyAddedMovies
@@ -187,9 +219,9 @@ struct CinemaHomeContentGroupProvider: ContentGroupProvider {
         )
 
         CinemaRowContentGroup(
-            id: "cinema-my-list",
+            id: "cinema-my-velora",
             library: ItemLibrary(
-                parent: BaseItemDto(name: L10n.myList),
+                parent: BaseItemDto(name: L10n.myVelora),
                 filters: .init(
                     itemTypes: [.movie, .series],
                     sortBy: [.dateCreated],
@@ -200,7 +232,7 @@ struct CinemaHomeContentGroupProvider: ContentGroupProvider {
         )
 
         for category in languages.prefix(2) {
-            categoryRow(category)
+            regionalRow(category)
         }
 
         for category in leadingGenres {
@@ -208,9 +240,9 @@ struct CinemaHomeContentGroupProvider: ContentGroupProvider {
         }
 
         CinemaRowContentGroup(
-            id: "cinema-bingeworthy-shows",
+            id: "cinema-highly-rated-shows",
             library: ItemLibrary(
-                parent: BaseItemDto(name: L10n.bingeworthyTVShows),
+                parent: BaseItemDto(name: L10n.highlyRatedShows),
                 filters: .init(
                     itemTypes: [.series],
                     sortBy: [.communityRating],
@@ -240,7 +272,7 @@ struct CinemaHomeContentGroupProvider: ContentGroupProvider {
         )
 
         for category in languages.dropFirst(2) {
-            categoryRow(category)
+            regionalRow(category)
         }
 
         for category in trailingGenres {
@@ -255,7 +287,7 @@ struct CinemaHomeContentGroupProvider: ContentGroupProvider {
             CinemaRowContentGroup(
                 id: "cinema-recently-played",
                 library: ItemLibrary(
-                    parent: BaseItemDto(name: L10n.watchItAgain),
+                    parent: BaseItemDto(name: L10n.watchAgain),
                     filters: .init(
                         itemTypes: [.movie, .series],
                         sortBy: [.datePlayed],
@@ -290,7 +322,21 @@ struct CinemaHomeContentGroupProvider: ContentGroupProvider {
             library: ItemLibrary(
                 parent: BaseItemDto(name: category.title),
                 filters: category.filters
-            )
+            ),
+            minimumCount: Limits.categoryTitles
+        )
+    }
+
+    private func regionalRow(_ category: RegionalCategory) -> any ContentGroup {
+        CinemaRowContentGroup(
+            id: "cinema-regional-\(category.id)",
+            library: CinemaRegionalLibrary(
+                id: category.id,
+                displayTitle: category.title,
+                audioLanguages: category.audioLanguages,
+                countries: category.countries
+            ),
+            minimumCount: Limits.categoryTitles
         )
     }
 
@@ -344,56 +390,54 @@ struct CinemaHomeContentGroupProvider: ContentGroupProvider {
             }
     }
 
-    /// Jellyfin can't filter by country, so audio language stands in for "Indian Movies" or "Made in Korea".
-    /// Titles that only carry a dubbed track in a language will also appear in that language's row.
-    private func languageCategories(from filters: QueryFilters?) -> [Category] {
+    /// Rows for the languages the library holds. Jellyfin filters by any audio track, so each row
+    /// also checks where a title was made; see ``CinemaRegionalLibrary``.
+    private func languageCategories(from filters: QueryFilters?) -> [RegionalCategory] {
         let languages = (filters?.audioLanguages ?? [])
             .compactMap(ItemLanguage.init)
             .reduce(into: [String: ItemLanguage]()) { $0[$1.value.lowercased()] = $1 }
 
-        func movies(in codes: [String]) -> ItemFilterCollection {
-            .init(
-                audioLanguages: codes.compactMap { languages[$0] },
-                itemTypes: [.movie],
-                sortBy: [.dateCreated],
-                sortOrder: [.descending]
+        /// The server's spellings of a region's codes, empty when the library has none
+        func present(_ region: Region) -> [ItemLanguage] {
+            region.codes.compactMap { languages[$0] }
+        }
+
+        func category(id: String, title: String, regions: [Region]) -> RegionalCategory {
+            RegionalCategory(
+                id: id,
+                title: title,
+                audioLanguages: regions.flatMap(present).map(\.value),
+                countries: regions.reduce(into: Set<String>()) { $0.formUnion($1.countries) }
             )
         }
 
-        var categories: [Category] = []
+        func languageCategory(_ region: Region, title: String? = nil) -> RegionalCategory? {
+            guard let language = present(region).first else { return nil }
 
-        let indian = Self.indianLanguages.filter { languages[$0] != nil }
-        let southIndian = indian.filter(Self.southIndianLanguages.contains)
-
-        if indian.isNotEmpty {
-            categories.append(.init(id: "indian-movies", title: L10n.indianMovies, filters: movies(in: indian)))
+            return category(id: "language-\(region.id)", title: title ?? L10n.categoryMovies(language.displayTitle), regions: [region])
         }
 
-        if southIndian.isNotEmpty, southIndian.count < indian.count {
-            categories.append(.init(id: "south-indian-cinema", title: L10n.southIndianCinema, filters: movies(in: southIndian)))
+        var categories: [RegionalCategory] = []
+
+        let indian = Self.indianRegions.filter { present($0).isNotEmpty }
+        let southIndian = indian.filter { Self.southIndianLanguages.contains($0.id) }
+
+        if indian.isNotEmpty {
+            categories.append(category(id: "indian-movies", title: L10n.indianMovies, regions: indian))
+        }
+
+        // Only when it differs from both the Indian row and a single language's row
+        if southIndian.count > 1, southIndian.count < indian.count {
+            categories.append(category(id: "south-indian-cinema", title: L10n.southIndianCinema, regions: southIndian))
         }
 
         if indian.count > 1 {
-            for code in indian.prefix(Limits.indianLanguages) {
-                guard let language = languages[code] else { continue }
-
-                categories.append(.init(
-                    id: "language-\(code)",
-                    title: L10n.categoryMovies(language.displayTitle),
-                    filters: movies(in: [code])
-                ))
-            }
+            categories += indian.prefix(Limits.indianLanguages).compactMap { languageCategory($0) }
         }
 
-        for code in Self.worldLanguages.filter({ languages[$0] != nil }).prefix(Limits.worldLanguages) {
-            guard let language = languages[code] else { continue }
-
-            categories.append(.init(
-                id: "language-\(code)",
-                title: code == "kor" ? L10n.madeInKorea : L10n.categoryMovies(language.displayTitle),
-                filters: movies(in: [code])
-            ))
-        }
+        categories += Self.worldRegions
+            .compactMap { languageCategory($0, title: $0.id == "kor" ? L10n.madeInKorea : nil) }
+            .prefix(Limits.worldLanguages)
 
         return categories
     }
@@ -418,7 +462,7 @@ struct CinemaHomeContentGroupProvider: ContentGroupProvider {
 
     private func tvGenreTitle(_ genre: String) -> String {
         switch genre.lowercased() {
-        case "drama": L10n.bringTheDrama
+        case "drama": L10n.dramaSeries
         case "comedy": L10n.tvComedies
         case "animation": L10n.animatedSeries
         case "documentary": L10n.docuseries
