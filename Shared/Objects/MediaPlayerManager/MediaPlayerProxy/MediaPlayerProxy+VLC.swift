@@ -151,6 +151,25 @@ class VLCMediaPlayerProxy: VideoMediaPlayerLayoutConfigurable,
         manager?.logger.warning("SwiftVLC operation rejected: \(error)")
     }
 
+    /// Private IPv4 ranges and mDNS names; Tailscale's 100.64/10 counts as remote
+    private static func isOnLocalNetwork(_ url: URL) -> Bool {
+        guard let host = url.host()?.lowercased() else { return false }
+
+        if host == "localhost" || host.hasSuffix(".local") {
+            return true
+        }
+
+        let octets = host.split(separator: ".").compactMap { Int($0) }
+        guard octets.count == 4 else { return false }
+
+        switch (octets[0], octets[1]) {
+        case (10, _), (192, 168), (172, 16 ... 31):
+            return true
+        default:
+            return false
+        }
+    }
+
     private func failPlayback(_ error: Error) {
         manager?.logger.error("SwiftVLC error: \(error)")
         manager?.error(ErrorMessage("VLC player error: \(error.localizedDescription)"))
@@ -195,8 +214,9 @@ class VLCMediaPlayerProxy: VideoMediaPlayerLayoutConfigurable,
                 }
             }
 
-            // Milliseconds of stream held ahead; the default second stalls on any network dip
-            media.addOption(":network-caching=3000")
+            // libVLC fills this many milliseconds before starting and after every seek, so keep it short
+            // on the home network and longer where the connection can dip
+            media.addOption(":network-caching=\(Self.isOnLocalNetwork(item.url) ? 1000 : 3000)")
 
             // libVLC 4 applies font and color options when opening media.
             // Size remains adjustable during playback through SubtitleScale.
