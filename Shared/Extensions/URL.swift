@@ -93,4 +93,24 @@ extension URL {
 
         return components.url
     }
+
+    /// Home-network addresses. Tailscale's 100.64.0.0/10 range stays remote, so a
+    /// phone away from home does not get the local-playback path.
+    var isPrivateNetwork: Bool {
+        guard let host = host()?.lowercased() else { return false }
+
+        if host == "localhost" || host.hasSuffix(".local") {
+            return true
+        }
+
+        let octets = host.split(separator: ".").compactMap { Int($0) }
+        guard octets.count == 4, octets.allSatisfy({ (0 ... 255).contains($0) }) else { return false }
+
+        switch (octets[0], octets[1]) {
+        case (10, _), (192, 168), (172, 16 ... 31):
+            return true
+        default:
+            return false
+        }
+    }
 }

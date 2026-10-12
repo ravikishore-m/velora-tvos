@@ -71,11 +71,22 @@ extension VideoPlayer.PlaybackControls.Toolbar {
         }
 
         private var barActionButtons: [VideoPlayerActionButton] {
-            resolvedActionButtons(rawBarActionButtons)
+            var buttons = resolvedActionButtons(rawBarActionButtons)
+            #if os(tvOS)
+            // Stored button lists predate this control, so keep it on the bar.
+            if !buttons.contains(.playbackStats) {
+                buttons.insert(.playbackStats, at: 0)
+            }
+            #endif
+            return buttons
         }
 
         private var menuActionButtons: [VideoPlayerActionButton] {
-            resolvedActionButtons(rawMenuActionButtons)
+            var buttons = resolvedActionButtons(rawMenuActionButtons)
+            #if os(tvOS)
+            buttons.removeAll { $0 == .playbackStats }
+            #endif
+            return buttons
         }
 
         private var menuSystemImage: String {
@@ -107,6 +118,10 @@ extension VideoPlayer.PlaybackControls.Toolbar {
                 PlaybackRateMenu()
             case .playbackSettings:
                 PlaybackSettings()
+            #if os(tvOS)
+            case .playbackStats:
+                PlaybackStats()
+            #endif
             case .playNextItem:
                 PlayNextItem()
             case .playPreviousItem:

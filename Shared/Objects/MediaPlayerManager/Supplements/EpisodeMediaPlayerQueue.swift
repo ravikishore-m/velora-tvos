@@ -125,7 +125,6 @@ class EpisodeMediaPlayerQueue: ViewModel, MediaPlayerQueue {
             nextProvider = MediaPlayerItemProvider(item: nextItem) { [weak self] item, modifyItem in
                 let bitrate = self?.manager?.playbackBitrate ?? Defaults[.VideoPlayer.Playback.appMaximumBitrate]
                 return try await MediaPlayerItem.build(for: item, requestedBitrate: bitrate) { item in
-                    item.userData?.playbackPositionTicks = .zero
                     modifyItem?(&item)
                 }
             }
@@ -135,7 +134,6 @@ class EpisodeMediaPlayerQueue: ViewModel, MediaPlayerQueue {
             previousProvider = MediaPlayerItemProvider(item: previousItem) { [weak self] item, modifyItem in
                 let bitrate = self?.manager?.playbackBitrate ?? Defaults[.VideoPlayer.Playback.appMaximumBitrate]
                 return try await MediaPlayerItem.build(for: item, requestedBitrate: bitrate) { item in
-                    item.userData?.playbackPositionTicks = .zero
                     modifyItem?(&item)
                 }
             }

@@ -43,7 +43,7 @@ extension SeriesEpisodeContentGroup {
                     router.route(
                         to: .videoPlayer(
                             provider: provider,
-                            queue: EpisodeMediaPlayerQueue(episode: episode)
+                            queue: PlaybackQueue.make(for: episode)
                         )
                     )
                 },

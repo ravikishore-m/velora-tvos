@@ -23,10 +23,10 @@
 - **Sign in with your phone.** Use Quick Connect by scanning a QR code, or sign in with the remote.
 
 ### Home
-- **Tabs.** Home, Movies, TV Shows, **My Velora** (your favourites and watch history), Search and Settings.
+- **Tabs.** Home, Movies, TV Shows, **My Velora** (your favourites and watch history), Requests, Search and Settings.
 - **Featured banner.** Rotates through titles with backdrop art, with Play / Resume and More Info buttons.
 - **Rows built from your library:**
-  - Continue Watching, Recently Added Movies, Next Up and, if turned on in Settings, New Episodes.
+  - Continue Watching, Airing this week, Recently Added Movies, Next Up and, if turned on in Settings, New Episodes.
   - **Top 10** charts for movies and shows.
   - New Releases, Critically Acclaimed Movies, Highly Rated Shows, Watch Again and "Because you watched" picks.
   - A **My Velora** row with your favourite movies and shows.
@@ -38,6 +38,10 @@
 
 <sub>Jellyfin has no server-wide popularity data, so the Top 10 charts rank recent titles by community and critic ratings.</sub>
 
+### Requests
+- **Ask Seerr.** The Requests tab searches for a film or show and sends it to Seerr on the home server. Seerr passes a movie to Radarr and a show to Sonarr. Both are connected to qBittorrent, and their library folders are the folders Jellyfin reads.
+- **Seerr’s rows.** The same tab shows the rows Seerr shows on its own Discover page: Trending, Popular Movies, Upcoming Movies, Popular Series and Upcoming Series.
+
 ### Details
 - **Metadata line.** Year, runtime and the content rating, followed by the title's formats:
   - picture: 4K or HD tags, the Dolby Vision logo, and HDR10, HDR10+ and HLG tags;
@@ -46,19 +50,18 @@
 - **Info panel.** Information, Languages and Accessibility on a glass panel, plus cast and director credits.
 
 ### Playback
-- **Three players.** VLC is the default. Apple's AVPlayer and MPV are also available.
-- **Automatic switch for 4K and HDR.** 4K and HDR titles chosen with VLC play through AVPlayer instead, for smooth hardware-decoded video. If the selected subtitles are image-based, VLC is kept.
-- **Remuxed HEVC.** HEVC in MKV is remuxed by the server rather than re-encoded.
+- **Hardware player.** On Apple TV, movies play through the hardware player. It opens the original file, the Apple TV decodes the picture, and Apple's audio output keeps the source channels. Dolby Digital Plus keeps its Atmos data. TrueHD plays as the original 7.1. A codec the Apple TV cannot decode in hardware, such as AV1, is still converted by the server.
 - **Fast-forward with the picture playing.** Hold right on the remote to fast-forward at 2x, and keep holding for 4x. The video keeps playing at that speed, preview frames show above the progress bar, and letting go returns to normal speed. A quick click still jumps ahead. AVPlayer stays at 2x for streams that can't play faster.
 - **Larger buffers.**
 
   | Player | Buffer |
   |---|---|
   | AVPlayer | 60 s forward |
-  | MPV | 400 MiB ahead, 100 MiB back, 60 s network cache |
-  | VLC | 3 s network caching |
+  | Hardware player | 4 s, up to 96 MiB ahead |
+  | VLC | 1.5 s on the home network, 4 s for high-bitrate files, 3 s away from home |
 
 - **Playback info.** Shows the player in use and whether the stream is direct, remuxed or transcoded.
+- **Live stats.** The chart button on the player opens a panel on the picture. Network speed, buffer, and decode rate update while the movie plays, along with the video, audio, stream, and decoder details. The panel stays up after the controls hide.
 
 ### Design
 - **Liquid Glass** on buttons, chips, panels and the profile bar. Focused buttons fill with Velora red.

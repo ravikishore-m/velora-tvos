@@ -42,8 +42,7 @@ struct PlayButton: View {
             return
         }
 
-        let queue: (any MediaPlayerQueue)? = mediaPlayerItemProvider.item.type == .episode ?
-            EpisodeMediaPlayerQueue(episode: mediaPlayerItemProvider.item) : nil
+        let queue: (any MediaPlayerQueue)? = PlaybackQueue.make(for: mediaPlayerItemProvider.item)
 
         router.route(
             to: .videoPlayer(

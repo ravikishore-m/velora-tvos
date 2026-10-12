@@ -264,10 +264,7 @@ final class MediaPlayerManager: ViewModel {
         self.queue = queue.map { AnyMediaPlayerQueue($0) }
         self.state = .loadingItem
         self.initialMediaPlayerItemProvider = provider
-        self.playerType = .resolved(
-            for: provider.mediaSource ?? provider.item.mediaSources?.first,
-            subtitleStreamIndex: provider.subtitleStreamIndex
-        )
+        self.playerType = .resolved()
         super.init()
 
         self.queue?.manager = self
@@ -307,11 +304,17 @@ final class MediaPlayerManager: ViewModel {
             return
         }
 
-        if let nextItem = queue?.nextItem, try authenticatedUser.data.configuration?.enableNextEpisodeAutoPlay == true {
+        if let nextItem = queue?.nextItem, autoPlayEnabled {
             await self.playNewItem(provider: nextItem)
         } else {
             await self.stop()
         }
+    }
+
+    private var autoPlayEnabled: Bool {
+        guard let user = try? authenticatedUser else { return true }
+
+        return user.data.configuration?.enableNextEpisodeAutoPlay ?? true
     }
 
     @Function(\Action.Cases.error)

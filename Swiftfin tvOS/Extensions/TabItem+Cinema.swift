@@ -24,6 +24,22 @@ extension TabItem {
         )
     }
 
+    static var cinemaRequests: TabItem {
+        TabItem(
+            id: "cinema-requests",
+            title: L10n.requests,
+            systemImage: "plus.circle.fill"
+        ) {
+            CinemaRequestsView()
+                .background {
+                    CinemaTheme.Colors.background
+                        .ignoresSafeArea()
+                }
+                .environment(\.colorScheme, .dark)
+                .toolbar(.hidden, for: .navigationBar)
+        }
+    }
+
     private static func cinema(
         provider: some ContentGroupProvider,
         systemImage: String

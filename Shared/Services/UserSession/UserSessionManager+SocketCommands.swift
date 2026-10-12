@@ -218,7 +218,7 @@ extension UserSessionManager {
                 if hasActivePlayback, let mediaPlayerManager {
                     await mediaPlayerManager.playNewItem(provider: provider)
                 } else {
-                    routePublisher.send(.videoPlayer(provider: provider))
+                    routePublisher.send(.videoPlayer(provider: provider, queue: PlaybackQueue.make(for: provider.item)))
                 }
             } catch {
                 logger.error(

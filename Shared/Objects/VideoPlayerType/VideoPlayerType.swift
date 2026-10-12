@@ -55,11 +55,16 @@ enum VideoPlayerType: String, CaseIterable, Displayable, SupportedCaseIterable, 
 
     @ArrayBuilder<VideoPlayerType>
     static var supportedCases: [VideoPlayerType] {
+        #if os(tvOS)
+        // The hardware player is the one that plays on Apple TV.
+        VideoPlayerType.mpv
+        #else
         VideoPlayerType.avPlayer
         VideoPlayerType.vlc
 
         if Defaults[.Experimental.mpvPlayer] {
             VideoPlayerType.mpv
         }
+        #endif
     }
 }

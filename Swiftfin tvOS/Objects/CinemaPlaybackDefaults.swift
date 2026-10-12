@@ -7,6 +7,7 @@
 //
 
 import Defaults
+import JellyfinAPI
 
 enum CinemaPlaybackDefaults {
 
@@ -25,5 +26,27 @@ enum CinemaPlaybackDefaults {
         if Defaults[.VideoPlayer.videoPlayerType] == .avPlayer {
             Defaults[.VideoPlayer.videoPlayerType] = .vlc
         }
+    }
+
+    private static var upNextEnabled: Defaults.Key<Bool> {
+        Defaults.Key("cinemaUpNextEnabled", default: false, suite: .currentUserSuite)
+    }
+
+    /// Turn on rolling into the next episode or movie once for this profile.
+    static func enableUpNext(session: UserSession) async {
+        guard !Defaults[upNextEnabled] else { return }
+
+        var userData = session.user.data
+        guard let userID = userData.id else { return }
+
+        var configuration = userData.configuration ?? UserConfiguration()
+        configuration.enableNextEpisodeAutoPlay = true
+        userData.configuration = configuration
+
+        let request = Paths.updateUserConfiguration(userID: userID, configuration)
+        guard await (try? session.client.send(request)) != nil else { return }
+
+        session.user.data = userData
+        Defaults[upNextEnabled] = true
     }
 }

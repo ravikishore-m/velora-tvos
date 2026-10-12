@@ -7,41 +7,23 @@
 //
 
 import Defaults
-import JellyfinAPI
 
 extension VideoPlayerType {
 
-    /// The player for a title: the chosen player, except that on Apple TV, VLC hands 4K and HDR video
-    /// to AVPlayer, whose hardware path keeps up with it. VLC falls behind on 4K 10-bit HEVC,
-    /// freezing the picture while the sound carries on.
-    static func resolved(
-        for mediaSource: MediaSourceInfo?,
-        subtitleStreamIndex: Int? = nil
-    ) -> VideoPlayerType {
-        let chosen = Defaults[.VideoPlayer.videoPlayerType]
-
+    /// The player for this session.
+    ///
+    /// On Apple TV that is the hardware player: it opens the original file, VideoToolbox
+    /// decodes the picture, and Apple's audio output keeps the source channels, including
+    /// Dolby Atmos carried in Dolby Digital Plus. AVPlayer cannot open MKV, so sending
+    /// 4K there made Jellyfin repackage the movie.
+    static func resolved() -> VideoPlayerType {
         #if os(tvOS)
-        guard chosen == .vlc, let mediaSource else { return chosen }
-
-        let streams = mediaSource.mediaStreams ?? []
-        guard let video = streams.first(where: { $0.type == .video }) else { return chosen }
-
-        let isUltraHD = (video.width ?? 0) > 2048 || (video.height ?? 0) > 1200
-        let isHDR = video.videoRangeType.map { $0 != .sdr && $0 != .unknown } ?? false
-        guard isUltraHD || isHDR else { return chosen }
-
-        // AVPlayer has picture subtitles burned in, which re-encodes the whole video on the server
-        let subtitleIndex = subtitleStreamIndex ?? mediaSource.defaultSubtitleStreamIndex
-        if let subtitleIndex, subtitleIndex >= 0,
-           let subtitle = streams.first(where: { $0.type == .subtitle && $0.index == subtitleIndex }),
-           subtitle.isTextSubtitleStream != true
-        {
-            return chosen
+        if Defaults[.VideoPlayer.videoPlayerType] != .mpv {
+            Defaults[.VideoPlayer.videoPlayerType] = .mpv
         }
-
-        return .avPlayer
+        return .mpv
         #else
-        return chosen
+        return Defaults[.VideoPlayer.videoPlayerType]
         #endif
     }
 }

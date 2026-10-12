@@ -217,7 +217,7 @@ struct CinemaProfilePicker: View {
                 .opacity(isChoosing ? 0 : 1)
 
             Text(isEditing ? L10n.manageProfiles : L10n.whosWatching)
-                .font(.title2.weight(.bold))
+                .font(.system(size: CinemaTheme.Profile.titleSize, weight: .bold))
                 .foregroundStyle(CinemaTheme.Colors.primaryText)
                 .contentTransition(.opacity)
                 .accessibilityAddTraits(.isHeader)
@@ -595,7 +595,7 @@ extension CinemaProfilePicker {
 
                 VStack(alignment: .leading, spacing: 6) {
                     Text(user.username)
-                        .font(.title2.weight(.semibold))
+                        .font(.system(size: CinemaTheme.Profile.nameSize, weight: .semibold))
                         .foregroundStyle(isFocused ? CinemaTheme.Colors.primaryText : CinemaTheme.Colors.secondaryText)
 
                     if showsServer {
@@ -640,7 +640,7 @@ extension CinemaProfilePicker {
                 .scaleEffect(isFocused ? CinemaTheme.Profile.focusScale : 1)
 
                 Text(L10n.addProfile)
-                    .font(.title2.weight(.semibold))
+                    .font(.system(size: CinemaTheme.Profile.nameSize, weight: .semibold))
                     .foregroundStyle(CinemaTheme.Colors.primaryText)
                     .lineLimit(1)
                     .frame(width: CinemaTheme.Profile.nameWidth, alignment: .leading)

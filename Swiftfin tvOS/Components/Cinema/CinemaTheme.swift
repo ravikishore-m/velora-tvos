@@ -158,7 +158,9 @@ enum CinemaTheme {
         static let focusRingWidth: CGFloat = 5
         static let panelCornerRadius: CGFloat = 48
         static let panelPadding: CGFloat = 48
-        static let logoSize: CGFloat = 104
+        static let logoSize: CGFloat = 168
+        static let titleSize: CGFloat = 52
+        static let nameSize: CGFloat = 42
         static let columnWidth: CGFloat = 720
         static let nameSpacing: CGFloat = 36
         static let nameWidth: CGFloat = 420

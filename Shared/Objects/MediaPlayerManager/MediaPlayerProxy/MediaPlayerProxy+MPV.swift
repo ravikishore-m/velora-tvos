@@ -21,14 +21,24 @@ class MPVMediaPlayerProxy: @MainActor VideoMediaPlayerLayoutConfigurable,
     // MPVUI does not currently expose frame statistics.
     let droppedFrames: PublishedBox<Int> = .init(initialValue: 0)
     let corruptedFrames: PublishedBox<Int> = .init(initialValue: 0)
+    /// Original file, hardware decode, Apple's audio renderer. A few seconds of
+    /// read-ahead covers a pause from the disk without holding a minute of a 4K remux in memory.
     let player = MPVPlayer(
         configuration: .init(
             additionalOptions: [
-                "demuxer-max-bytes": "400MiB",
-                "demuxer-max-back-bytes": "100MiB",
+                "demuxer-max-bytes": "96MiB",
+                "demuxer-max-back-bytes": "32MiB",
             ],
-            audio: .init(audioSession: .hostManaged),
-            networkCacheSeconds: .seconds(60)
+            audio: .init(
+                audioSession: .hostManaged,
+                dolbyDecoding: .automatic,
+                spatialization: .multichannel
+            ),
+            dolbyVisionPolicy: .profile7Compatibility,
+            hardwareDecoding: .automatic,
+            hdrPolicy: .automatic,
+            networkCacheSeconds: .seconds(4),
+            videoOutput: .sampleBuffer
         )
     )
 

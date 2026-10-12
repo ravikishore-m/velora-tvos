@@ -6,6 +6,7 @@
 // Copyright (c) 2026 Jellyfin & Jellyfin Contributors
 //
 
+import AVFoundation
 import Defaults
 import Foundation
 import JellyfinAPI
@@ -21,7 +22,14 @@ class VLCMediaPlayerProxy: VideoMediaPlayerLayoutConfigurable,
     let videoSize: PublishedBox<CGSize> = .init(initialValue: .zero)
     let droppedFrames: PublishedBox<Int> = .init(initialValue: 0)
     let corruptedFrames: PublishedBox<Int> = .init(initialValue: 0)
-    let player = Player()
+    /// VideoToolbox decodes video. Without this, libVLC decodes 4K HEVC on the CPU
+    /// and the picture falls behind the sound.
+    private static let playbackInstance: VLCInstance = {
+        let arguments = VLCInstance.defaultArguments + ["--avcodec-hw=videotoolbox"]
+        return (try? VLCInstance(arguments: arguments)) ?? .shared
+    }()
+
+    let player = Player(instance: playbackInstance)
 
     private var pendingStartTime: Duration?
 
@@ -34,7 +42,7 @@ class VLCMediaPlayerProxy: VideoMediaPlayerLayoutConfigurable,
     }
 
     var observers: [any MediaPlayerObserver] = [
-        NowPlayableObserver(),
+        NowPlayableObserver(audioSessionMode: .moviePlayback, supportsMultichannelContent: true),
     ]
 
     func play() {
@@ -99,6 +107,8 @@ class VLCMediaPlayerProxy: VideoMediaPlayerLayoutConfigurable,
     }
 
     func setAudioStream(_ stream: MediaStream) {
+        applyOutputChannels(stream.channels)
+
         guard let index = stream.index, player.audioTracks.indices.contains(index) else {
             player.selectedAudioTrack = nil
             return
@@ -151,23 +161,35 @@ class VLCMediaPlayerProxy: VideoMediaPlayerLayoutConfigurable,
         manager?.logger.warning("SwiftVLC operation rejected: \(error)")
     }
 
-    /// Private IPv4 ranges and mDNS names; Tailscale's 100.64/10 counts as remote
-    private static func isOnLocalNetwork(_ url: URL) -> Bool {
-        guard let host = url.host()?.lowercased() else { return false }
-
-        if host == "localhost" || host.hasSuffix(".local") {
-            return true
+    /// Asks libVLC and tvOS for the source channel count. The default session
+    /// downmixes 7.1 to stereo before it reaches the receiver.
+    private func applyOutputChannels(_ channels: Int?) {
+        guard let channels, channels > 2 else {
+            player.mixMode = .unset
+            return
         }
 
-        let octets = host.split(separator: ".").compactMap { Int($0) }
-        guard octets.count == 4 else { return false }
-
-        switch (octets[0], octets[1]) {
-        case (10, _), (192, 168), (172, 16 ... 31):
-            return true
+        switch channels {
+        case 8...:
+            player.mixMode = .sevenPointOne
+        case 6...:
+            player.mixMode = .fivePointOne
         default:
-            return false
+            player.mixMode = .fourPointZero
         }
+
+        let session = AVAudioSession.sharedInstance()
+        let available = session.maximumOutputNumberOfChannels
+        guard available > 2 else { return }
+
+        try? session.setPreferredOutputNumberOfChannels(min(channels, available))
+    }
+
+    private static func networkCachingMilliseconds(for item: MediaPlayerItem) -> Int {
+        guard item.url.isPrivateNetwork else { return 3000 }
+
+        let bitrate = item.mediaSource.bitrate ?? 0
+        return bitrate >= 40_000_000 ? 4000 : 1500
     }
 
     private func failPlayback(_ error: Error) {
@@ -214,9 +236,14 @@ class VLCMediaPlayerProxy: VideoMediaPlayerLayoutConfigurable,
                 }
             }
 
-            // libVLC fills this many milliseconds before starting and after every seek, so keep it short
-            // on the home network and longer where the connection can dip
-            media.addOption(":network-caching=\(Self.isOnLocalNetwork(item.url) ? 1000 : 3000)")
+            // libVLC fills this many milliseconds before starting and after every seek.
+            // A high-bitrate file needs more of it ready, or a pause while the
+            // disk is read shows up as a stutter. The picture is still the original file.
+            media.addOption(":network-caching=\(Self.networkCachingMilliseconds(for: item))")
+            media.addOption(":avcodec-hw=videotoolbox")
+
+            let channels = item.audioStreams.first { $0.index == item.selectedAudioStreamIndex }?.channels
+            applyOutputChannels(channels)
 
             // libVLC 4 applies font and color options when opening media.
             // Size remains adjustable during playback through SubtitleScale.

@@ -84,7 +84,7 @@ struct CinemaHeroBanner: View {
             return
         }
 
-        let queue: (any MediaPlayerQueue)? = item.type == .episode ? EpisodeMediaPlayerQueue(episode: item) : nil
+        let queue: (any MediaPlayerQueue)? = PlaybackQueue.make(for: item)
 
         router.route(
             to: .videoPlayer(

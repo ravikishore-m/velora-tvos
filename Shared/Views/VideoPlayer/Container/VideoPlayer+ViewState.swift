@@ -162,6 +162,9 @@ extension VideoPlayer {
             didSet { refreshAutoDismiss() }
         }
 
+        /// Live playback stats stay on the picture after the controls hide.
+        var isShowingPlaybackStats = false
+
         var selectedSupplementID: String? {
             get {
                 guard case let .supplement(id, _) = presentation else { return nil }

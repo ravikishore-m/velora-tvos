@@ -355,13 +355,16 @@ final class UserSessionManager: ObservableObject {
         Container.shared.currentUserSession.reset()
         Container.shared.mediaPlayerManager.reset()
 
-        if newSession == nil {
-            state = .signedOut
-        } else {
+        if let newSession {
             #if os(tvOS)
             CinemaPlaybackDefaults.preferDirectPlayer()
+            Task {
+                await CinemaPlaybackDefaults.enableUpNext(session: newSession)
+            }
             #endif
             state = .signedIn
+        } else {
+            state = .signedOut
         }
 
         newSession?.didStart()

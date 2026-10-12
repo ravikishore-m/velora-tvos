@@ -15,6 +15,9 @@ enum VideoPlayerActionButton: String, CaseIterable, Displayable, Equatable, Iden
     case pictureInPicture
     case playbackSpeed
     case playbackSettings
+    #if os(tvOS)
+    case playbackStats
+    #endif
     case playNextItem
     case playPreviousItem
     case subtitles
@@ -39,6 +42,10 @@ enum VideoPlayerActionButton: String, CaseIterable, Displayable, Equatable, Iden
             L10n.playbackSpeed
         case .playbackSettings:
             L10n.playback
+        #if os(tvOS)
+        case .playbackStats:
+            L10n.playbackInfo
+        #endif
         case .playNextItem:
             L10n.playNextItem
         case .playPreviousItem:
@@ -68,6 +75,7 @@ enum VideoPlayerActionButton: String, CaseIterable, Displayable, Equatable, Iden
         case .pictureInPicture: "pip.enter"
         case .playbackSpeed: "speedometer"
         case .playbackSettings: "tv"
+        case .playbackStats: "chart.xyaxis.line"
         case .playNextItem: "forward.end.fill"
         case .playPreviousItem: "backward.end.fill"
         case .subtitles: "captions.bubble.fill"

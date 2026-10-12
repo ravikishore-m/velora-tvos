@@ -50,6 +50,7 @@ struct MainTabView: View {
                 filters: .init(itemTypes: [.series])
             )
             TabItem.cinemaMyList
+            TabItem.cinemaRequests
             TabItem.search
             TabItem.settings
         }

@@ -163,6 +163,11 @@ struct CinemaHomeContentGroupProvider: ContentGroupProvider {
             displayTitle: L10n.continueWatching
         )
 
+        CinemaRowContentGroup(
+            id: "cinema-airing-this-week",
+            library: AiringThisWeekLibrary()
+        )
+
         recentlyAddedMovies
 
         CinemaRowContentGroup(

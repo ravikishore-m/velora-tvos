@@ -105,10 +105,20 @@ extension VideoPlayer {
                         }
                         .allowsHitTesting(false)
                 }
-                #if os(iOS)
-                .overlay {
-                        VideoZoomBorder(isVisible: viewState.zoom.isFillBorderPresented)
+                #if os(tvOS)
+                .overlay(alignment: .top) {
+                        if viewState.isShowingPlaybackStats {
+                            CinemaPlaybackStats()
+                                .padding(.top, 40)
+                                .padding(.horizontal, 48)
+                                .allowsHitTesting(false)
+                        }
                     }
+                #endif
+                #if os(iOS)
+                    .overlay {
+                    VideoZoomBorder(isVisible: viewState.zoom.isFillBorderPresented)
+                }
                 #endif
             }
         }

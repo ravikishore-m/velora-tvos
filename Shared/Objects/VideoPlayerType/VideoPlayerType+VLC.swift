@@ -24,6 +24,8 @@ extension VideoPlayerType {
             AudioCodec.dts
             AudioCodec.eac3
             AudioCodec.flac
+            AudioCodec.mlp
+            AudioCodec.truehd
             AudioCodec.mp1
             AudioCodec.mp2
             AudioCodec.mp3

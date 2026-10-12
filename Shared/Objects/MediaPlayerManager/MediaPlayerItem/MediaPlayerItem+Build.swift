@@ -65,13 +65,21 @@ extension MediaPlayerItem {
             throw ErrorMessage(L10n.unknownError)
         }
 
-        let maxBitrate = try await MediaPlayerManager.getMaxBitrate(for: requestedBitrate)
-
         let videoPlayerType = if let videoPlayerType {
             videoPlayerType
         } else {
             Container.shared.mediaPlayerManager().playerType
         }
+
+        // On the home network an automatic bitrate test can come back low enough that
+        // Jellyfin re-encodes a file the player could have opened directly.
+        // AVPlayer cannot open the original MKV, so it keeps the server's normal decision.
+        let playsOriginalFile = userSession.server.effectiveServerURL.isPrivateNetwork
+            && !item.isLiveStream
+            && videoPlayerType != .avPlayer
+        let maxBitrate = try await MediaPlayerManager.getMaxBitrate(
+            for: playsOriginalFile && requestedBitrate == .auto ? .max : requestedBitrate
+        )
 
         let deviceProfile = DeviceProfile.build(
             for: videoPlayerType,
@@ -87,6 +95,13 @@ extension MediaPlayerItem {
         playbackInfo.userID = userSession.user.id
         playbackInfo.audioStreamIndex = audioStreamIndex
         playbackInfo.subtitleStreamIndex = subtitleStreamIndex
+
+        if playsOriginalFile {
+            // Direct stream is Jellyfin repackaging the file into a new container.
+            // Leave transcoding available for codecs the Apple TV cannot decode in hardware.
+            playbackInfo.enableDirectPlay = true
+            playbackInfo.enableDirectStream = false
+        }
 
         if !item.isLiveStream, initialMediaSource.type != .placeholder {
             playbackInfo.mediaSourceID = initialMediaSource.id
