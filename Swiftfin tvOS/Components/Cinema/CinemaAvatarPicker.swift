@@ -20,7 +20,8 @@ struct CinemaAvatarPicker: View {
 
     let user: UserState
     let server: ServerState
-    let onDelete: () -> Void
+    /// Offers deleting the profile when set
+    let onDelete: (() -> Void)?
 
     private let columns = Array(
         repeating: GridItem(.fixed(CinemaTheme.Avatar.size), spacing: CinemaTheme.Avatar.spacing),
@@ -38,7 +39,7 @@ struct CinemaAvatarPicker: View {
         Task { @MainActor in
             // Let the cover close before the confirmation is presented from the picker
             try? await Task.sleep(for: .milliseconds(450))
-            onDelete()
+            onDelete?()
         }
     }
 
@@ -58,8 +59,10 @@ struct CinemaAvatarPicker: View {
 
             Spacer()
 
-            Button(role: .destructive, action: delete) {
-                Label(L10n.deleteProfile, systemImage: "trash")
+            if onDelete != nil {
+                Button(role: .destructive, action: delete) {
+                    Label(L10n.deleteProfile, systemImage: "trash")
+                }
             }
         }
         .focusSection()

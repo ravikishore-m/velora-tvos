@@ -14,6 +14,8 @@ struct RKPlexWordmark: View {
     let size: CGFloat
     /// Sweeps a highlight across the letters every few seconds
     var isShimmering = false
+    /// Letters at or beyond this index are hidden, and spring in one after another as it grows
+    var revealedLetters: Int = .max
 
     private var letters: [String] {
         L10n.rkPlex.uppercased().map(String.init)
@@ -30,8 +32,17 @@ struct RKPlexWordmark: View {
     private var lettering: some View {
         HStack(spacing: size * CinemaTheme.Brand.letterSpacing) {
             ForEach(Array(letters.enumerated()), id: \.offset) { index, letter in
+                let isRevealed = index < revealedLetters
+
                 Text(letter)
                     .scaleEffect(x: 1, y: archScale(at: index))
+                    .scaleEffect(isRevealed ? 1 : 1.4)
+                    .blur(radius: isRevealed ? 0 : size * 0.06)
+                    .opacity(isRevealed ? 1 : 0)
+                    .animation(
+                        .spring(response: 0.5, dampingFraction: 0.7).delay(Double(index) * 0.08),
+                        value: isRevealed
+                    )
             }
         }
         .font(.system(size: size, weight: .black).width(.condensed))
@@ -95,53 +106,61 @@ extension RKPlexWordmark {
     }
 }
 
-/// Launch ident: the wordmark springs in over black, light ribbons burst from behind it,
-/// then it rushes towards the viewer to reveal the profile picker.
+/// Launch ident, after Netflix's: the letters spring in over black, hold with a glow,
+/// then the camera dives into the R as it breaks into streaks of light that reveal the profile picker.
 struct RKPlexIntro: View {
 
     private enum Stage: Int, Comparable {
         case hidden
-        case appear
-        case ribbons
-        case zoom
+        case letters
+        case hold
+        case dive
+        case reveal
 
         static func < (lhs: Stage, rhs: Stage) -> Bool {
             lhs.rawValue < rhs.rawValue
         }
     }
 
-    /// Called as the wordmark rushes forward, so the screen behind can start revealing
+    /// Called during the dive, so the screen behind can start revealing
     let onReveal: () -> Void
     let onFinished: () -> Void
 
     @State
     private var stage: Stage = .hidden
 
+    /// The R's centre within the wordmark, which the camera dives into
+    private static let diveAnchor = UnitPoint(x: 0.085, y: 0.5)
+
     private var wordmarkScale: CGFloat {
         switch stage {
-        case .hidden: 0.6
-        case .appear: 1
-        case .ribbons: 1.08
-        case .zoom: 7
+        case .hidden, .letters: 1
+        case .hold: 1.05
+        case .dive, .reveal: CinemaTheme.Brand.diveScale
         }
     }
 
     private func play() async {
-        withAnimation(.spring(response: 0.7, dampingFraction: 0.72)) {
-            stage = .appear
-        }
-        try? await Task.sleep(for: .milliseconds(850))
+        stage = .letters
+        try? await Task.sleep(for: .milliseconds(1000))
 
-        withAnimation(.easeOut(duration: 0.6)) {
-            stage = .ribbons
+        withAnimation(.easeInOut(duration: 0.6)) {
+            stage = .hold
+        }
+        try? await Task.sleep(for: .milliseconds(650))
+
+        withAnimation(.easeIn(duration: 0.95)) {
+            stage = .dive
         }
         try? await Task.sleep(for: .milliseconds(600))
 
         onReveal()
-        withAnimation(.easeIn(duration: 0.6)) {
-            stage = .zoom
+        try? await Task.sleep(for: .milliseconds(350))
+
+        withAnimation(.easeOut(duration: 0.4)) {
+            stage = .reveal
         }
-        try? await Task.sleep(for: .milliseconds(650))
+        try? await Task.sleep(for: .milliseconds(420))
 
         onFinished()
     }
@@ -149,23 +168,29 @@ struct RKPlexIntro: View {
     var body: some View {
         ZStack {
             Color.black
-                .opacity(stage == .zoom ? 0 : 1)
+                .opacity(stage >= .reveal ? 0 : 1)
 
             RadialGradient(
-                colors: [CinemaTheme.Colors.accent.opacity(0.45), .clear],
+                colors: [CinemaTheme.Colors.accent.opacity(0.4), .clear],
                 center: .center,
                 startRadius: 0,
                 endRadius: CinemaTheme.Brand.introSize * 3
             )
-            .opacity(stage >= .appear && stage < .zoom ? 1 : 0)
+            .opacity(stage == .hold ? 1 : 0)
 
-            RibbonBurst(isExpanded: stage >= .ribbons)
-                .opacity(stage == .zoom ? 0 : 1)
-
-            RKPlexWordmark(size: CinemaTheme.Brand.introSize, isShimmering: stage >= .appear)
-                .scaleEffect(wordmarkScale)
-                .opacity(stage == .hidden || stage == .zoom ? 0 : 1)
-                .blur(radius: stage == .zoom ? 16 : 0)
+            RKPlexWordmark(
+                size: CinemaTheme.Brand.introSize,
+                isShimmering: stage == .hold,
+                revealedLetters: stage >= .letters ? .max : 0
+            )
+            .overlay(alignment: .leading) {
+                RibbonBurst()
+                    .frame(width: CinemaTheme.Brand.introSize * 0.5, height: CinemaTheme.Brand.introSize * 1.2)
+                    .opacity(stage >= .dive ? 1 : 0)
+                    .animation(.easeIn(duration: 0.3), value: stage)
+            }
+            .scaleEffect(wordmarkScale, anchor: Self.diveAnchor)
+            .opacity(stage >= .reveal ? 0 : 1)
         }
         .ignoresSafeArea()
         .allowsHitTesting(false)
@@ -178,12 +203,8 @@ struct RKPlexIntro: View {
 
 extension RKPlexIntro {
 
-    /// Vertical streaks of colour that stretch out from behind the wordmark
+    /// Vertical streaks of colour, the inside of the R once the camera is close enough
     private struct RibbonBurst: View {
-
-        let isExpanded: Bool
-
-        private static let widths: [CGFloat] = [4, 10, 6, 14, 3, 8, 5]
 
         private func color(at index: Int) -> Color {
             let palette = CinemaTheme.Brand.ribbonPalette
@@ -191,26 +212,19 @@ extension RKPlexIntro {
         }
 
         var body: some View {
-            HStack(spacing: 3) {
+            HStack(spacing: 1) {
                 ForEach(0 ..< CinemaTheme.Brand.introRibbonCount, id: \.self) { index in
                     Rectangle()
                         .fill(
                             LinearGradient(
-                                colors: [.clear, color(at: index), .clear],
+                                colors: [.clear, color(at: index), color(at: index).opacity(0.6), .clear],
                                 startPoint: .top,
                                 endPoint: .bottom
                             )
                         )
-                        .frame(width: Self.widths[index % Self.widths.count])
-                        .scaleEffect(x: 1, y: isExpanded ? 1 : 0.02)
-                        .animation(
-                            .easeOut(duration: 0.7).delay(Double(index % 7) * 0.03),
-                            value: isExpanded
-                        )
+                        .opacity(index.isMultiple(of: 3) ? 0.55 : 1)
                 }
             }
-            .frame(width: CinemaTheme.Brand.introSize * 3.4)
-            .blur(radius: 1.5)
             .blendMode(.screen)
         }
     }

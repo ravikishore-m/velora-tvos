@@ -130,13 +130,15 @@ enum CinemaTheme {
         )
         /// How much taller the outer letters are than the centre ones, giving the wordmark its curve
         static let archDepth: CGFloat = 0.16
-        static let letterSpacing: CGFloat = -0.03
+        static let letterSpacing: CGFloat = 0.035
         static let shimmerInterval: Duration = .seconds(7)
         static let shimmerDuration: TimeInterval = 1.2
 
         static let homeSize: CGFloat = 50
         static let introSize: CGFloat = 190
-        static let introRibbonCount = 44
+        static let introRibbonCount = 28
+        /// How far the camera dives into the R, enough for its streaks to fill the screen
+        static let diveScale: CGFloat = 22
         static let ribbonPalette: [Color] = [
             Colors.accent,
             Color(red: 0.55, green: 0.02, blue: 0.05),
@@ -181,15 +183,6 @@ enum CinemaTheme {
         static let chooseAnimation: Animation = .spring(response: 0.55, dampingFraction: 0.85)
         /// Lets the chosen profile settle before sign in begins
         static let chooseDelay: Duration = .milliseconds(550)
-
-        static let palette: [Color] = [
-            Color(red: 0.13, green: 0.47, blue: 0.95),
-            Color(red: 0.96, green: 0.74, blue: 0.1),
-            Color(red: 0.9, green: 0.04, blue: 0.08),
-            Color(red: 0.11, green: 0.68, blue: 0.4),
-            Color(red: 0.55, green: 0.3, blue: 0.9),
-            Color(red: 0.96, green: 0.45, blue: 0.1),
-        ]
     }
 
     // MARK: - Poster Wall

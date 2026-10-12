@@ -40,18 +40,17 @@ struct MainTabView: View {
         TabCoordinator {
             TabItem.cinemaHome
             TabItem.library(
-                title: L10n.tvShowsCapitalized,
-                systemName: "tv",
-                filters: .init(itemTypes: [.series])
-            )
-            TabItem.library(
                 title: L10n.movies,
                 systemName: "film",
                 filters: .init(itemTypes: [.movie])
             )
+            TabItem.library(
+                title: L10n.tvShowsCapitalized,
+                systemName: "tv",
+                filters: .init(itemTypes: [.series])
+            )
             TabItem.cinemaMyList
             TabItem.search
-            TabItem.media
             TabItem.settings
         }
         #endif
@@ -99,11 +98,25 @@ struct MainTabView: View {
                     tabRoot(tab)
                     #endif
                 } label: {
+                    #if os(tvOS)
+                    // Settings sits at the trailing end of the tab bar as an icon, like Netflix
+                    if tab.item.id == TabItem.settings.id {
+                        Image(systemName: tab.item.systemImage)
+                            .accessibilityLabel(tab.item.displayTitle)
+                    } else {
+                        Label(
+                            tab.item.displayTitle,
+                            systemImage: tab.item.systemImage
+                        )
+                        .symbolRenderingMode(.monochrome)
+                    }
+                    #else
                     Label(
                         tab.item.displayTitle,
                         systemImage: tab.item.systemImage
                     )
                     .symbolRenderingMode(.monochrome)
+                    #endif
                 }
             }
         }

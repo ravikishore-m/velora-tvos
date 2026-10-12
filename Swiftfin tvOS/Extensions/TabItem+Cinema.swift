@@ -20,7 +20,7 @@ extension TabItem {
     static var cinemaMyList: TabItem {
         cinema(
             provider: CinemaMyListContentGroupProvider(),
-            systemImage: "plus.rectangle.on.rectangle"
+            systemImage: "person.crop.square.fill"
         )
     }
 

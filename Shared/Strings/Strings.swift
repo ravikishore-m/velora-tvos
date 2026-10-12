@@ -1178,6 +1178,8 @@ internal enum L10n {
   internal static let mvc = L10n.tr("Localizable", "mvc", fallback: "MVC")
   /// My List
   internal static let myList = L10n.tr("Localizable", "myList", fallback: "My List")
+  /// My RKPlex
+  internal static let myRKPlex = L10n.tr("Localizable", "myRKPlex", fallback: "My RKPlex")
   /// Name
   internal static let name = L10n.tr("Localizable", "name", fallback: "Name")
   /// Narrator

@@ -9,10 +9,10 @@
 import Foundation
 import JellyfinAPI
 
-/// The viewer's personal hub: in-progress items, favorites and recently played titles
+/// My RKPlex, the viewer's personal hub: their profile, in-progress items, favorites and recently played titles
 struct CinemaMyListContentGroupProvider: ContentGroupProvider {
 
-    let displayTitle: String = L10n.myList
+    let displayTitle: String = L10n.myRKPlex
     let id: String = "cinema-my-list-content-group-provider"
 
     func makeGroups(environment: Empty) async throws -> [any ContentGroup] {
@@ -21,6 +21,8 @@ struct CinemaMyListContentGroupProvider: ContentGroupProvider {
 
     @ContentGroupBuilder
     private func _makeGroups() -> [any ContentGroup] {
+        CinemaProfileHeaderGroup()
+
         CinemaRowContentGroup(
             id: "cinema-my-list-continue-watching",
             library: ResumeItemsLibrary(mediaTypes: [.video])

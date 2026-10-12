@@ -110,11 +110,13 @@ struct AppSettingsView: View {
                 }
             }
 
+            #if os(iOS)
             Section {
                 Toggle(L10n.signoutClose, isOn: $signOutOnClose)
             } footer: {
                 Text(L10n.signoutCloseFooter)
             }
+            #endif
 
             Section {
                 Toggle(L10n.signoutBackground, isOn: $signOutOnBackground)

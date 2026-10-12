@@ -87,7 +87,7 @@ final class UserSessionManager: ObservableObject {
         guard state == .initial else { return }
 
         do {
-            if Defaults[.signOutOnClose] {
+            if Self.asksWhoIsWatchingOnOpen {
                 Defaults[.lastSignedInUserID] = .signedOut
             }
 
@@ -102,8 +102,14 @@ final class UserSessionManager: ObservableObject {
         }
     }
 
-    /// Returning within this window, such as after a brief trip to the Home screen, keeps the current profile
-    private static let reopenGraceInterval: TimeInterval = 30
+    /// Like Netflix, the Apple TV app asks who's watching every time it opens
+    private static var asksWhoIsWatchingOnOpen: Bool {
+        #if os(tvOS)
+        true
+        #else
+        Defaults[.signOutOnClose]
+        #endif
+    }
 
     @MainActor
     private func refreshCurrentSession() async {
@@ -218,21 +224,15 @@ final class UserSessionManager: ObservableObject {
         guard currentSession != nil else { return }
         guard !hasActivePlayback else { return }
 
-        let backgroundedInterval = Date.now.timeIntervalSince(Defaults[.backgroundTimeStamp])
-
         #if os(tvOS)
-        // Like Netflix, reopening the app asks who's watching
-        if Defaults[.signOutOnClose], backgroundedInterval > Self.reopenGraceInterval {
-            await signOut(reason: .appReopened)
-            return
-        }
-        #endif
-
+        await signOut(reason: .appReopened)
+        #else
         guard Defaults[.signOutOnBackground] else { return }
 
-        if backgroundedInterval > Defaults[.backgroundSignOutInterval] {
+        if Date.now.timeIntervalSince(Defaults[.backgroundTimeStamp]) > Defaults[.backgroundSignOutInterval] {
             await signOut(reason: .backgroundTimeout)
         }
+        #endif
     }
 
     private enum ServerInformationRefreshReason {

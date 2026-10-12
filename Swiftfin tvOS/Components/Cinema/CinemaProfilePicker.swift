@@ -512,20 +512,8 @@ extension CinemaProfilePicker {
 
         let user: UserState
         let server: ServerState
-        /// Shows the server picture or initial even when a character avatar is chosen
+        /// Shows the server picture, or the profile's default character, even when another avatar is chosen
         var ignoresChosenAvatar = false
-
-        /// Stable per user so a profile keeps its colour between launches
-        private var tileColor: Color {
-            let palette = CinemaTheme.Profile.palette
-            let seed = user.id.unicodeScalars.reduce(0) { $0 + Int($1.value) }
-
-            return palette[seed % palette.count]
-        }
-
-        private var initial: String {
-            user.username.first.map { String($0).uppercased() } ?? ""
-        }
 
         private var chosenAvatar: CinemaAvatar? {
             ignoresChosenAvatar ? nil : CinemaAvatar.chosen(for: user.id, in: avatarChoices)
@@ -536,18 +524,7 @@ extension CinemaProfilePicker {
                 if let chosenAvatar {
                     CinemaAvatarTile(avatar: chosenAvatar)
                 } else {
-                    LinearGradient(
-                        colors: [tileColor, tileColor.mix(with: .black, by: 0.35)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-
-                    GeometryReader { proxy in
-                        Text(initial)
-                            .font(.system(size: proxy.size.width * 0.5, weight: .bold, design: .rounded))
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    }
+                    CinemaAvatarTile(avatar: .standard(for: user.id))
 
                     ImageView(user.profileImageSource(client: server.client))
                         .pipeline(.Swiftfin.local)

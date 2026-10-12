@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "avatar-ninja-cat.jpg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
