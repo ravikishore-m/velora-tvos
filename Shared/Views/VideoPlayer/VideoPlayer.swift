@@ -39,7 +39,7 @@ struct VideoPlayer: View {
     private var viewState: ViewState = .init()
 
     init() {
-        switch VideoPlayerType.current {
+        switch Defaults[.VideoPlayer.videoPlayerType] {
         case .avPlayer:
             self._proxy = .init(wrappedValue: AVMediaPlayerProxy())
         case .mpv:

@@ -184,7 +184,7 @@ struct CinemaPlaybackSummary: View {
             VStack(alignment: .leading, spacing: 12) {
                 row(L10n.video, value: videoDescription)
                 row(L10n.audio, value: audioDescription)
-                row(L10n.videoPlayer, value: VideoPlayerType.current.displayTitle)
+                row(L10n.videoPlayer, value: Defaults[.VideoPlayer.videoPlayerType].displayTitle)
                 row(L10n.container, value: playbackItem?.mediaSource.container?.uppercased())
                 row(L10n.transcodeReasons, value: transcodeReasons)
             }

@@ -53,27 +53,13 @@ enum VideoPlayerType: String, CaseIterable, Displayable, SupportedCaseIterable, 
         }
     }
 
-    /// The player used for playback. tvOS always uses VLC, which plays Matroska and
-    /// lossless audio directly from the server without remuxing or converting.
-    static var current: VideoPlayerType {
-        #if os(tvOS)
-        .vlc
-        #else
-        Defaults[.VideoPlayer.videoPlayerType]
-        #endif
-    }
-
     @ArrayBuilder<VideoPlayerType>
     static var supportedCases: [VideoPlayerType] {
-        #if os(tvOS)
-        VideoPlayerType.vlc
-        #else
         VideoPlayerType.avPlayer
         VideoPlayerType.vlc
 
         if Defaults[.Experimental.mpvPlayer] {
             VideoPlayerType.mpv
         }
-        #endif
     }
 }

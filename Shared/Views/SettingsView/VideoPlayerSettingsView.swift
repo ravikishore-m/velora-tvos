@@ -136,7 +136,9 @@ struct VideoPlayerSettingsView: View {
             #if os(iOS)
             videoPlayerPicker
             #else
-            LabeledContent(L10n.player, value: VideoPlayerType.current.displayTitle)
+            ListRowMenu(L10n.player, subtitle: videoPlayerType.displayTitle) {
+                videoPlayerPicker
+            }
             #endif
 
             ChevronButton(L10n.playbackQuality) {
@@ -147,12 +149,10 @@ struct VideoPlayerSettingsView: View {
                 L10n.vlc,
                 value: L10n.playerVlcDescription
             )
-            #if !os(tvOS)
             LabeledContent(
                 L10n.avPlayer,
                 value: L10n.playerNativeDescription
             )
-            #endif
         }
     }
 

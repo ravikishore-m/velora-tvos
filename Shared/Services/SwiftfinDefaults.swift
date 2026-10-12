@@ -389,12 +389,7 @@ extension Defaults.Keys {
             }
 
             static var appMaximumBitrate: Key<PlaybackBitrate> {
-                #if os(tvOS)
-                // A bandwidth estimate below the file's bitrate forces a transcode on a local network
-                UserKey("appMaximumBitrate", default: .max)
-                #else
                 UserKey("appMaximumBitrate", default: .auto)
-                #endif
             }
 
             static var appMaximumBitrateTest: Key<PlaybackBitrateTestSize> {
