@@ -34,9 +34,13 @@ struct CinemaFormatBadges: View {
         static let audioFormat = Content(rawValue: 1 << 1)
         static let channels = Content(rawValue: 1 << 2)
         static let accessibility = Content(rawValue: 1 << 3)
+        /// Channel layout only when no audio format badge is shown
+        static let channelsFallback = Content(rawValue: 1 << 4)
 
         static let audio: Content = [.audioFormat, .channels]
         static let all: Content = [.video, .audio, .accessibility]
+        /// The Apple TV app's details line
+        static let summary: Content = [.video, .audioFormat, .channelsFallback, .accessibility]
     }
 
     /// Streams describing what plays: the video and the audio track(s) to badge
@@ -135,17 +139,23 @@ struct CinemaFormatBadges: View {
             }
         }
 
+        var hasAudioFormatBadge = false
+
         if content.contains(.audioFormat) {
+            hasAudioFormatBadge = true
+
             if hasAtmos {
                 badges.append(.dolbyAtmos)
             } else if isDolbyDigital {
                 badges.append(.dolbyDigital)
             } else if let audioFormatTitle {
                 badges.append(.audioFormat(audioFormatTitle))
+            } else {
+                hasAudioFormatBadge = false
             }
         }
 
-        if content.contains(.channels) {
+        if content.contains(.channels) || (content.contains(.channelsFallback) && !hasAudioFormatBadge) {
             if streams.has71AudioChannelLayout {
                 badges.append(.surround(L10n.surround71))
             } else if streams.has51AudioChannelLayout {
@@ -249,6 +259,19 @@ extension CinemaFormatBadges {
                 .accessibilityLabel(accessibilityLabel ?? title)
         }
 
+        /// An outlined tag, used by the Apple TV app for accessibility features
+        private func outline(_ title: String, accessibilityLabel: String) -> some View {
+            knockoutText(title)
+                .foregroundStyle(CinemaTheme.Badge.tint)
+                .overlay {
+                    RoundedRectangle(cornerRadius: CinemaTheme.Badge.cornerRadius, style: .continuous)
+                        .strokeBorder(CinemaTheme.Badge.tint, lineWidth: CinemaTheme.Badge.outlineWidth)
+                }
+                .lineLimit(1)
+                .accessibilityElement()
+                .accessibilityLabel(accessibilityLabel)
+        }
+
         var body: some View {
             switch badge {
             case .uhd:
@@ -268,11 +291,11 @@ extension CinemaFormatBadges {
             case let .surround(title):
                 knockout(title)
             case .closedCaptions:
-                knockout(L10n.cc, accessibilityLabel: L10n.closedCaptions)
+                outline(L10n.cc, accessibilityLabel: L10n.closedCaptions)
             case .sdh:
-                knockout(L10n.sdh, accessibilityLabel: L10n.sdhSubtitles)
+                outline(L10n.sdh, accessibilityLabel: L10n.sdhSubtitles)
             case .audioDescription:
-                knockout(L10n.ad, accessibilityLabel: L10n.audioDescription)
+                outline(L10n.ad, accessibilityLabel: L10n.audioDescription)
             }
         }
     }

@@ -97,6 +97,14 @@ extension ItemView {
                     VStack(alignment: .leading, spacing: 10) {
                         ItemView.Description(item: provider.item)
 
+                        #if os(tvOS)
+                        CinemaBadges(
+                            item: provider.item,
+                            mediaStreams: provider.mediaPlayerItemProvider?.mediaSource?.mediaStreams,
+                            formats: .summary,
+                            showsRatings: true
+                        )
+                        #else
                         HStack(alignment: .top) {
                             ItemView.AttributesHStack(
                                 attributes: attributes,
@@ -108,6 +116,7 @@ extension ItemView {
                             MetadataHStack(item: provider.item)
                         }
                         .foregroundStyle(.secondary)
+                        #endif
                     }
                     .frame(maxWidth: .infinity)
                 }

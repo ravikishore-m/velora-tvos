@@ -133,6 +133,11 @@ enum CinemaTheme {
         static let fontSize: CGFloat = 19
         static let horizontalPadding: CGFloat = 8
         static let spacing: CGFloat = 12
+        /// Between the year and runtime, ratings, age rating and format badges
+        static let groupSpacing: CGFloat = 22
+        static let iconSpacing: CGFloat = 6
+        static let outlineWidth: CGFloat = 2
+        static let star = Color(red: 1, green: 0.8, blue: 0.2)
         static let stackedLogoHeight: CGFloat = 38
         static let wideLogoHeight: CGFloat = 28
         static let tint = Color.white.opacity(0.85)
