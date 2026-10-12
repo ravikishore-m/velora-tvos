@@ -195,6 +195,9 @@ class VLCMediaPlayerProxy: VideoMediaPlayerLayoutConfigurable,
                 }
             }
 
+            // Milliseconds of stream held ahead; the default second stalls on any network dip
+            media.addOption(":network-caching=3000")
+
             // libVLC 4 applies font and color options when opening media.
             // Size remains adjustable during playback through SubtitleScale.
             media.addOption(":freetype-font=\(subtitleConfiguration.fontName)")

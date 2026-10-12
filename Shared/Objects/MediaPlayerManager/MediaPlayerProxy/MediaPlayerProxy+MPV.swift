@@ -21,7 +21,16 @@ class MPVMediaPlayerProxy: @MainActor VideoMediaPlayerLayoutConfigurable,
     // MPVUI does not currently expose frame statistics.
     let droppedFrames: PublishedBox<Int> = .init(initialValue: 0)
     let corruptedFrames: PublishedBox<Int> = .init(initialValue: 0)
-    let player = MPVPlayer(configuration: .init(audio: .init(audioSession: .hostManaged)))
+    let player = MPVPlayer(
+        configuration: .init(
+            additionalOptions: [
+                "demuxer-max-bytes": "400MiB",
+                "demuxer-max-back-bytes": "100MiB",
+            ],
+            audio: .init(audioSession: .hostManaged),
+            networkCacheSeconds: .seconds(60)
+        )
+    )
 
     weak var manager: MediaPlayerManager? {
         didSet {

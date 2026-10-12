@@ -279,6 +279,8 @@ extension AVMediaPlayerProxy {
     func playNew(item: MediaPlayerItem) {
         let playerItem = AVPlayerItem(url: item.url)
         playerItem.externalMetadata = item.baseItem.avMetadata
+        // A minute ahead rides out dips on a remote connection; a 4K remux is about 120 MB
+        playerItem.preferredForwardBufferDuration = 60
 
         removeItemObservers()
         addTimeObserver()
