@@ -23,8 +23,6 @@ struct CinemaProfilePicker: View {
 
     @Binding
     var isEditing: Bool
-    @Binding
-    var selectedUsers: Set<UserState>
 
     let userItems: [SelectUserView.UserItem]
     let servers: OrderedSet<ServerState>
@@ -33,8 +31,7 @@ struct CinemaProfilePicker: View {
     /// Returns whether sign in started, so the picker can recover when it is cancelled or fails
     let onSelect: (UserState) async -> Bool
     let onAddUser: (ServerState) -> Void
-    /// Deletes a single profile, or the selected profiles when `nil`
-    let onDelete: (UserState?) -> Void
+    let onDelete: (UserState) -> Void
 
     @FocusState
     private var focusedID: String?
@@ -49,6 +46,8 @@ struct CinemaProfilePicker: View {
     private var chosenID: String?
     @State
     private var isPresentingServerChoice = false
+    @State
+    private var editingItem: SelectUserView.UserItem?
 
     private var chosenItem: SelectUserView.UserItem? {
         userItems.first { $0.user.id == chosenID }
@@ -121,6 +120,9 @@ struct CinemaProfilePicker: View {
             }
             .menuOrder(.fixed)
             .buttonBorderShape(.circle)
+
+            RKPlexWordmark(size: CinemaTheme.Profile.wordmarkSize, isShimmering: hasAppeared && !isChoosing)
+                .padding(.leading, 16)
         }
         .focusSection()
     }
@@ -155,11 +157,10 @@ struct CinemaProfilePicker: View {
     @ViewBuilder
     private func profileButton(_ item: SelectUserView.UserItem) -> some View {
         let isChosen = item.user.id == chosenID
-        let isSelected = selectedUsers.contains(item.user)
 
         Button {
             if isEditing {
-                selectedUsers.toggle(value: item.user)
+                editingItem = item
             } else {
                 choose(item)
             }
@@ -169,7 +170,6 @@ struct CinemaProfilePicker: View {
                 server: item.server,
                 showsServer: showsServer,
                 isEditing: isEditing,
-                isSelected: isSelected,
                 isHidden: isChosen,
                 namespace: namespace
             )
@@ -178,6 +178,10 @@ struct CinemaProfilePicker: View {
         .focused($focusedID, equals: item.user.id)
         .contextMenu {
             if !isEditing {
+                Button(L10n.chooseAvatar, systemImage: "face.smiling") {
+                    editingItem = item
+                }
+
                 Button(L10n.delete, role: .destructive) {
                     onDelete(item.user)
                 }
@@ -197,14 +201,6 @@ struct CinemaProfilePicker: View {
                     isEditing = false
                 }
                 .buttonStyle(OutlineButtonStyle())
-
-                Button {
-                    onDelete(nil)
-                } label: {
-                    Label(L10n.delete, systemImage: "trash")
-                }
-                .buttonStyle(OutlineButtonStyle(isDestructive: true))
-                .disabled(selectedUsers.isEmpty)
             } else {
                 Button {
                     isEditing = true
@@ -221,16 +217,12 @@ struct CinemaProfilePicker: View {
 
     private var column: some View {
         VStack(alignment: .leading, spacing: 0) {
-            RKPlexWordmark(size: CinemaTheme.Profile.wordmarkSize, isShimmering: hasAppeared && !isChoosing)
-                .modifier(EntranceModifier(index: -2, isVisible: hasAppeared))
-                .opacity(isChoosing ? 0 : 1)
-
             Text(isEditing ? L10n.manageProfiles : L10n.chooseProfile)
-                .font(.title3.weight(.semibold))
-                .foregroundStyle(CinemaTheme.Colors.secondaryText)
+                .font(.title2.weight(.bold))
+                .foregroundStyle(CinemaTheme.Colors.primaryText)
                 .contentTransition(.opacity)
                 .accessibilityAddTraits(.isHeader)
-                .padding(.top, 50)
+                .padding(.top, 30)
                 .modifier(EntranceModifier(index: -1, isVisible: hasAppeared))
                 .opacity(isChoosing ? 0 : 1)
 
@@ -305,6 +297,22 @@ struct CinemaProfilePicker: View {
         .onChange(of: hasError) {
             if hasError {
                 reset()
+            }
+        }
+        .fullScreenCover(
+            isPresented: Binding(
+                get: { editingItem != nil },
+                set: {
+                    if !$0 {
+                        editingItem = nil
+                    }
+                }
+            )
+        ) {
+            if let editingItem {
+                CinemaAvatarPicker(user: editingItem.user, server: editingItem.server) {
+                    onDelete(editingItem.user)
+                }
             }
         }
         .confirmationDialog(L10n.addUser, isPresented: $isPresentingServerChoice) {
@@ -499,8 +507,13 @@ extension CinemaProfilePicker {
 
     struct ProfileAvatar: View {
 
+        @Default(.cinemaProfileAvatars)
+        private var avatarChoices
+
         let user: UserState
         let server: ServerState
+        /// Shows the server picture or initial even when a character avatar is chosen
+        var ignoresChosenAvatar = false
 
         /// Stable per user so a profile keeps its colour between launches
         private var tileColor: Color {
@@ -514,31 +527,40 @@ extension CinemaProfilePicker {
             user.username.first.map { String($0).uppercased() } ?? ""
         }
 
+        private var chosenAvatar: CinemaAvatar? {
+            ignoresChosenAvatar ? nil : CinemaAvatar.chosen(for: user.id, in: avatarChoices)
+        }
+
         var body: some View {
             ZStack {
-                LinearGradient(
-                    colors: [tileColor, tileColor.mix(with: .black, by: 0.35)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
+                if let chosenAvatar {
+                    CinemaAvatarTile(avatar: chosenAvatar)
+                } else {
+                    LinearGradient(
+                        colors: [tileColor, tileColor.mix(with: .black, by: 0.35)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
 
-                Text(initial)
-                    .font(.system(size: 110, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white)
-                    .minimumScaleFactor(0.3)
-                    .padding(12)
+                    GeometryReader { proxy in
+                        Text(initial)
+                            .font(.system(size: proxy.size.width * 0.5, weight: .bold, design: .rounded))
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
 
-                ImageView(user.profileImageSource(client: server.client))
-                    .pipeline(.Swiftfin.local)
-                    .image { image in
-                        image.aspectRatio(contentMode: .fill)
-                    }
-                    .placeholder { _ in
-                        Color.clear
-                    }
-                    .failure {
-                        Color.clear
-                    }
+                    ImageView(user.profileImageSource(client: server.client))
+                        .pipeline(.Swiftfin.local)
+                        .image { image in
+                            image.aspectRatio(contentMode: .fill)
+                        }
+                        .placeholder { _ in
+                            Color.clear
+                        }
+                        .failure {
+                            Color.clear
+                        }
+                }
             }
             .clipShape(RoundedRectangle(cornerRadius: CinemaTheme.Profile.cornerRadius, style: .continuous))
         }
@@ -554,7 +576,6 @@ extension CinemaProfilePicker {
         let server: ServerState
         let showsServer: Bool
         let isEditing: Bool
-        let isSelected: Bool
         /// The avatar is drawn in the centre while this profile signs in
         let isHidden: Bool
         let namespace: Namespace.ID
@@ -584,12 +605,11 @@ extension CinemaProfilePicker {
                     .overlay {
                         if isEditing, !isHidden {
                             ZStack {
-                                shape.fill(.black.opacity(isSelected ? 0.3 : 0.5))
+                                shape.fill(.black.opacity(0.45))
 
-                                Image(systemName: isSelected ? "checkmark.circle.fill" : "pencil")
+                                Image(systemName: "pencil")
                                     .font(.system(size: 54, weight: .semibold))
-                                    .symbolRenderingMode(.palette)
-                                    .foregroundStyle(.white, CinemaTheme.Colors.accent)
+                                    .foregroundStyle(.white)
                             }
                         }
                     }

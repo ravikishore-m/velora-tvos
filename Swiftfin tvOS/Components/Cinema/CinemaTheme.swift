@@ -134,6 +134,7 @@ enum CinemaTheme {
         static let shimmerInterval: Duration = .seconds(7)
         static let shimmerDuration: TimeInterval = 1.2
 
+        static let homeSize: CGFloat = 50
         static let introSize: CGFloat = 190
         static let introRibbonCount = 44
         static let ribbonPalette: [Color] = [
@@ -156,7 +157,7 @@ enum CinemaTheme {
         static let spacing: CGFloat = 30
         static let cornerRadius: CGFloat = 12
         static let focusScale: CGFloat = 1.1
-        static let wordmarkSize: CGFloat = 76
+        static let wordmarkSize: CGFloat = 64
         static let columnWidth: CGFloat = 720
         static let nameSpacing: CGFloat = 36
         static let nameWidth: CGFloat = 420
@@ -189,6 +190,45 @@ enum CinemaTheme {
             Color(red: 0.55, green: 0.3, blue: 0.9),
             Color(red: 0.96, green: 0.45, blue: 0.1),
         ]
+    }
+
+    // MARK: - Poster Wall
+
+    enum PosterWall {
+
+        static let posterWidth: CGFloat = 220
+        static let posterHeight: CGFloat = 330
+        static let spacing: CGFloat = 24
+        static let rows = 5
+        static let columns = 12
+        static let tilt: Angle = .degrees(-9)
+        static let drift: CGFloat = 120
+        static let driftDuration: TimeInterval = 40
+
+        /// Keeps the sign-in content readable over the artwork
+        static var scrim: some View {
+            ZStack {
+                Color.black.opacity(0.72)
+
+                LinearGradient(
+                    colors: [.black.opacity(0.6), .clear, .black.opacity(0.6)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            }
+        }
+    }
+
+    // MARK: - Avatar
+
+    enum Avatar {
+
+        static let size: CGFloat = 170
+        static let spacing: CGFloat = 44
+        static let columns = 8
+        static let headerSize: CGFloat = 200
+        /// Profile button at the top-leading corner of Home
+        static let homeSize: CGFloat = 66
     }
 
     // MARK: - Player
@@ -238,7 +278,6 @@ enum CinemaTheme {
         static let contentSpacing: CGFloat = 10
         static let logoMaxWidth: CGFloat = 360
         static let logoMaxHeight: CGFloat = 90
-        static let synopsisLineLimit = 2
         static let progressHeight: CGFloat = 6
         static let imageMaxWidth: CGFloat = 640
         static let headerSpacing: CGFloat = 20
@@ -293,7 +332,6 @@ enum CinemaTheme {
         static let badgeHeight: CGFloat = 56
         static let badgeLabelSize: CGFloat = 13
         static let badgeNumberSize: CGFloat = 25
-        static let inlineBadgeScale: CGFloat = 0.62
     }
 
     // MARK: - New Content

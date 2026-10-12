@@ -23,6 +23,12 @@ struct CinemaFeaturedArtwork: Storable, Hashable {
     let genres: [String]
     let backdropURL: URL
     let logoURL: URL?
+    var posterURL: URL?
+
+    /// Portrait artwork for poster walls, falling back to the backdrop for entries saved before posters were kept
+    var wallImageURL: URL {
+        posterURL ?? backdropURL
+    }
 
     @MainActor
     static func remember(_ items: [BaseItemDto]) {
@@ -46,6 +52,9 @@ struct CinemaFeaturedArtwork: Storable, Hashable {
                         maxWidth: CinemaTheme.Hero.logoMaxWidth,
                         maxHeight: CinemaTheme.Hero.logoMaxHeight
                     )?
+                        .url
+                        .flatMap(withoutCredentials),
+                    posterURL: item.cinemaPosterSource(maxWidth: CinemaTheme.Card.portraitWidth)?
                         .url
                         .flatMap(withoutCredentials)
                 )

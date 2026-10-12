@@ -184,20 +184,13 @@ struct SelectUserView: View {
         if userItems.isNotEmpty {
             CinemaProfilePicker(
                 isEditing: $isEditing,
-                selectedUsers: $selectedUsers,
                 userItems: userItems,
                 servers: viewModel.servers.keys,
                 showsServer: serverSelection == .all && viewModel.servers.count > 1,
                 hasError: viewModel.error != nil,
                 onSelect: { await signIn(user: $0) },
                 onAddUser: { addUser(server: $0) },
-                onDelete: { user in
-                    if let user {
-                        delete(user: user)
-                    } else {
-                        isPresentingConfirmDeleteUsers = true
-                    }
-                }
+                onDelete: { delete(user: $0) }
             )
         } else {
             userListView

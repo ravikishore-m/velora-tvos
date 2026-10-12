@@ -139,37 +139,9 @@ struct CinemaCard: View {
         ZStack(alignment: .bottomLeading) {
             CinemaTheme.Card.scrim
 
+            // Only the title while browsing; details live on the item page
             VStack(alignment: .leading, spacing: CinemaTheme.Card.contentSpacing) {
                 logo(for: item)
-
-                if item.type == .episode {
-                    Text(item.displayTitle)
-                        .font(CinemaTheme.Typography.metadata)
-                        .foregroundStyle(CinemaTheme.Colors.primaryText)
-                        .lineLimit(1)
-                }
-
-                HStack(spacing: CinemaTheme.Badge.spacing) {
-                    CinemaTopTenBadge(item: item, scale: CinemaTheme.TopTen.inlineBadgeScale)
-
-                    if let label = item.cinemaNewContentLabel {
-                        Text(label)
-                            .font(CinemaTheme.Typography.metadata)
-                            .foregroundStyle(CinemaTheme.Colors.accent)
-                            .lineLimit(1)
-                    }
-                }
-
-                CinemaFactsLine(item: item)
-                    .minimumScaleFactor(0.8)
-
-                if let overview = item.overview, overview.isNotEmpty {
-                    Text(overview)
-                        .font(.caption)
-                        .foregroundStyle(CinemaTheme.Colors.secondaryText)
-                        .lineLimit(CinemaTheme.Card.synopsisLineLimit)
-                        .multilineTextAlignment(.leading)
-                }
 
                 progressBar(for: item)
             }

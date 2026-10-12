@@ -71,14 +71,14 @@ struct CinemaSignInView<RemoteContent: View>: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack {
-                wordmark
-
+            HStack(spacing: 32) {
                 Spacer()
 
                 if isLoading {
                     ProgressView()
                 }
+
+                wordmark
             }
 
             Text(L10n.signInToServer(server.name))
@@ -108,7 +108,9 @@ struct CinemaSignInView<RemoteContent: View>: View {
         .edgePadding()
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .foregroundStyle(CinemaTheme.Colors.primaryText)
-        .background(Color.black.ignoresSafeArea())
+        .background {
+            CinemaPosterWall(serverID: server.id)
+        }
         .environment(\.colorScheme, .dark)
         .toolbar(.hidden, for: .navigationBar)
     }

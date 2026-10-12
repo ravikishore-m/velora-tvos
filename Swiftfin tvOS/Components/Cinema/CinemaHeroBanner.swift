@@ -361,12 +361,14 @@ struct CinemaHeroBanner: View {
             let nextItem = items[(min(index, items.count - 1) + 1) % items.count]
 
             VStack(alignment: .leading, spacing: CinemaTheme.Hero.indicatorSpacing) {
+                CinemaHomeTopBar()
+                    .frame(height: CinemaTheme.Hero.cardTopInset - CinemaTheme.Hero.indicatorSpacing)
+
                 card(for: item, warming: nextItem)
 
                 pageIndicator
                     .padding(.leading, CinemaTheme.Hero.cardContentPadding)
             }
-            .padding(.top, CinemaTheme.Hero.cardTopInset)
             .padding(.horizontal, CinemaTheme.Spacing.edge)
             .frame(maxWidth: .infinity, alignment: .topLeading)
             .frame(height: heroHeight, alignment: .top)

@@ -358,6 +358,9 @@ final class UserSessionManager: ObservableObject {
         if newSession == nil {
             state = .signedOut
         } else {
+            #if os(tvOS)
+            CinemaPlaybackDefaults.preferDirectPlayer()
+            #endif
             state = .signedIn
         }
 

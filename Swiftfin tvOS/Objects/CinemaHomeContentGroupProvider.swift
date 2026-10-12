@@ -106,12 +106,12 @@ struct CinemaHomeContentGroupProvider: ContentGroupProvider {
         otherVideoLibraries: [BaseItemDto]
     ) -> [any ContentGroup] {
 
-        let newOnServer = CinemaRowContentGroup(
-            id: "cinema-new-on-server",
+        let recentlyAddedMovies = CinemaRowContentGroup(
+            id: "cinema-recently-added-movies",
             library: ItemLibrary(
-                parent: BaseItemDto(name: L10n.newOn(serverName)),
+                parent: BaseItemDto(name: L10n.recentlyAddedMovies),
                 filters: .init(
-                    itemTypes: [.movie, .series],
+                    itemTypes: [.movie],
                     sortBy: [.dateCreated],
                     sortOrder: [.descending]
                 )
@@ -122,7 +122,7 @@ struct CinemaHomeContentGroupProvider: ContentGroupProvider {
         let trailingGenres = movieGenres.dropFirst(3)
 
         CinemaHeroContentGroup(
-            fallbackViewModel: newOnServer.viewModel
+            fallbackViewModel: recentlyAddedMovies.viewModel
         )
 
         CinemaRowContentGroup(
@@ -131,10 +131,26 @@ struct CinemaHomeContentGroupProvider: ContentGroupProvider {
             displayTitle: L10n.continueWatchingFor(userName)
         )
 
+        recentlyAddedMovies
+
         CinemaRowContentGroup(
             id: "cinema-next-up",
             library: NextUpLibrary()
         )
+
+        if Defaults[.Customization.Home.showRecentlyAdded] {
+            CinemaRowContentGroup(
+                id: "cinema-recently-added-episodes",
+                library: ItemLibrary(
+                    parent: BaseItemDto(name: L10n.newEpisodes),
+                    filters: .init(
+                        itemTypes: [.episode],
+                        sortBy: [.dateCreated],
+                        sortOrder: [.descending]
+                    )
+                )
+            )
+        }
 
         CinemaRowContentGroup(
             id: CinemaTopTenStore.moviesRowID,
@@ -145,18 +161,20 @@ struct CinemaHomeContentGroupProvider: ContentGroupProvider {
             isRanked: true
         )
 
-        newOnServer
+        CinemaRowContentGroup(
+            id: "cinema-new-releases",
+            library: ItemLibrary(
+                parent: BaseItemDto(name: L10n.newReleases),
+                filters: .init(
+                    itemTypes: [.movie],
+                    sortBy: [.premiereDate],
+                    sortOrder: [.descending]
+                )
+            )
+        )
 
         if let watched = recentlyWatched.first {
             becauseYouWatched(watched)
-        }
-
-        for category in languages.prefix(2) {
-            categoryRow(category)
-        }
-
-        for category in leadingGenres {
-            categoryRow(category)
         }
 
         CinemaRowContentGroup(
@@ -167,6 +185,27 @@ struct CinemaHomeContentGroupProvider: ContentGroupProvider {
             ),
             isRanked: true
         )
+
+        CinemaRowContentGroup(
+            id: "cinema-my-list",
+            library: ItemLibrary(
+                parent: BaseItemDto(name: L10n.myList),
+                filters: .init(
+                    itemTypes: [.movie, .series],
+                    sortBy: [.dateCreated],
+                    sortOrder: [.descending],
+                    traits: [.isFavorite]
+                )
+            )
+        )
+
+        for category in languages.prefix(2) {
+            categoryRow(category)
+        }
+
+        for category in leadingGenres {
+            categoryRow(category)
+        }
 
         CinemaRowContentGroup(
             id: "cinema-bingeworthy-shows",
@@ -188,14 +227,6 @@ struct CinemaHomeContentGroupProvider: ContentGroupProvider {
             becauseYouWatched(watched)
         }
 
-        for category in languages.dropFirst(2) {
-            categoryRow(category)
-        }
-
-        for category in trailingGenres {
-            categoryRow(category)
-        }
-
         CinemaRowContentGroup(
             id: "cinema-critically-acclaimed",
             library: ItemLibrary(
@@ -208,34 +239,16 @@ struct CinemaHomeContentGroupProvider: ContentGroupProvider {
             )
         )
 
-        for category in tvGenres.dropFirst(2) {
+        for category in languages.dropFirst(2) {
             categoryRow(category)
         }
 
-        CinemaRowContentGroup(
-            id: "cinema-new-releases",
-            library: ItemLibrary(
-                parent: BaseItemDto(name: L10n.newReleases),
-                filters: .init(
-                    itemTypes: [.movie],
-                    sortBy: [.premiereDate],
-                    sortOrder: [.descending]
-                )
-            )
-        )
+        for category in trailingGenres {
+            categoryRow(category)
+        }
 
-        if Defaults[.Customization.Home.showRecentlyAdded] {
-            CinemaRowContentGroup(
-                id: "cinema-recently-added-episodes",
-                library: ItemLibrary(
-                    parent: BaseItemDto(name: L10n.newEpisodes),
-                    filters: .init(
-                        itemTypes: [.episode],
-                        sortBy: [.dateCreated],
-                        sortOrder: [.descending]
-                    )
-                )
-            )
+        for category in tvGenres.dropFirst(2) {
+            categoryRow(category)
         }
 
         if Defaults[.Customization.Home.showRecentlyPlayed] {
@@ -252,19 +265,6 @@ struct CinemaHomeContentGroupProvider: ContentGroupProvider {
                 )
             )
         }
-
-        CinemaRowContentGroup(
-            id: "cinema-my-list",
-            library: ItemLibrary(
-                parent: BaseItemDto(name: L10n.myList),
-                filters: .init(
-                    itemTypes: [.movie, .series],
-                    sortBy: [.dateCreated],
-                    sortOrder: [.descending],
-                    traits: [.isFavorite]
-                )
-            )
-        )
 
         PosterGroup(
             id: "cinema-programs-recommended",

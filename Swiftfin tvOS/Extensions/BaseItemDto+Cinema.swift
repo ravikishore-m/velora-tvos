@@ -38,6 +38,26 @@ extension BaseItemDto {
         )
     }
 
+    /// Episodes use their series poster
+    func cinemaPosterSource(maxWidth: CGFloat) -> ImageSource? {
+        let environment = ImageSourceOptions(maxWidth: maxWidth)
+
+        if type == .episode {
+            return imageSource(
+                .primary,
+                itemID: seriesID,
+                tag: seriesPrimaryImageTag,
+                environment: environment
+            )
+        }
+
+        return imageSource(
+            .primary,
+            itemID: id,
+            environment: environment
+        )
+    }
+
     /// Episodes use their own still; everything else prefers a text-free backdrop
     func cinemaLandscapeSources(maxWidth: CGFloat) -> [ImageSource] {
         imageSources(

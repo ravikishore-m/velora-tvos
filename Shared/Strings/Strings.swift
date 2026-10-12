@@ -338,6 +338,8 @@ internal enum L10n {
   internal static let chapters = L10n.tr("Localizable", "chapters", fallback: "Chapters")
   /// Chapter slider
   internal static let chapterSlider = L10n.tr("Localizable", "chapterSlider", fallback: "Chapter slider")
+  /// Choose an Avatar
+  internal static let chooseAvatar = L10n.tr("Localizable", "chooseAvatar", fallback: "Choose an Avatar")
   /// Choose a profile
   internal static let chooseProfile = L10n.tr("Localizable", "chooseProfile", fallback: "Choose a profile")
   /// Client
@@ -566,6 +568,8 @@ internal enum L10n {
   internal static let deleteItemConfirmation = L10n.tr("Localizable", "deleteItemConfirmation", fallback: "Are you sure you want to delete this item?")
   /// Are you sure you want to delete this item? This action cannot be undone.
   internal static let deleteItemConfirmationMessage = L10n.tr("Localizable", "deleteItemConfirmationMessage", fallback: "Are you sure you want to delete this item? This action cannot be undone.")
+  /// Delete Profile
+  internal static let deleteProfile = L10n.tr("Localizable", "deleteProfile", fallback: "Delete Profile")
   /// Are you sure you want to delete the selected items?
   internal static let deleteSelectedConfirmation = L10n.tr("Localizable", "deleteSelectedConfirmation", fallback: "Are you sure you want to delete the selected items?")
   /// Are you sure you wish to delete all selected devices? All selected sessions will be logged out.
@@ -1274,6 +1278,8 @@ internal enum L10n {
   internal static let originalAudio = L10n.tr("Localizable", "originalAudio", fallback: "Original Audio")
   /// Original Media Info
   internal static let originalMediaInfo = L10n.tr("Localizable", "originalMediaInfo", fallback: "Original Media Info")
+  /// Original Picture
+  internal static let originalPicture = L10n.tr("Localizable", "originalPicture", fallback: "Original Picture")
   /// Original title
   internal static let originalTitle = L10n.tr("Localizable", "originalTitle", fallback: "Original title")
   /// Other
@@ -1904,6 +1910,8 @@ internal enum L10n {
   internal static let supportsMediaControl = L10n.tr("Localizable", "supportsMediaControl", fallback: "Media control")
   /// Persistent identifier
   internal static let supportsPersistentIdentifier = L10n.tr("Localizable", "supportsPersistentIdentifier", fallback: "Persistent identifier")
+  /// Switch Profile
+  internal static let switchProfile = L10n.tr("Localizable", "switchProfile", fallback: "Switch Profile")
   /// Switch user
   internal static let switchUser = L10n.tr("Localizable", "switchUser", fallback: "Switch user")
   /// SyncPlay
