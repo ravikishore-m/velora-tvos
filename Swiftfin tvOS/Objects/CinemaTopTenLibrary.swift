@@ -11,7 +11,7 @@ import JellyfinAPI
 
 /// The ten highest rated recent titles, topped up with all-time favourites for smaller libraries.
 ///
-/// Jellyfin has no server-wide popularity, so ratings stand in for Netflix's daily charts.
+/// Jellyfin has no server-wide popularity, so ratings stand in for daily viewing charts.
 struct CinemaTopTenLibrary: MediaLibrary {
 
     static let count = 10

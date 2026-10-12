@@ -53,7 +53,7 @@ struct CinemaCarousel<Library: PagingLibrary>: View where Library.Element == Ite
     var viewModel: PagingLibraryViewModel<Library>
 
     let title: String
-    /// Ranked rows show large numbers beside each poster, Netflix Top 10 style
+    /// Ranked rows show large numbers beside each poster, chart style
     var rankingID: String?
 
     private var isRanked: Bool {

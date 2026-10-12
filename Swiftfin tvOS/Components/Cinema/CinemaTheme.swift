@@ -26,8 +26,8 @@ enum CinemaTheme {
         static let focusedActionForeground = Color.black
 
         static let placeholder = Color.white.opacity(0.08)
-        /// Netflix red, used for progress and highlights
-        static let accent = Color(red: 0.898, green: 0.035, blue: 0.078)
+        /// Velora violet, used for progress and highlights
+        static let accent = Color(red: 0.55, green: 0.42, blue: 1)
         /// Cool secondary glow for backgrounds
         static let glow = Color(red: 0.25, green: 0.4, blue: 1)
     }
@@ -119,36 +119,21 @@ enum CinemaTheme {
 
     enum Brand {
 
-        /// Netflix-style wordmark: deep red falling to a darker base
-        static let fill = LinearGradient(
-            colors: [
-                Color(red: 0.93, green: 0.06, blue: 0.1),
-                Color(red: 0.62, green: 0.02, blue: 0.05),
-            ],
-            startPoint: .top,
-            endPoint: .bottom
-        )
-        /// How much taller the outer letters are than the centre ones, giving the wordmark its curve
-        static let archDepth: CGFloat = 0.16
-        static let letterSpacing: CGFloat = 0.035
+        static let violet = Color(red: 0.43, green: 0.33, blue: 1)
+        static let sky = Color(red: 0.25, green: 0.66, blue: 0.98)
+        static let mint = Color(red: 0.2, green: 0.88, blue: 0.72)
+        /// The deep blue-black behind the launch ident
+        static let night = Color(red: 0.02, green: 0.024, blue: 0.06)
+
+        /// Ribbon thickness as a fraction of the mark's size
+        static let ribbonWidth: CGFloat = 0.2
+        static let letterSpacing: CGFloat = 0.02
         static let shimmerInterval: Duration = .seconds(7)
         static let shimmerDuration: TimeInterval = 1.2
 
-        static let homeSize: CGFloat = 50
-        static let introRibbonCount = 28
-        static let monogramSize: CGFloat = 520
-        /// How far the camera dives into the R, enough for its streaks to fill the screen
-        static let diveScale: CGFloat = 10
-        static let ribbonPalette: [Color] = [
-            Colors.accent,
-            Color(red: 0.55, green: 0.02, blue: 0.05),
-            Color(red: 1, green: 0.3, blue: 0.45),
-            Color(red: 0.85, green: 0.1, blue: 0.55),
-            Color(red: 0.5, green: 0.2, blue: 0.95),
-            Color(red: 0.2, green: 0.45, blue: 1),
-            Color(red: 0.2, green: 0.85, blue: 0.95),
-            Color(red: 1, green: 0.55, blue: 0.15),
-        ]
+        static let homeSize: CGFloat = 44
+        static let introMarkSize: CGFloat = 300
+        static let introNameSize: CGFloat = 120
     }
 
     // MARK: - Profile

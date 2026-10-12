@@ -52,7 +52,7 @@ struct CinemaRankNumber: View {
     }
 }
 
-/// Netflix's red "TOP 10" corner badge
+/// "TOP 10" corner badge
 struct CinemaTopTenBadge: View {
 
     @ObservedObject

@@ -11,7 +11,7 @@ import Defaults
 import JellyfinAPI
 import SwiftUI
 
-/// Fades a local trailer in over the backdrop after the header has been focused for a moment, as Netflix does
+/// Fades a local trailer in over the backdrop after the header has been focused for a moment
 struct CinemaTrailerBackdrop: View {
 
     private struct TaskID: Equatable {

@@ -9,7 +9,7 @@
 import Defaults
 import SwiftUI
 
-/// Netflix-style profile editor: pick a character avatar, go back to the original picture, or delete the profile
+/// Profile editor: pick a character avatar, go back to the original picture, or delete the profile
 struct CinemaAvatarPicker: View {
 
     @Default(.cinemaProfileAvatars)

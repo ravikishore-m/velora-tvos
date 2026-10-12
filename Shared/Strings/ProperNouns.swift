@@ -14,7 +14,7 @@ extension L10n {
 
     // MARK: - Brand
 
-    static let rkPlex = "RKPlex"
+    static let velora = "Velora"
 
     // MARK: - Licenses
 

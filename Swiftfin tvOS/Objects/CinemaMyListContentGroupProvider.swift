@@ -9,10 +9,10 @@
 import Foundation
 import JellyfinAPI
 
-/// My RKPlex, the viewer's personal hub: their profile, in-progress items, favorites and recently played titles
+/// My Velora, the viewer's personal hub: their profile, in-progress items, favorites and recently played titles
 struct CinemaMyListContentGroupProvider: ContentGroupProvider {
 
-    let displayTitle: String = L10n.myRKPlex
+    let displayTitle: String = L10n.myVelora
     let id: String = "cinema-my-list-content-group-provider"
 
     func makeGroups(environment: Empty) async throws -> [any ContentGroup] {

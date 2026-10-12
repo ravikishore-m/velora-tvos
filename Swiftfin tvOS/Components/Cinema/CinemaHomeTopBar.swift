@@ -9,7 +9,7 @@
 import FactoryKit
 import SwiftUI
 
-/// The signed-in profile at the leading edge, returning to "Who's watching?", and the RKPlex wordmark at the trailing edge
+/// The signed-in profile at the leading edge, returning to "Who's watching?", and the Velora wordmark at the trailing edge
 struct CinemaHomeTopBar: View {
 
     @Injected(\.currentUserSession)
@@ -35,7 +35,7 @@ struct CinemaHomeTopBar: View {
 
             Spacer()
 
-            RKPlexWordmark(size: CinemaTheme.Brand.homeSize, isShimmering: true)
+            VeloraWordmark(size: CinemaTheme.Brand.homeSize, isShimmering: true)
         }
         .focusSection()
     }

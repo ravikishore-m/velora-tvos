@@ -9,7 +9,7 @@
 import Defaults
 import SwiftUI
 
-/// Illustrated character avatars a profile can pick, after Netflix's profile icons.
+/// Illustrated character avatars a profile can pick, original artwork made for Velora.
 ///
 /// The choice is kept on this device by user ID, leaving the server's profile image untouched.
 struct CinemaAvatar: Identifiable, Hashable {
@@ -21,7 +21,16 @@ struct CinemaAvatar: Identifiable, Hashable {
         "avatar-\(id)"
     }
 
-    static let all: [CinemaAvatar] = [
+    /// The Velora set, on the brand's aurora backdrop; new profiles start with one of these
+    static let velora: [CinemaAvatar] = [
+        "otter", "koala", "axolotl", "sloth",
+        "hedgehog", "raccoon", "narwhal", "capybara",
+        "chameleon", "bunny", "octopus", "lion-cub",
+        "frog", "bee", "unicorn", "whale",
+    ]
+        .map(CinemaAvatar.init(id:))
+
+    static let classics: [CinemaAvatar] = [
         "red-panda", "fox", "tiger", "kitten",
         "penguin", "popcorn-bear", "ninja-cat", "owl-wizard",
         "astronaut", "hero", "robot", "alien",
@@ -29,10 +38,12 @@ struct CinemaAvatar: Identifiable, Hashable {
     ]
         .map(CinemaAvatar.init(id:))
 
+    static let all = velora + classics
+
     /// Stable per user, so a profile without a picture keeps the same character between launches
     static func standard(for userID: String) -> CinemaAvatar {
         let seed = userID.unicodeScalars.reduce(0) { $0 + Int($1.value) }
-        return all[seed % all.count]
+        return velora[seed % velora.count]
     }
 
     /// The avatar a user picked on this device, if any

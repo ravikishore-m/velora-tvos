@@ -10,8 +10,8 @@ import Defaults
 import OrderedCollections
 import SwiftUI
 
-/// Netflix-style "Choose a profile" screen: the wordmark and a column of profiles on the left,
-/// with artwork from the library rotating behind. The RKPlex ident plays each time it opens,
+/// "Choose a profile" screen: the wordmark and a column of profiles on the left,
+/// with artwork from the library rotating behind. The Velora ident plays each time it opens,
 /// and the chosen profile glides to the centre with a spinner while the others fade away.
 struct CinemaProfilePicker: View {
 
@@ -121,7 +121,7 @@ struct CinemaProfilePicker: View {
             .menuOrder(.fixed)
             .buttonBorderShape(.circle)
 
-            RKPlexWordmark(size: CinemaTheme.Profile.wordmarkSize, isShimmering: hasAppeared && !isChoosing)
+            VeloraWordmark(size: CinemaTheme.Profile.wordmarkSize, isShimmering: hasAppeared && !isChoosing)
                 .padding(.leading, 16)
         }
         .focusSection()
@@ -279,7 +279,7 @@ struct CinemaProfilePicker: View {
             chosenOverlay
 
             if isShowingIntro {
-                RKPlexIntro {
+                VeloraIntro {
                     hasAppeared = true
                 } onFinished: {
                     isShowingIntro = false
@@ -549,7 +549,7 @@ extension CinemaProfilePicker {
         }
     }
 
-    /// Avatar with the name beside it, shown for the focused profile as in the Netflix picker
+    /// Avatar with the name beside it, shown for the focused profile
     private struct ProfileLabel: View {
 
         @Environment(\.isFocused)

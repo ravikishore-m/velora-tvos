@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "avatar-axolotl.jpg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

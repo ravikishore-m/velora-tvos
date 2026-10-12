@@ -10,7 +10,7 @@ import CoreImage.CIFilterBuiltins
 import JellyfinAPI
 import SwiftUI
 
-/// TV sign-in in the style of Netflix: sign in with a phone through Quick Connect, or with the remote
+/// TV sign-in: sign in with a phone through Quick Connect, or with the remote
 struct CinemaSignInView<RemoteContent: View>: View {
 
     enum Method: Hashable {
@@ -46,7 +46,7 @@ struct CinemaSignInView<RemoteContent: View>: View {
     }
 
     private var wordmark: some View {
-        RKPlexWordmark(size: 64, isShimmering: true)
+        VeloraWordmark(size: 64, isShimmering: true)
     }
 
     @ViewBuilder

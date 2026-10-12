@@ -77,7 +77,7 @@ struct CinemaNewContentTag: View {
 
 extension BaseItemDto {
 
-    /// Netflix's "Recently added" and "New Episodes" labels for content added within the last two weeks
+    /// The "Recently added" and "New Episodes" labels for content added within the last two weeks
     var cinemaNewContentLabel: String? {
         let cutoff = Date.now.addingTimeInterval(-CinemaTheme.NewContent.window)
 

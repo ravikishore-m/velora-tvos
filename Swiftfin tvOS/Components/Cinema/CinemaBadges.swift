@@ -38,7 +38,7 @@ struct CinemaContentLine: View {
     }
 }
 
-/// Netflix's plain summary line for posters and the home hero: "Movie · Romance · 2026 · 2h 26m · A"
+/// Plain summary line for posters and the home hero: "Movie · Romance · 2026 · 2h 26m · A"
 struct CinemaFactsLine: View {
 
     let item: BaseItemDto

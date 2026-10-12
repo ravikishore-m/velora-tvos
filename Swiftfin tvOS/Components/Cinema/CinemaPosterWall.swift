@@ -9,7 +9,7 @@
 import Defaults
 import SwiftUI
 
-/// Tilted, slowly drifting wall of library posters behind sign in, after the Netflix sign-in screen.
+/// Tilted, slowly drifting wall of library posters behind sign in.
 ///
 /// Uses the artwork remembered from the last home visit, preferring titles from `serverID`.
 struct CinemaPosterWall: View {

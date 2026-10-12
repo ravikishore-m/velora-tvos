@@ -9,7 +9,7 @@
 import FactoryKit
 import SwiftUI
 
-/// The signed-in profile at the top of My RKPlex, like the profile card on My Netflix
+/// The signed-in profile at the top of My Velora
 struct CinemaProfileHeaderGroup: ContentGroup {
 
     let id = "cinema-profile-header"

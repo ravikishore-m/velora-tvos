@@ -102,7 +102,7 @@ final class UserSessionManager: ObservableObject {
         }
     }
 
-    /// Like Netflix, the Apple TV app asks who's watching every time it opens
+    /// The Apple TV app asks who's watching every time it opens
     private static var asksWhoIsWatchingOnOpen: Bool {
         #if os(tvOS)
         true

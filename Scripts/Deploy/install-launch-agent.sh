@@ -6,23 +6,23 @@
 #
 # Copyright (c) 2026 Jellyfin & Jellyfin Contributors
 #
-# Installs a LaunchAgent that runs rkplex-deploy.sh every hour, and at once when the deploy repository
-# (~/rkplex-deploy.git) receives a push. Most runs only check the branch and exit; a build happens
+# Installs a LaunchAgent that runs velora-deploy.sh every hour, and at once when the deploy repository
+# (~/velora-deploy.git) receives a push. Most runs only check the branch and exit; a build happens
 # on a new commit or before the profile lapses. The branch is pushed to that repository and tracks it,
-# so from another machine on the tailnet: git push ssh://<user>@<mac>/~/rkplex-deploy.git <branch>
+# so from another machine on the tailnet: git push ssh://<user>@<mac>/~/velora-deploy.git <branch>
 #
 # Usage: install-launch-agent.sh <devicectl device id> <xcodebuild device udid> [branch]
 #        install-launch-agent.sh --uninstall
 
 set -euo pipefail
 
-LABEL="com.rkplex.deploy"
+LABEL="com.velora.deploy"
 PLIST="$HOME/Library/LaunchAgents/$LABEL.plist"
-LOG_DIR="$HOME/Library/Logs/RKPlexDeploy"
-SCRIPT="${0:A:h}/rkplex-deploy.sh"
+LOG_DIR="$HOME/Library/Logs/VeloraDeploy"
+SCRIPT="${0:A:h}/velora-deploy.sh"
 REPO="${0:A:h:h:h}"
-DEPLOY_REPO="$HOME/rkplex-deploy.git"
-REQUESTS="$HOME/Library/Caches/RKPlexDeploy/requests"
+DEPLOY_REPO="$HOME/velora-deploy.git"
+REQUESTS="$HOME/Library/Caches/VeloraDeploy/requests"
 
 if [[ ${1:-} == --uninstall ]]; then
     launchctl bootout "gui/$UID/$LABEL" 2>/dev/null || true
@@ -55,11 +55,11 @@ cat >"$PLIST" <<EOF
     </array>
     <key>EnvironmentVariables</key>
     <dict>
-        <key>RKPLEX_BRANCH</key>
+        <key>VELORA_BRANCH</key>
         <string>$branch</string>
-        <key>RKPLEX_DEVICE</key>
+        <key>VELORA_DEVICE</key>
         <string>$device</string>
-        <key>RKPLEX_DESTINATION</key>
+        <key>VELORA_DESTINATION</key>
         <string>$destination</string>
     </dict>
     <key>StartInterval</key>
@@ -81,7 +81,7 @@ EOF
 launchctl bootout "gui/$UID/$LABEL" 2>/dev/null || true
 launchctl bootstrap "gui/$UID" "$PLIST"
 
-git -C "$REPO" remote get-url tv >/dev/null 2>&1 || git -C "$REPO" remote add tv "$DEPLOY_REPO"
+git -C "$REPO" remote add tv "$DEPLOY_REPO" 2>/dev/null || git -C "$REPO" remote set-url tv "$DEPLOY_REPO"
 git -C "$REPO" push --quiet --set-upstream tv "$branch"
 
 print "Installed $LABEL: deploys $branch from $DEPLOY_REPO on push and checks hourly, log at $LOG_DIR/deploy.log"

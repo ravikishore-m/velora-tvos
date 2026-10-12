@@ -11,7 +11,7 @@ import FactoryKit
 import Foundation
 import JellyfinAPI
 
-/// Netflix-style home: personal rows, Top 10 charts and categories built from what the server actually holds
+/// Velora home: personal rows, Top 10 charts and categories built from what the server actually holds
 struct CinemaHomeContentGroupProvider: ContentGroupProvider {
 
     private struct Category {
@@ -34,7 +34,7 @@ struct CinemaHomeContentGroupProvider: ContentGroupProvider {
         static let recentlyWatched = 2
     }
 
-    /// Genres in Netflix's usual order of prominence
+    /// Genres in order of prominence
     private static let movieGenrePriority = [
         "Action", "Comedy", "Thriller", "Romance", "Horror", "Science Fiction", "Animation",
         "Crime", "Drama", "Family", "Adventure", "Fantasy", "Mystery", "Documentary",

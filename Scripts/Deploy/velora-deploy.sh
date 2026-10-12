@@ -6,31 +6,31 @@
 #
 # Copyright (c) 2026 Jellyfin & Jellyfin Contributors
 #
-# Keeps RKPlex on the Apple TV in step with a git branch: deploys when the branch moves,
+# Keeps Velora on the Apple TV in step with a git branch: deploys when the branch moves,
 # and re-signs before a free Apple ID's 7-day provisioning profile lapses.
 # Builds in its own worktree, so the working copy is never touched.
 #
 # Run by launchd (see install-launch-agent.sh), or by hand. `--force`, or a `force` file in
-# ~/Library/Caches/RKPlexDeploy/requests, deploys regardless.
+# ~/Library/Caches/VeloraDeploy/requests, deploys regardless.
 #
 # Environment:
-#   RKPLEX_BRANCH         branch to deploy; follows its upstream when it has one
-#   RKPLEX_DEVICE         Apple TV identifier for devicectl
-#   RKPLEX_DESTINATION    Apple TV UDID for xcodebuild
-#   RKPLEX_MAX_AGE_DAYS   rebuild after this many days without changes (default 5)
+#   VELORA_BRANCH         branch to deploy; follows its upstream when it has one
+#   VELORA_DEVICE         Apple TV identifier for devicectl
+#   VELORA_DESTINATION    Apple TV UDID for xcodebuild
+#   VELORA_MAX_AGE_DAYS   rebuild after this many days without changes (default 5)
 
 set -euo pipefail
 
 SCRIPT_DIR=${0:A:h}
-REPO=${RKPLEX_REPO:-${SCRIPT_DIR:h:h}}
-BRANCH=${RKPLEX_BRANCH:?set RKPLEX_BRANCH}
-DEVICE=${RKPLEX_DEVICE:?set RKPLEX_DEVICE}
-DESTINATION=${RKPLEX_DESTINATION:?set RKPLEX_DESTINATION}
-MAX_AGE_DAYS=${RKPLEX_MAX_AGE_DAYS:-5}
+REPO=${VELORA_REPO:-${SCRIPT_DIR:h:h}}
+BRANCH=${VELORA_BRANCH:?set VELORA_BRANCH}
+DEVICE=${VELORA_DEVICE:?set VELORA_DEVICE}
+DESTINATION=${VELORA_DESTINATION:?set VELORA_DESTINATION}
+MAX_AGE_DAYS=${VELORA_MAX_AGE_DAYS:-5}
 
-STATE_DIR="$HOME/Library/Application Support/RKPlexDeploy"
-CACHE_DIR="$HOME/Library/Caches/RKPlexDeploy"
-LOG_DIR="$HOME/Library/Logs/RKPlexDeploy"
+STATE_DIR="$HOME/Library/Application Support/VeloraDeploy"
+CACHE_DIR="$HOME/Library/Caches/VeloraDeploy"
+LOG_DIR="$HOME/Library/Logs/VeloraDeploy"
 WORKTREE="$CACHE_DIR/worktree"
 DERIVED_DATA="$CACHE_DIR/DerivedData"
 SIGNING_CONFIG="XcodeConfig/DevelopmentTeam.xcconfig"
@@ -44,7 +44,7 @@ find "$LOG_DIR" -name 'build-*.log' -mtime +30 -delete 2>/dev/null || true
 log() { print -r -- "$(date '+%F %T') $*"; }
 
 notify() {
-    osascript -e "display notification \"$2\" with title \"RKPlex deploy\" subtitle \"$1\"" >/dev/null 2>&1 || true
+    osascript -e "display notification \"$2\" with title \"Velora deploy\" subtitle \"$1\"" >/dev/null 2>&1 || true
 }
 
 LOCK="$CACHE_DIR/lock"

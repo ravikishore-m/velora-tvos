@@ -9,8 +9,8 @@
 # Hook for the deploy repository: a push wakes the deploy LaunchAgent, which watches the requests folder.
 # The build runs in the logged-in session rather than this SSH session, which cannot reach the signing keychain.
 
-mkdir -p "$HOME/Library/Caches/RKPlexDeploy/requests"
-date >"$HOME/Library/Caches/RKPlexDeploy/requests/push"
+mkdir -p "$HOME/Library/Caches/VeloraDeploy/requests"
+date >"$HOME/Library/Caches/VeloraDeploy/requests/push"
 
-echo "RKPlex: deploy queued. The Apple TV updates when the build finishes;"
-echo "        check with: tail -f ~/Library/Logs/RKPlexDeploy/deploy.log"
+echo "Velora: deploy queued. The Apple TV updates when the build finishes;"
+echo "        check with: tail -f ~/Library/Logs/VeloraDeploy/deploy.log"

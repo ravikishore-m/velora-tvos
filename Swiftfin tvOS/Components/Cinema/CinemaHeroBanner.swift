@@ -65,7 +65,7 @@ struct CinemaHeroBanner: View {
         max(parentSize.height * CinemaTheme.Hero.heightRatio, CinemaTheme.Hero.minimumHeight)
     }
 
-    /// Netflix's inset, rounded billboard below the tab bar
+    /// Inset, rounded billboard below the tab bar
     private var cardSize: CGSize {
         CGSize(
             width: max(parentSize.width - CinemaTheme.Spacing.edge * 2, 1),
@@ -230,7 +230,7 @@ struct CinemaHeroBanner: View {
         .frame(maxWidth: .infinity, alignment: .bottomLeading)
     }
 
-    /// Netflix's corner chips: the audio languages on offer and the title's Top 10 position
+    /// Corner chips: the audio languages on offer and the title's Top 10 position
     @ViewBuilder
     private func chips(for item: BaseItemDto) -> some View {
         let languages = item.cinemaAudioLanguageCodes
