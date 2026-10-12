@@ -12,6 +12,7 @@ struct CinemaRowContentGroup<Library: PagingLibrary>: ContentGroup where Library
 
     let displayTitle: String
     let id: String
+    let isRanked: Bool
     let viewModel: PagingLibraryViewModel<Library>
 
     var _shouldBeResolved: Bool {
@@ -21,17 +22,20 @@ struct CinemaRowContentGroup<Library: PagingLibrary>: ContentGroup where Library
     init(
         id: String,
         library: Library,
-        displayTitle: String? = nil
+        displayTitle: String? = nil,
+        isRanked: Bool = false
     ) {
         self.displayTitle = displayTitle ?? library.parent.displayTitle
         self.id = id
+        self.isRanked = isRanked
         self.viewModel = .init(library: library, pageSize: 20)
     }
 
     func body(with viewModel: PagingLibraryViewModel<Library>) -> some View {
         CinemaCarousel(
             viewModel: viewModel,
-            title: displayTitle
+            title: displayTitle,
+            rankingID: isRanked ? id : nil
         )
     }
 }

@@ -30,9 +30,60 @@ struct CinemaCard: View {
 
     let entry: ItemEntry
     let isExpanded: Bool
+    var showsTopTenBadge: Bool = true
 
     private var shape: RoundedRectangle {
         RoundedRectangle(cornerRadius: CinemaTheme.Card.cornerRadius)
+    }
+
+    /// Netflix's "Recently added" and "New Episodes" labels for fresh content
+    private func newContentLabel(for item: BaseItemDto) -> String? {
+        let cutoff = Date.now.addingTimeInterval(-CinemaTheme.NewContent.window)
+
+        func isRecent(_ date: Date?) -> Bool {
+            date.map { $0 > cutoff } ?? false
+        }
+
+        switch item.type {
+        case .series:
+            if isRecent(item.dateCreated) {
+                return L10n.recentlyAdded
+            }
+            if isRecent(item.dateLastMediaAdded) {
+                return L10n.newEpisodes
+            }
+
+        case .episode:
+            if isRecent(item.dateCreated) {
+                return L10n.newEpisode
+            }
+
+        default:
+            if isRecent(item.dateCreated) {
+                return L10n.recentlyAdded
+            }
+        }
+
+        return nil
+    }
+
+    @ViewBuilder
+    private func newContentBadge(for item: BaseItemDto) -> some View {
+        if let label = newContentLabel(for: item) {
+            Text(label)
+                .font(.system(size: CinemaTheme.NewContent.fontSize, weight: .bold))
+                .foregroundStyle(CinemaTheme.Colors.primaryText)
+                .lineLimit(1)
+                .padding(.horizontal, CinemaTheme.NewContent.horizontalPadding)
+                .padding(.vertical, CinemaTheme.NewContent.verticalPadding)
+                .background(CinemaTheme.Colors.accent)
+                .clipShape(
+                    UnevenRoundedRectangle(
+                        topLeadingRadius: CinemaTheme.NewContent.cornerRadius,
+                        topTrailingRadius: CinemaTheme.NewContent.cornerRadius
+                    )
+                )
+        }
     }
 
     @ViewBuilder
@@ -129,6 +180,17 @@ struct CinemaCard: View {
                         .lineLimit(1)
                 }
 
+                HStack(spacing: CinemaTheme.Badge.spacing) {
+                    CinemaTopTenBadge(item: item, scale: CinemaTheme.TopTen.inlineBadgeScale)
+
+                    if let label = newContentLabel(for: item) {
+                        Text(label)
+                            .font(CinemaTheme.Typography.metadata)
+                            .foregroundStyle(CinemaTheme.Colors.accent)
+                            .lineLimit(1)
+                    }
+                }
+
                 CinemaBadges(item: item)
 
                 if let overview = item.overview, overview.isNotEmpty {
@@ -162,7 +224,15 @@ struct CinemaCard: View {
 
             poster
                 .overlay(alignment: .bottom) {
-                    progressBar(for: item)
+                    VStack(spacing: 0) {
+                        newContentBadge(for: item)
+                        progressBar(for: item)
+                    }
+                }
+                .overlay(alignment: .topTrailing) {
+                    if showsTopTenBadge {
+                        CinemaTopTenBadge(item: item)
+                    }
                 }
                 .opacity(isExpanded ? 0 : 1)
 

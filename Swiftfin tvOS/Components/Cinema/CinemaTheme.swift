@@ -170,6 +170,37 @@ enum CinemaTheme {
         )
     }
 
+    // MARK: - Top 10
+
+    enum TopTen {
+
+        static let numberSize: CGFloat = 300
+        static let numberTracking: CGFloat = -28
+        /// How far each poster tucks over its rank number
+        static let numberOverlap: CGFloat = 34
+        static let outlineWidth: CGFloat = 3
+        static let outlineColor = Color.white.opacity(0.7)
+        static let numberFill = Colors.background
+
+        static let badgeWidth: CGFloat = 46
+        static let badgeHeight: CGFloat = 56
+        static let badgeLabelSize: CGFloat = 13
+        static let badgeNumberSize: CGFloat = 25
+        static let inlineBadgeScale: CGFloat = 0.62
+    }
+
+    // MARK: - New Content
+
+    enum NewContent {
+
+        /// Titles added within this window get a "Recently added" style badge
+        static let window: TimeInterval = 14 * 24 * 60 * 60
+        static let fontSize: CGFloat = 17
+        static let horizontalPadding: CGFloat = 12
+        static let verticalPadding: CGFloat = 5
+        static let cornerRadius: CGFloat = 4
+    }
+
     // MARK: - Focus
 
     enum Focus {

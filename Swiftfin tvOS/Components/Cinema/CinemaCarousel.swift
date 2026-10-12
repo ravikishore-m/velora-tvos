@@ -21,6 +21,7 @@ struct CinemaCarousel<Library: PagingLibrary>: View where Library.Element == Ite
 
         let entry: ItemEntry
         let isExpanded: Bool
+        let showsTopTenBadge: Bool
 
         var body: some View {
             Button {
@@ -28,7 +29,8 @@ struct CinemaCarousel<Library: PagingLibrary>: View where Library.Element == Ite
             } label: {
                 CinemaCard(
                     entry: entry,
-                    isExpanded: isExpanded
+                    isExpanded: isExpanded,
+                    showsTopTenBadge: showsTopTenBadge
                 )
             }
             .buttonStyle(.cinemaCard)
@@ -51,6 +53,19 @@ struct CinemaCarousel<Library: PagingLibrary>: View where Library.Element == Ite
     var viewModel: PagingLibraryViewModel<Library>
 
     let title: String
+    /// Ranked rows show large numbers beside each poster, Netflix Top 10 style
+    var rankingID: String?
+
+    private var isRanked: Bool {
+        rankingID != nil
+    }
+
+    private var rankedEntries: [(rank: Int, entry: ItemEntry)] {
+        let elements = viewModel.elements.elements
+        let visible = isRanked ? Array(elements.prefix(CinemaTopTenLibrary.count)) : elements
+
+        return visible.enumerated().map { (rank: $0.offset + 1, entry: $0.element) }
+    }
 
     /// Begin loading the next page while a few cards remain
     private static var prefetchDistance: Int {
@@ -68,14 +83,29 @@ struct CinemaCarousel<Library: PagingLibrary>: View where Library.Element == Ite
     }
 
     @ViewBuilder
-    private func card(for entry: ItemEntry) -> some View {
-        CardButton(
+    private func card(for entry: ItemEntry, rank: Int) -> some View {
+        let button = CardButton(
             entry: entry,
-            isExpanded: focusedID == entry.id
+            isExpanded: focusedID == entry.id,
+            showsTopTenBadge: !isRanked
         )
         .focused($focusedID, equals: entry.id)
+
+        Group {
+            if isRanked {
+                HStack(alignment: .bottom, spacing: -CinemaTheme.TopTen.numberOverlap) {
+                    CinemaRankNumber(rank: rank)
+
+                    button
+                }
+            } else {
+                button
+            }
+        }
         .id(entry.id)
         .onAppear {
+            guard !isRanked else { return }
+
             loadMoreIfNeeded(after: entry)
         }
     }
@@ -93,8 +123,8 @@ struct CinemaCarousel<Library: PagingLibrary>: View where Library.Element == Ite
                 ScrollViewReader { proxy in
                     ScrollView(.horizontal) {
                         LazyHStack(alignment: .top, spacing: CinemaTheme.Card.spacing) {
-                            ForEach(viewModel.elements.elements) { entry in
-                                card(for: entry)
+                            ForEach(rankedEntries, id: \.entry.id) { ranked in
+                                card(for: ranked.entry, rank: ranked.rank)
                             }
                         }
                     }
@@ -111,6 +141,11 @@ struct CinemaCarousel<Library: PagingLibrary>: View where Library.Element == Ite
                 }
             }
             .focusSection()
+            .onChange(of: rankedEntries.map(\.entry.itemID), initial: true) { _, ids in
+                guard let rankingID else { return }
+
+                CinemaTopTenStore.shared.update(ids, for: rankingID)
+            }
             .animation(CinemaTheme.Card.expandAnimation, value: focusedID)
             .environment(\.colorScheme, .dark)
             .accessibilityElement(children: .contain)
