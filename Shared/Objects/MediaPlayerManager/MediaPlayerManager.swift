@@ -243,6 +243,9 @@ final class MediaPlayerManager: ViewModel {
 
     private var initialMediaPlayerItemProvider: MediaPlayerItemProvider?
 
+    /// Fixed for the session, so items built later match the player on screen
+    let playerType: VideoPlayerType
+
     // MARK: init
 
 //    static let empty: MediaPlayerManager = .init()
@@ -261,6 +264,10 @@ final class MediaPlayerManager: ViewModel {
         self.queue = queue.map { AnyMediaPlayerQueue($0) }
         self.state = .loadingItem
         self.initialMediaPlayerItemProvider = provider
+        self.playerType = .resolved(
+            for: provider.mediaSource ?? provider.item.mediaSources?.first,
+            subtitleStreamIndex: provider.subtitleStreamIndex
+        )
         super.init()
 
         self.queue?.manager = self
@@ -273,6 +280,7 @@ final class MediaPlayerManager: ViewModel {
         self.selectedItem = playbackItem.baseItem
         self.queue = queue.map { AnyMediaPlayerQueue($0) }
         self.state = .playback
+        self.playerType = Defaults[.VideoPlayer.videoPlayerType]
         super.init()
 
         self.queue?.manager = self

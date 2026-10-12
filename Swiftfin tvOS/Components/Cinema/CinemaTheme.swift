@@ -135,10 +135,10 @@ enum CinemaTheme {
         static let shimmerDuration: TimeInterval = 1.2
 
         static let homeSize: CGFloat = 50
-        static let introSize: CGFloat = 190
         static let introRibbonCount = 28
+        static let monogramSize: CGFloat = 520
         /// How far the camera dives into the R, enough for its streaks to fill the screen
-        static let diveScale: CGFloat = 22
+        static let diveScale: CGFloat = 10
         static let ribbonPalette: [Color] = [
             Colors.accent,
             Color(red: 0.55, green: 0.02, blue: 0.05),

@@ -299,6 +299,12 @@ struct CinemaProfilePicker: View {
                 reset()
             }
         }
+        .onReceive(Notifications[.applicationWillEnterForeground].publisher) {
+            guard !reduceMotion, !isChoosing else { return }
+
+            hasAppeared = false
+            isShowingIntro = true
+        }
         .fullScreenCover(
             isPresented: Binding(
                 get: { editingItem != nil },

@@ -185,9 +185,11 @@ extension VideoPlayerType {
                 ) {
                     avPlayerHDRProfiles
                 }
+                /// Not required: MKV carries no codec tag, and the server tags HEVC as hvc1 when remuxing to HLS,
+                /// so untagged HEVC is copied instead of re-encoded
                 ProfileCondition(
                     condition: .equalsAny,
-                    isRequired: true,
+                    isRequired: false,
                     property: .videoCodecTag
                 ) {
                     "hvc1"

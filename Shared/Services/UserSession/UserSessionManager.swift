@@ -222,11 +222,11 @@ final class UserSessionManager: ObservableObject {
         }
 
         guard currentSession != nil else { return }
-        guard !hasActivePlayback else { return }
 
         #if os(tvOS)
         await signOut(reason: .appReopened)
         #else
+        guard !hasActivePlayback else { return }
         guard Defaults[.signOutOnBackground] else { return }
 
         if Date.now.timeIntervalSince(Defaults[.backgroundTimeStamp]) > Defaults[.backgroundSignOutInterval] {

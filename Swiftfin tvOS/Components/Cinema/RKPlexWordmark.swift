@@ -14,8 +14,6 @@ struct RKPlexWordmark: View {
     let size: CGFloat
     /// Sweeps a highlight across the letters every few seconds
     var isShimmering = false
-    /// Letters at or beyond this index are hidden, and spring in one after another as it grows
-    var revealedLetters: Int = .max
 
     private var letters: [String] {
         L10n.rkPlex.uppercased().map(String.init)
@@ -32,17 +30,8 @@ struct RKPlexWordmark: View {
     private var lettering: some View {
         HStack(spacing: size * CinemaTheme.Brand.letterSpacing) {
             ForEach(Array(letters.enumerated()), id: \.offset) { index, letter in
-                let isRevealed = index < revealedLetters
-
                 Text(letter)
                     .scaleEffect(x: 1, y: archScale(at: index))
-                    .scaleEffect(isRevealed ? 1 : 1.4)
-                    .blur(radius: isRevealed ? 0 : size * 0.06)
-                    .opacity(isRevealed ? 1 : 0)
-                    .animation(
-                        .spring(response: 0.5, dampingFraction: 0.7).delay(Double(index) * 0.08),
-                        value: isRevealed
-                    )
             }
         }
         .font(.system(size: size, weight: .black).width(.condensed))
@@ -65,9 +54,9 @@ struct RKPlexWordmark: View {
     }
 }
 
-extension RKPlexWordmark {
+fileprivate extension RKPlexWordmark {
 
-    private struct ShimmerBand: View {
+    struct ShimmerBand: View {
 
         @State
         private var progress: CGFloat = 0
@@ -106,13 +95,51 @@ extension RKPlexWordmark {
     }
 }
 
-/// Launch ident, after Netflix's: the letters spring in over black, hold with a glow,
-/// then the camera dives into the R as it breaks into streaks of light that reveal the profile picker.
+/// The R on its own, the app's mark, shaded across the middle like a folded ribbon
+struct RKPlexMonogram: View {
+
+    let size: CGFloat
+    var isShimmering = false
+
+    private var letter: some View {
+        Text(L10n.rkPlex.prefix(1).uppercased())
+            .font(.system(size: size, weight: .black).width(.condensed))
+            .fixedSize()
+    }
+
+    var body: some View {
+        letter
+            .foregroundStyle(CinemaTheme.Brand.fill)
+            .overlay {
+                LinearGradient(
+                    stops: [
+                        .init(color: .clear, location: 0.35),
+                        .init(color: .black.opacity(0.4), location: 0.5),
+                        .init(color: .clear, location: 0.65),
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .mask(letter)
+            }
+            .overlay {
+                if isShimmering {
+                    RKPlexWordmark.ShimmerBand()
+                        .mask(letter)
+                }
+            }
+            .shadow(color: .black.opacity(0.6), radius: size * 0.05, y: size * 0.03)
+            .accessibilityHidden(true)
+    }
+}
+
+/// Launch ident, after Netflix's: the R springs out of the dark, holds with a glow,
+/// then the camera dives into it as it breaks into streaks of light that reveal the profile picker.
 struct RKPlexIntro: View {
 
     private enum Stage: Int, Comparable {
         case hidden
-        case letters
+        case appear
         case hold
         case dive
         case reveal
@@ -129,30 +156,32 @@ struct RKPlexIntro: View {
     @State
     private var stage: Stage = .hidden
 
-    /// The R's centre within the wordmark, which the camera dives into
-    private static let diveAnchor = UnitPoint(x: 0.085, y: 0.5)
-
-    private var wordmarkScale: CGFloat {
+    private var monogramScale: CGFloat {
         switch stage {
-        case .hidden, .letters: 1
-        case .hold: 1.05
+        case .hidden: 0.6
+        case .appear: 1
+        case .hold: 1.06
         case .dive, .reveal: CinemaTheme.Brand.diveScale
         }
     }
 
     private func play() async {
-        stage = .letters
-        try? await Task.sleep(for: .milliseconds(1000))
+        try? await Task.sleep(for: .milliseconds(150))
 
-        withAnimation(.easeInOut(duration: 0.6)) {
+        withAnimation(.spring(response: 0.7, dampingFraction: 0.72)) {
+            stage = .appear
+        }
+        try? await Task.sleep(for: .milliseconds(800))
+
+        withAnimation(.easeInOut(duration: 0.7)) {
             stage = .hold
         }
-        try? await Task.sleep(for: .milliseconds(650))
+        try? await Task.sleep(for: .milliseconds(750))
 
-        withAnimation(.easeIn(duration: 0.95)) {
+        withAnimation(.easeIn(duration: 0.9)) {
             stage = .dive
         }
-        try? await Task.sleep(for: .milliseconds(600))
+        try? await Task.sleep(for: .milliseconds(550))
 
         onReveal()
         try? await Task.sleep(for: .milliseconds(350))
@@ -171,26 +200,26 @@ struct RKPlexIntro: View {
                 .opacity(stage >= .reveal ? 0 : 1)
 
             RadialGradient(
-                colors: [CinemaTheme.Colors.accent.opacity(0.4), .clear],
+                colors: [CinemaTheme.Colors.accent.opacity(0.45), .clear],
                 center: .center,
                 startRadius: 0,
-                endRadius: CinemaTheme.Brand.introSize * 3
+                endRadius: CinemaTheme.Brand.monogramSize
             )
-            .opacity(stage == .hold ? 1 : 0)
+            .opacity(stage == .hold ? 1 : stage == .appear ? 0.5 : 0)
 
-            RKPlexWordmark(
-                size: CinemaTheme.Brand.introSize,
-                isShimmering: stage == .hold,
-                revealedLetters: stage >= .letters ? .max : 0
+            RKPlexMonogram(
+                size: CinemaTheme.Brand.monogramSize,
+                isShimmering: stage == .hold
             )
-            .overlay(alignment: .leading) {
+            .overlay {
                 RibbonBurst()
-                    .frame(width: CinemaTheme.Brand.introSize * 0.5, height: CinemaTheme.Brand.introSize * 1.2)
+                    .frame(width: CinemaTheme.Brand.monogramSize * 0.55, height: CinemaTheme.Brand.monogramSize * 0.8)
                     .opacity(stage >= .dive ? 1 : 0)
                     .animation(.easeIn(duration: 0.3), value: stage)
             }
-            .scaleEffect(wordmarkScale, anchor: Self.diveAnchor)
-            .opacity(stage >= .reveal ? 0 : 1)
+            .scaleEffect(monogramScale)
+            .blur(radius: stage == .hidden ? 30 : 0)
+            .opacity(stage == .hidden || stage >= .reveal ? 0 : 1)
         }
         .ignoresSafeArea()
         .allowsHitTesting(false)
