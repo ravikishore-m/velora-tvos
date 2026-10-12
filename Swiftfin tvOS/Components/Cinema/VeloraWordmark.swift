@@ -8,57 +8,101 @@
 
 import SwiftUI
 
-/// The Velora mark: a V of two rounded ribbons, violet over mint, meeting in sky blue.
-/// Each ribbon can be drawn in part, for the launch ident.
+/// The Velora mark: one ribbon folded into a V. It runs down the violet arm, folds at the base,
+/// showing its darker underside, and rises again as the mint arm.
+/// Each arm can be revealed in part, for the launch ident.
+///
+/// Scripts/Brand/render-brand.swift draws the same facets for the app icon.
 struct VeloraMark: View {
 
+    /// Facet corners in a unit square, y down
+    static let leadingArm = [
+        CGPoint(x: 0.05, y: 0.1),
+        CGPoint(x: 0.32, y: 0.1),
+        CGPoint(x: 0.635, y: 0.9),
+        CGPoint(x: 0.365, y: 0.9),
+    ]
+    static let trailingArm = [
+        CGPoint(x: 0.68, y: 0.1),
+        CGPoint(x: 0.95, y: 0.1),
+        CGPoint(x: 0.635, y: 0.9),
+        CGPoint(x: 0.365, y: 0.9),
+    ]
+
     let size: CGFloat
+    /// Reveals the leading arm from the top down
     var leadingProgress: CGFloat = 1
+    /// Reveals the fold and trailing arm from the bottom up
     var trailingProgress: CGFloat = 1
 
-    private struct Ribbon: Shape {
+    struct Facet: Shape {
 
-        let start: UnitPoint
-        let end: UnitPoint
+        let corners: [CGPoint]
 
         func path(in rect: CGRect) -> Path {
-            Path { path in
-                path.move(to: CGPoint(x: rect.minX + start.x * rect.width, y: rect.minY + start.y * rect.height))
-                path.addLine(to: CGPoint(x: rect.minX + end.x * rect.width, y: rect.minY + end.y * rect.height))
+            let points = corners.map { CGPoint(x: rect.minX + $0.x * rect.width, y: rect.minY + $0.y * rect.height) }
+            let radius = CinemaTheme.Brand.facetRadius * min(rect.width, rect.height)
+
+            guard let first = points.first, let last = points.last else { return Path() }
+
+            var path = Path()
+            path.move(to: CGPoint(x: (last.x + first.x) / 2, y: (last.y + first.y) / 2))
+            for index in points.indices {
+                path.addArc(tangent1End: points[index], tangent2End: points[(index + 1) % points.count], radius: radius)
             }
+            path.closeSubpath()
+            return path
         }
     }
 
-    private var stroke: StrokeStyle {
-        StrokeStyle(lineWidth: size * CinemaTheme.Brand.ribbonWidth, lineCap: .round)
+    private static let sheen = LinearGradient(
+        colors: [.white.opacity(0.32), .clear],
+        startPoint: .top,
+        endPoint: UnitPoint(x: 0.5, y: 0.5)
+    )
+
+    private func arm(_ corners: [CGPoint], top: Color) -> some View {
+        Facet(corners: corners)
+            .fill(LinearGradient(colors: [top, CinemaTheme.Brand.sky], startPoint: .top, endPoint: .bottom))
+            .overlay {
+                Facet(corners: corners)
+                    .fill(Self.sheen)
+            }
+    }
+
+    private var fold: some View {
+        Facet(corners: Self.trailingArm)
+            .fill(
+                LinearGradient(
+                    colors: [CinemaTheme.Brand.fold, CinemaTheme.Brand.sky.mix(with: CinemaTheme.Brand.fold, by: 0.45)],
+                    startPoint: .bottom,
+                    endPoint: .center
+                )
+            )
+            .mask(Facet(corners: Self.leadingArm))
     }
 
     var body: some View {
         ZStack {
-            Ribbon(start: UnitPoint(x: 0.84, y: 0.16), end: UnitPoint(x: 0.5, y: 0.84))
-                .trim(from: 0, to: trailingProgress)
-                .stroke(
-                    LinearGradient(
-                        colors: [CinemaTheme.Brand.mint, CinemaTheme.Brand.sky],
-                        startPoint: .topTrailing,
-                        endPoint: .bottom
-                    ),
-                    style: stroke
-                )
+            arm(Self.leadingArm, top: CinemaTheme.Brand.violet)
+                .mask(alignment: .top) {
+                    Rectangle()
+                        .frame(height: size * leadingProgress)
+                }
 
-            Ribbon(start: UnitPoint(x: 0.16, y: 0.16), end: UnitPoint(x: 0.5, y: 0.84))
-                .trim(from: 0, to: leadingProgress)
-                .stroke(
-                    LinearGradient(
-                        colors: [CinemaTheme.Brand.violet, CinemaTheme.Brand.sky],
-                        startPoint: .topLeading,
-                        endPoint: .bottom
-                    ),
-                    style: stroke
-                )
-                .shadow(color: .black.opacity(0.35), radius: size * 0.03, x: size * 0.02)
+            ZStack {
+                arm(Self.trailingArm, top: CinemaTheme.Brand.mint)
+
+                fold
+            }
+            .mask(alignment: .bottom) {
+                Rectangle()
+                    .frame(height: size * trailingProgress)
+            }
         }
         .frame(width: size, height: size)
+        .compositingGroup()
+        .shadow(color: .black.opacity(0.35), radius: size * 0.04, y: size * 0.02)
         .accessibilityHidden(true)
     }
 }
@@ -138,7 +182,7 @@ extension VeloraWordmark {
     }
 }
 
-/// Launch ident: an aurora rises in the dark, the V draws itself ribbon by ribbon,
+/// Launch ident: an aurora rises in the dark, the ribbon runs down, folds and rises into the V,
 /// the name lifts in letter by letter, and the whole mark drifts forward and fades into the profile picker.
 struct VeloraIntro: View {
 

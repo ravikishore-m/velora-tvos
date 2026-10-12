@@ -185,6 +185,8 @@ extension CinemaSignInView {
                 }
                 .frame(maxWidth: 820, alignment: .leading)
             }
+            .padding(48)
+            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 44, style: .continuous))
             .frame(maxWidth: .infinity)
             .task {
                 do {

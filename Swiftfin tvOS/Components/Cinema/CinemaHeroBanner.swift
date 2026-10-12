@@ -185,10 +185,15 @@ struct CinemaHeroBanner: View {
     private func progress(for item: BaseItemDto) -> some View {
         if let percentage = item.progressPercentage {
             HStack(spacing: CinemaTheme.Spacing.metadata) {
-                ProgressView(value: percentage)
-                    .progressViewStyle(.linear)
-                    .tint(CinemaTheme.Colors.accent)
-                    .frame(width: CinemaTheme.Hero.progressWidth)
+                Capsule()
+                    .fill(CinemaTheme.Colors.track)
+                    .overlay(alignment: .leading) {
+                        Capsule()
+                            .fill(CinemaTheme.Brand.gradient)
+                            .frame(width: CinemaTheme.Hero.progressWidth * percentage)
+                    }
+                    .frame(width: CinemaTheme.Hero.progressWidth, height: 8)
+                    .accessibilityHidden(true)
 
                 if let progressLabel = item.progressLabel {
                     Text(progressLabel)
@@ -239,7 +244,7 @@ struct CinemaHeroBanner: View {
         HStack(spacing: CinemaTheme.Hero.chipSpacing) {
             if languages.count > 1 {
                 HeroChip(
-                    systemImage: "speaker.wave.2.fill",
+                    glyph: .channels,
                     title: L10n.inLanguages(
                         languages
                             .prefix(CinemaTheme.Hero.maximumChipLanguages)
@@ -251,7 +256,7 @@ struct CinemaHeroBanner: View {
 
             if let ranking {
                 HeroChip(
-                    systemImage: "chart.bar.fill",
+                    glyph: .sound,
                     title: ranking.rowID == CinemaTopTenStore.showsRowID ?
                         L10n.rankInShows(ranking.rank) :
                         L10n.rankInMovies(ranking.rank)
@@ -305,7 +310,11 @@ struct CinemaHeroBanner: View {
         }
         .frame(width: cardSize.width, height: cardSize.height)
         .clipShape(RoundedRectangle(cornerRadius: CinemaTheme.Hero.cardCornerRadius, style: .continuous))
-        .shadow(color: .black.opacity(0.5), radius: 30, y: 16)
+        .overlay {
+            RoundedRectangle(cornerRadius: CinemaTheme.Hero.cardCornerRadius, style: .continuous)
+                .strokeBorder(.white.opacity(0.14), lineWidth: 1.5)
+        }
+        .shadow(color: CinemaTheme.Brand.violet.opacity(0.25), radius: 40, y: 16)
     }
 
     @ViewBuilder
@@ -344,10 +353,13 @@ struct CinemaHeroBanner: View {
             HStack(spacing: 10) {
                 ForEach(items.indices, id: \.self) { page in
                     Capsule()
-                        .fill(page == index ? CinemaTheme.Colors.primaryText : CinemaTheme.Colors.tertiaryText)
+                        .fill(page == index ? AnyShapeStyle(CinemaTheme.Brand.gradient) : AnyShapeStyle(CinemaTheme.Colors.tertiaryText))
                         .frame(width: page == index ? 36 : 10, height: 10)
                 }
             }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .glassEffect(.regular, in: Capsule())
             .animation(CinemaTheme.Hero.crossfade, value: index)
             .accessibilityHidden(true)
         }
@@ -405,29 +417,24 @@ struct CinemaHeroBanner: View {
 
 extension CinemaHeroBanner {
 
-    /// A dark translucent capsule with a red icon tile
+    /// A glass capsule led by a Velora glyph
     private struct HeroChip: View {
 
-        let systemImage: String
+        let glyph: VeloraFormatGlyph
         let title: String
 
         var body: some View {
             HStack(spacing: CinemaTheme.Hero.chipIconSpacing) {
-                Image(systemName: systemImage)
-                    .font(.system(size: CinemaTheme.Hero.chipIconSize, weight: .bold))
-                    .foregroundStyle(CinemaTheme.Colors.primaryText)
-                    .frame(width: CinemaTheme.Hero.chipIconTile, height: CinemaTheme.Hero.chipIconTile)
-                    .background(CinemaTheme.Colors.accent, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                VeloraFormatGlyphView(glyph: glyph, size: CinemaTheme.Hero.chipIconSize)
 
                 Text(title)
                     .font(CinemaTheme.Hero.chipFont)
                     .foregroundStyle(CinemaTheme.Colors.primaryText)
                     .lineLimit(1)
             }
-            .padding(.leading, CinemaTheme.Hero.chipPadding / 2)
-            .padding(.trailing, CinemaTheme.Hero.chipPadding)
+            .padding(.horizontal, CinemaTheme.Hero.chipPadding)
             .padding(.vertical, CinemaTheme.Hero.chipPadding / 2)
-            .background(.black.opacity(0.55), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .glassEffect(.regular, in: Capsule())
             .accessibilityElement(children: .combine)
         }
     }

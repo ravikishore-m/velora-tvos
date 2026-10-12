@@ -236,6 +236,17 @@ struct CinemaProfilePicker: View {
                 .opacity(isChoosing ? 0 : 1)
         }
         .frame(width: CinemaTheme.Profile.columnWidth, alignment: .leading)
+        .padding(CinemaTheme.Profile.panelPadding)
+        .background {
+            Color.clear
+                .glassEffect(
+                    .regular.tint(CinemaTheme.Brand.night.opacity(0.35)),
+                    in: RoundedRectangle(cornerRadius: CinemaTheme.Profile.panelCornerRadius, style: .continuous)
+                )
+                .opacity(hasAppeared && !isChoosing ? 1 : 0)
+                .animation(CinemaTheme.Profile.chooseAnimation, value: isChoosing)
+                .animation(.easeOut(duration: 0.6), value: hasAppeared)
+        }
         .frame(maxHeight: .infinity, alignment: .topLeading)
     }
 
@@ -333,45 +344,39 @@ struct CinemaProfilePicker: View {
 
 // MARK: - Background
 
-/// Deep red glow with faint concentric rings, shown behind the picker until the library artwork is known
+/// The Velora aurora: violet, sky and mint light drifting over the night,
+/// shown behind the picker until the library artwork is known
 struct CinemaProfilesBackground: View {
 
     @State
-    private var isGlowing = false
+    private var isDrifting = false
 
     var body: some View {
         ZStack {
-            Color.black
+            CinemaTheme.Brand.night
 
-            RadialGradient(
-                colors: [
-                    Color(red: 0.42, green: 0.05, blue: 0.07),
-                    Color(red: 0.2, green: 0.02, blue: 0.04),
-                    .black,
-                ],
-                center: UnitPoint(x: 0.5, y: -0.2),
-                startRadius: 0,
-                endRadius: 1500
-            )
-            .opacity(isGlowing ? 1 : 0.75)
+            ZStack {
+                Ellipse()
+                    .fill(CinemaTheme.Brand.violet)
+                    .frame(width: 1300, height: 640)
+                    .offset(x: isDrifting ? -380 : -520, y: isDrifting ? -260 : -180)
 
-            Canvas { context, size in
-                let center = CGPoint(x: size.width / 2, y: -size.height * 0.15)
+                Ellipse()
+                    .fill(CinemaTheme.Brand.mint)
+                    .frame(width: 1000, height: 480)
+                    .offset(x: isDrifting ? 520 : 380, y: isDrifting ? 300 : 360)
 
-                for index in 1 ... 16 {
-                    let radius = CGFloat(index) * 140
-                    let rect = CGRect(x: center.x - radius, y: center.y - radius, width: radius * 2, height: radius * 2)
-
-                    context.stroke(
-                        Path(ellipseIn: rect),
-                        with: .color(.white.opacity(0.03)),
-                        lineWidth: 1.5
-                    )
-                }
+                Ellipse()
+                    .fill(CinemaTheme.Brand.sky)
+                    .frame(width: 800, height: 420)
+                    .offset(x: isDrifting ? 120 : -60, y: 40)
+                    .opacity(0.7)
             }
+            .blur(radius: 180)
+            .opacity(0.5)
 
             LinearGradient(
-                colors: [.clear, .black.opacity(0.85)],
+                colors: [.clear, CinemaTheme.Brand.night.opacity(0.8)],
                 startPoint: .center,
                 endPoint: .bottom
             )
@@ -379,8 +384,8 @@ struct CinemaProfilesBackground: View {
         .ignoresSafeArea()
         .accessibilityHidden(true)
         .onAppear {
-            withAnimation(.easeInOut(duration: 6).repeatForever(autoreverses: true)) {
-                isGlowing = true
+            withAnimation(.easeInOut(duration: 14).repeatForever(autoreverses: true)) {
+                isDrifting = true
             }
         }
     }
@@ -597,7 +602,9 @@ extension CinemaProfilePicker {
                         }
                     }
                     .overlay {
-                        shape.strokeBorder(.white, lineWidth: isFocused && !isHidden ? 5 : 0)
+                        shape
+                            .strokeBorder(CinemaTheme.Brand.diagonalGradient, lineWidth: CinemaTheme.Profile.focusRingWidth)
+                            .opacity(isFocused && !isHidden ? 1 : 0)
                     }
                     .scaleEffect(isFocused ? CinemaTheme.Profile.focusScale : 1)
                     .shadow(
@@ -648,7 +655,9 @@ extension CinemaProfilePicker {
                 }
                 .frame(width: CinemaTheme.Profile.size, height: CinemaTheme.Profile.size)
                 .overlay {
-                    shape.strokeBorder(.white, lineWidth: isFocused ? 5 : 0)
+                    shape
+                        .strokeBorder(CinemaTheme.Brand.diagonalGradient, lineWidth: CinemaTheme.Profile.focusRingWidth)
+                        .opacity(isFocused ? 1 : 0)
                 }
                 .scaleEffect(isFocused ? CinemaTheme.Profile.focusScale : 1)
 
@@ -666,7 +675,7 @@ extension CinemaProfilePicker {
         }
     }
 
-    /// Thin outlined capsule that fills white on focus, like the Manage Profiles button
+    /// Thin outlined capsule that fills with the Velora gradient on focus
     private struct OutlineButtonStyle: ButtonStyle {
 
         var isDestructive = false
@@ -686,20 +695,16 @@ extension CinemaProfilePicker {
         let configuration: ButtonStyleConfiguration
         let isDestructive: Bool
 
-        private var fill: Color {
-            guard isFocused else { return .clear }
+        private var fill: AnyShapeStyle {
+            guard isFocused else { return AnyShapeStyle(Color.clear) }
 
-            return isDestructive ? CinemaTheme.Colors.accent : .white
-        }
-
-        private var foreground: Color {
-            isFocused && !isDestructive ? .black : .white
+            return isDestructive ? AnyShapeStyle(Color.red) : AnyShapeStyle(CinemaTheme.Brand.gradient)
         }
 
         var body: some View {
             configuration.label
                 .font(.headline)
-                .foregroundStyle(foreground)
+                .foregroundStyle(CinemaTheme.Colors.primaryText)
                 .padding(.horizontal, 40)
                 .padding(.vertical, 18)
                 .background(Capsule().fill(fill))
@@ -713,7 +718,7 @@ extension CinemaProfilePicker {
         }
     }
 
-    /// Accent ring spinner shown while the chosen profile signs in
+    /// Gradient ring spinner shown while the chosen profile signs in
     private struct Spinner: View {
 
         @State
@@ -722,7 +727,13 @@ extension CinemaProfilePicker {
         var body: some View {
             Circle()
                 .trim(from: 0.05, to: 0.8)
-                .stroke(CinemaTheme.Colors.accent, style: StrokeStyle(lineWidth: 8, lineCap: .round))
+                .stroke(
+                    AngularGradient(
+                        colors: [CinemaTheme.Brand.violet, CinemaTheme.Brand.sky, CinemaTheme.Brand.mint],
+                        center: .center
+                    ),
+                    style: StrokeStyle(lineWidth: 8, lineCap: .round)
+                )
                 .frame(width: 84, height: 84)
                 .rotationEffect(.degrees(isRotating ? 360 : 0))
                 .onAppear {

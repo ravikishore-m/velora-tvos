@@ -15,6 +15,7 @@ extension ButtonStyle where Self == CinemaActionButtonStyle {
     }
 }
 
+/// Clear glass at rest; focus floods the glass with Velora violet
 struct CinemaActionButtonStyle: ButtonStyle {
 
     @Environment(\.isEnabled)
@@ -26,12 +27,8 @@ struct CinemaActionButtonStyle: ButtonStyle {
         isEnabled && isFocused
     }
 
-    private var backgroundColor: Color {
-        isHighlighted ? CinemaTheme.Colors.focusedActionBackground : CinemaTheme.Colors.actionBackground
-    }
-
-    private var foregroundColor: Color {
-        isHighlighted ? CinemaTheme.Colors.focusedActionForeground : CinemaTheme.Colors.actionForeground
+    private var glass: Glass {
+        isHighlighted ? .regular.tint(CinemaTheme.Colors.accent).interactive() : .regular
     }
 
     private func scale(isPressed: Bool) -> CGFloat {
@@ -45,23 +42,19 @@ struct CinemaActionButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(CinemaTheme.Typography.action)
-            .foregroundStyle(foregroundColor)
+            .foregroundStyle(CinemaTheme.Colors.primaryText)
             .symbolRenderingMode(.monochrome)
             .labelStyle(.titleAndIcon)
             .lineLimit(1)
             .fixedSize(horizontal: true, vertical: true)
             .padding(.horizontal, 36)
             .padding(.vertical, 16)
-            .background(
-                isHighlighted ? backgroundColor : .clear,
-                in: Capsule()
-            )
-            .glassEffect(isHighlighted ? .identity : .regular, in: Capsule())
+            .glassEffect(glass, in: Capsule())
             .contentShape(Capsule())
             .scaleEffect(scale(isPressed: configuration.isPressed))
             .opacity(isEnabled ? 1 : 0.5)
             .shadow(
-                color: .black.opacity(isHighlighted ? 0.45 : 0),
+                color: CinemaTheme.Colors.accent.opacity(isHighlighted ? 0.5 : 0),
                 radius: isHighlighted ? CinemaTheme.Focus.shadowRadius : 0,
                 y: isHighlighted ? 8 : 0
             )

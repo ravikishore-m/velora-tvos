@@ -151,7 +151,7 @@ extension VideoPlayer.PlaybackControls {
             }
             .frame(height: sliderHeight)
             .trackingSize($sliderSize)
-            .foregroundStyle(manager.state == .loadingItem ? .gray : CinemaTheme.Player.tint)
+            .foregroundStyle(manager.state == .loadingItem ? .gray : CinemaTheme.Player.progress)
         }
 
         @ViewBuilder

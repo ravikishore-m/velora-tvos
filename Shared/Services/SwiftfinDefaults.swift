@@ -66,11 +66,7 @@ extension Defaults.Keys {
     ///
     /// This is set externally whenever the app or user accent colors change,
     /// depending on the current app state.
-    #if os(tvOS)
-    static var accentColor: Key<Color> = AppKey("accentColor", default: Color(red: 0.898, green: 0.035, blue: 0.078))
-    #else
-    static var accentColor: Key<Color> = AppKey("accentColor", default: .jellyfinPurple)
-    #endif
+    static var accentColor: Key<Color> = AppKey("accentColor", default: .defaultAccent)
 
     /// The _real_ appearance key to be used.
     ///
@@ -113,7 +109,7 @@ extension Defaults.Keys {
     /// The accent color default for user contexts.
     /// Only use for `set`, use `accentColor` for `get`.
     static var userAccentColor: Key<Color> {
-        UserKey("userAccentColor", default: .jellyfinPurple)
+        UserKey("userAccentColor", default: .defaultAccent)
     }
 
     /// The appearance default for user contexts.

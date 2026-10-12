@@ -9,7 +9,7 @@
 import JellyfinAPI
 import SwiftUI
 
-/// Information, Languages and Accessibility columns at the bottom of a details page, as in the Apple TV app
+/// Information, Languages and Accessibility columns on a glass panel at the bottom of a details page
 struct CinemaItemInfoGroup: ContentGroup {
 
     let id: String
@@ -169,10 +169,10 @@ struct CinemaItemInfoGroup: ContentGroup {
                 }
                 .padding(.vertical, 40)
                 .padding(.horizontal, 40)
-                .background {
-                    RoundedRectangle(cornerRadius: 28, style: .continuous)
-                        .fill(Color.white.opacity(isFocused ? 0.1 : 0.04))
-                }
+                .glassEffect(
+                    .regular.tint(isFocused ? CinemaTheme.Colors.accent.opacity(0.2) : nil),
+                    in: RoundedRectangle(cornerRadius: 28, style: .continuous)
+                )
                 .edgePadding(.horizontal)
                 .padding(.vertical, 30)
                 .focusable()

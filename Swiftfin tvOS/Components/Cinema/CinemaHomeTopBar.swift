@@ -57,9 +57,9 @@ extension CinemaHomeTopBar {
                     .frame(width: CinemaTheme.Avatar.homeSize, height: CinemaTheme.Avatar.homeSize)
                     .overlay {
                         RoundedRectangle(cornerRadius: CinemaTheme.Profile.cornerRadius, style: .continuous)
-                            .strokeBorder(.white, lineWidth: isFocused ? 4 : 0)
+                            .strokeBorder(CinemaTheme.Brand.diagonalGradient, lineWidth: 4)
+                            .opacity(isFocused ? 1 : 0)
                     }
-                    .scaleEffect(isFocused ? CinemaTheme.Profile.focusScale : 1)
 
                 if isFocused {
                     Text(L10n.switchProfile)
@@ -68,6 +68,13 @@ extension CinemaHomeTopBar {
                         .transition(.opacity.combined(with: .move(edge: .leading)))
                 }
             }
+            .padding(8)
+            .padding(.trailing, isFocused ? 16 : 0)
+            .glassEffect(
+                isFocused ? .regular.tint(CinemaTheme.Colors.accent.opacity(0.35)) : .regular,
+                in: RoundedRectangle(cornerRadius: CinemaTheme.Profile.cornerRadius + 8, style: .continuous)
+            )
+            .scaleEffect(isFocused ? CinemaTheme.Profile.focusScale : 1, anchor: .leading)
             .animation(CinemaTheme.Focus.animation, value: isFocused)
         }
     }

@@ -101,7 +101,9 @@ struct CinemaAvatarPicker: View {
         }
         .scrollClipDisabled()
         .foregroundStyle(CinemaTheme.Colors.primaryText)
-        .background(Color.black.ignoresSafeArea())
+        .background {
+            CinemaProfilesBackground()
+        }
         .environment(\.colorScheme, .dark)
     }
 }
@@ -126,7 +128,9 @@ extension CinemaAvatarPicker {
                 .frame(width: CinemaTheme.Avatar.size, height: CinemaTheme.Avatar.size)
                 .clipShape(shape)
                 .overlay {
-                    shape.strokeBorder(.white, lineWidth: isFocused ? 5 : 0)
+                    shape
+                        .strokeBorder(CinemaTheme.Brand.diagonalGradient, lineWidth: CinemaTheme.Profile.focusRingWidth)
+                        .opacity(isFocused ? 1 : 0)
                 }
                 .overlay(alignment: .bottomTrailing) {
                     if isSelected {
@@ -138,7 +142,7 @@ extension CinemaAvatarPicker {
                     }
                 }
                 .scaleEffect(isFocused ? CinemaTheme.Profile.focusScale : 1)
-                .shadow(color: .black.opacity(isFocused ? 0.6 : 0), radius: 20, y: 10)
+                .shadow(color: CinemaTheme.Colors.accent.opacity(isFocused ? 0.5 : 0), radius: 24, y: 10)
                 .animation(CinemaTheme.Focus.animation, value: isFocused)
                 .accessibilityAddTraits(isSelected ? .isSelected : [])
         }

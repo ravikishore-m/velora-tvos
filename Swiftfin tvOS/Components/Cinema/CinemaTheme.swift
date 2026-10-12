@@ -14,20 +14,18 @@ enum CinemaTheme {
 
     enum Colors {
 
-        static let background = Color(red: 0.05, green: 0.05, blue: 0.06)
+        /// Blue-black, so glass and artwork pick up the brand's cool cast
+        static let background = Color(red: 0.03, green: 0.035, blue: 0.075)
 
         static let primaryText = Color.white
         static let secondaryText = Color.white.opacity(0.72)
         static let tertiaryText = Color.white.opacity(0.5)
 
-        static let actionBackground = Color.white.opacity(0.18)
-        static let actionForeground = Color.white
-        static let focusedActionBackground = Color.white
-        static let focusedActionForeground = Color.black
+        static let track = Color.white.opacity(0.18)
 
         static let placeholder = Color.white.opacity(0.08)
-        /// Velora violet, used for progress and highlights
-        static let accent = Color(red: 0.55, green: 0.42, blue: 1)
+        /// Velora violet, used for focus, progress and highlights
+        static let accent = Color.veloraViolet
         /// Cool secondary glow for backgrounds
         static let glow = Color(red: 0.25, green: 0.4, blue: 1)
     }
@@ -73,8 +71,7 @@ enum CinemaTheme {
         static let chipSpacing: CGFloat = 14
         static let chipPadding: CGFloat = 16
         static let chipIconSpacing: CGFloat = 12
-        static let chipIconSize: CGFloat = 18
-        static let chipIconTile: CGFloat = 34
+        static let chipIconSize: CGFloat = 22
         static let maximumChipLanguages = 5
 
         static let logoMaxWidth: CGFloat = 620
@@ -124,9 +121,19 @@ enum CinemaTheme {
         static let mint = Color(red: 0.2, green: 0.88, blue: 0.72)
         /// The deep blue-black behind the launch ident
         static let night = Color(red: 0.02, green: 0.024, blue: 0.06)
+        /// The underside of the ribbon where the V folds
+        static let fold = Color(red: 0.12, green: 0.16, blue: 0.48)
 
-        /// Ribbon thickness as a fraction of the mark's size
-        static let ribbonWidth: CGFloat = 0.2
+        /// Violet through sky to mint, for progress, focus and the format glyphs
+        static let gradient = LinearGradient(colors: [violet, sky, mint], startPoint: .leading, endPoint: .trailing)
+        static let diagonalGradient = LinearGradient(
+            colors: [violet, sky, mint],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+
+        /// Corner rounding of the mark's facets, as a fraction of its size
+        static let facetRadius: CGFloat = 0.035
         static let letterSpacing: CGFloat = 0.02
         static let shimmerInterval: Duration = .seconds(7)
         static let shimmerDuration: TimeInterval = 1.2
@@ -144,6 +151,9 @@ enum CinemaTheme {
         static let spacing: CGFloat = 30
         static let cornerRadius: CGFloat = 12
         static let focusScale: CGFloat = 1.1
+        static let focusRingWidth: CGFloat = 5
+        static let panelCornerRadius: CGFloat = 48
+        static let panelPadding: CGFloat = 48
         static let wordmarkSize: CGFloat = 64
         static let columnWidth: CGFloat = 720
         static let nameSpacing: CGFloat = 36
@@ -153,12 +163,12 @@ enum CinemaTheme {
         static let artworkLogoMaxWidth: CGFloat = 520
         static let artworkLogoMaxHeight: CGFloat = 180
 
+        /// Lighter than a solid fade, since the profiles sit on a glass panel
         static let columnScrim = LinearGradient(
             stops: [
-                .init(color: .black, location: 0),
-                .init(color: .black, location: 0.3),
-                .init(color: .black.opacity(0.7), location: 0.45),
-                .init(color: .clear, location: 0.68),
+                .init(color: Brand.night.opacity(0.8), location: 0),
+                .init(color: Brand.night.opacity(0.55), location: 0.4),
+                .init(color: .clear, location: 0.7),
             ],
             startPoint: .leading,
             endPoint: .trailing
@@ -216,29 +226,26 @@ enum CinemaTheme {
         static let logoMaxWidth: CGFloat = 520
         static let logoMaxHeight: CGFloat = 130
 
-        /// Apple TV style: white controls rather than the brand accent
+        /// White controls keep attention on the picture; the timeline carries the accent
         static let tint = Color.white
+        static let progress = Colors.accent
         static let warning = Color.orange
     }
 
     // MARK: - Badge
 
+    /// Glass format pills, each led by a Velora glyph
     enum Badge {
 
-        static let height: CGFloat = 34
-        static let cornerRadius: CGFloat = 7
-        static let fontSize: CGFloat = 22
-        static let horizontalPadding: CGFloat = 10
-        static let spacing: CGFloat = 10
+        static let height: CGFloat = 42
+        static let fontSize: CGFloat = 20
+        static let glyphSize: CGFloat = 24
+        static let horizontalPadding: CGFloat = 16
+        static let spacing: CGFloat = 12
         /// Between the year and runtime, the content rating and the format badges
         static let groupSpacing: CGFloat = 18
-        static let iconSpacing: CGFloat = 8
-        static let outlineWidth: CGFloat = 2.5
-        static let ratingSize: CGFloat = 26
-        /// Green circle behind the content-rating check, as in the Apple TV app
-        static let rating = Color(red: 0.2, green: 0.78, blue: 0.38)
-        static let stackedLogoHeight: CGFloat = 44
-        static let wideLogoHeight: CGFloat = 30
+        static let iconSpacing: CGFloat = 10
+        static let outlineWidth: CGFloat = 2
         static let tint = Color.white.opacity(0.92)
     }
 
@@ -294,22 +301,19 @@ enum CinemaTheme {
         static let lineSpacing: CGFloat = 6
     }
 
-    // MARK: - Top 10
+    // MARK: - Rank
 
-    enum TopTen {
+    /// Chart positions sit on the artwork in a glass tile instead of beside it
+    enum Rank {
 
-        static let numberSize: CGFloat = 300
-        static let numberTracking: CGFloat = -28
-        /// How far each poster tucks over its rank number
-        static let numberOverlap: CGFloat = 34
-        static let outlineWidth: CGFloat = 3
-        static let outlineColor = Color.white.opacity(0.7)
-        static let numberFill = Colors.background
+        static let tileSize: CGFloat = 72
+        static let tileCornerRadius: CGFloat = 20
+        static let numberSize: CGFloat = 40
+        static let inset: CGFloat = 12
 
-        static let badgeWidth: CGFloat = 46
-        static let badgeHeight: CGFloat = 56
-        static let badgeLabelSize: CGFloat = 13
-        static let badgeNumberSize: CGFloat = 25
+        static let badgeFontSize: CGFloat = 15
+        static let badgeHorizontalPadding: CGFloat = 12
+        static let badgeHeight: CGFloat = 30
     }
 
     // MARK: - New Content
@@ -318,10 +322,11 @@ enum CinemaTheme {
 
         /// Titles added within this window get a "Recently added" style badge
         static let window: TimeInterval = 14 * 24 * 60 * 60
-        static let fontSize: CGFloat = 17
-        static let horizontalPadding: CGFloat = 12
-        static let verticalPadding: CGFloat = 5
-        static let cornerRadius: CGFloat = 4
+        static let fontSize: CGFloat = 16
+        static let horizontalPadding: CGFloat = 14
+        static let verticalPadding: CGFloat = 6
+        static let dotSize: CGFloat = 9
+        static let inset: CGFloat = 12
     }
 
     // MARK: - Focus

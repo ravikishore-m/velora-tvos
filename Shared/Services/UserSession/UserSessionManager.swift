@@ -102,7 +102,7 @@ final class UserSessionManager: ObservableObject {
         }
     }
 
-    /// The Apple TV app asks who's watching every time it opens
+    /// On Apple TV, Velora asks who's watching every time it opens
     private static var asksWhoIsWatchingOnOpen: Bool {
         #if os(tvOS)
         true

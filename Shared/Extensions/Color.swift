@@ -11,6 +11,14 @@ import SwiftUI
 extension Color {
 
     static let jellyfinPurple = Color(red: 172 / 255, green: 92 / 255, blue: 195 / 255, opacity: 1)
+    static let veloraViolet = Color(red: 0.55, green: 0.42, blue: 1)
+
+    /// The accent before anyone picks their own
+    #if os(tvOS)
+    static let defaultAccent = veloraViolet
+    #else
+    static let defaultAccent = jellyfinPurple
+    #endif
 
     var uiColor: UIColor {
         UIColor(self)

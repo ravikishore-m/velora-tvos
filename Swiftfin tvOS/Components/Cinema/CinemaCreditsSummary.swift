@@ -9,7 +9,7 @@
 import JellyfinAPI
 import SwiftUI
 
-/// "Starring … / Director …", shown in the bottom corner of the Apple TV app's details page
+/// "Starring … / Director …", shown in the bottom corner of the details page
 struct CinemaCreditsSummary: View {
 
     let item: BaseItemDto
@@ -55,22 +55,38 @@ struct CinemaCreditsSummary: View {
     }
 }
 
-/// An outlined tag above the title, like the Apple TV app's "New"
+/// "Recently added" and "New episodes" in a glass pill, led by a mint dot
+struct CinemaNewContentPill: View {
+
+    let label: String
+    var font: Font = .system(size: CinemaTheme.NewContent.fontSize, weight: .bold, design: .rounded)
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Circle()
+                .fill(CinemaTheme.Brand.mint)
+                .frame(width: CinemaTheme.NewContent.dotSize, height: CinemaTheme.NewContent.dotSize)
+                .shadow(color: CinemaTheme.Brand.mint, radius: 4)
+
+            Text(label)
+                .font(font)
+                .foregroundStyle(CinemaTheme.Colors.primaryText)
+                .lineLimit(1)
+        }
+        .padding(.horizontal, CinemaTheme.NewContent.horizontalPadding)
+        .padding(.vertical, CinemaTheme.NewContent.verticalPadding)
+        .glassEffect(.regular, in: Capsule())
+    }
+}
+
+/// The new content pill above the title
 struct CinemaNewContentTag: View {
 
     let item: BaseItemDto
 
     var body: some View {
         if let label = item.cinemaNewContentLabel {
-            Text(label)
-                .font(CinemaTheme.Credits.font.weight(.semibold))
-                .foregroundStyle(CinemaTheme.Colors.primaryText)
-                .padding(.horizontal, CinemaTheme.NewContent.horizontalPadding)
-                .padding(.vertical, CinemaTheme.NewContent.verticalPadding)
-                .overlay {
-                    Capsule()
-                        .strokeBorder(CinemaTheme.Colors.secondaryText, lineWidth: CinemaTheme.Badge.outlineWidth)
-                }
+            CinemaNewContentPill(label: label, font: CinemaTheme.Credits.font.weight(.semibold))
         }
     }
 }

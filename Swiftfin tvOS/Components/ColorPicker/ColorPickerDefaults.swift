@@ -10,6 +10,7 @@ import SwiftUI
 
 enum ColorPickerDefaults: CaseIterable, Displayable {
 
+    case velora
     case jellyfin
     case red
     case orange
@@ -19,6 +20,8 @@ enum ColorPickerDefaults: CaseIterable, Displayable {
 
     var color: Color {
         switch self {
+        case .velora:
+            .veloraViolet
         case .jellyfin:
             .jellyfinPurple
         case .red:
@@ -36,6 +39,8 @@ enum ColorPickerDefaults: CaseIterable, Displayable {
 
     var displayTitle: String {
         switch self {
+        case .velora:
+            L10n.velora
         case .jellyfin:
             L10n.jellyfin
         case .red:

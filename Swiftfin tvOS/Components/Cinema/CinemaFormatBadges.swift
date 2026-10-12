@@ -9,7 +9,7 @@
 import JellyfinAPI
 import SwiftUI
 
-/// Video, audio and accessibility format badges in the style of the Apple TV app
+/// Video, audio and accessibility format badges as Velora glass pills
 struct CinemaFormatBadges: View {
 
     enum Badge: Hashable {
@@ -39,7 +39,7 @@ struct CinemaFormatBadges: View {
 
         static let audio: Content = [.audioFormat, .channels]
         static let all: Content = [.video, .audio, .accessibility]
-        /// The Apple TV app's details line
+        /// The details page line
         static let summary: Content = [.video, .audioFormat, .channelsFallback, .accessibility]
     }
 
@@ -225,47 +225,34 @@ extension CinemaFormatBadges {
 
         let badge: Badge
 
-        private func logo(_ resource: ImageResource, title: String, height: CGFloat) -> some View {
-            Image(resource)
-                .renderingMode(.template)
-                .resizable()
-                .interpolation(.high)
-                .aspectRatio(contentMode: .fit)
-                .frame(height: height)
-                .foregroundStyle(CinemaTheme.Badge.tint)
-                .accessibilityLabel(title)
+        /// A glass pill with a Velora glyph and the format's name
+        private func pill(_ glyph: VeloraFormatGlyph, _ title: String) -> some View {
+            HStack(spacing: CinemaTheme.Badge.iconSpacing) {
+                VeloraFormatGlyphView(glyph: glyph)
+
+                Text(title)
+                    .font(.system(size: CinemaTheme.Badge.fontSize, weight: .bold, design: .rounded))
+                    .foregroundStyle(CinemaTheme.Badge.tint)
+            }
+            .padding(.horizontal, CinemaTheme.Badge.horizontalPadding)
+            .frame(height: CinemaTheme.Badge.height)
+            .glassEffect(.regular, in: Capsule())
+            .lineLimit(1)
+            .accessibilityElement()
+            .accessibilityLabel(title)
         }
 
-        private func knockoutText(_ title: String) -> some View {
+        /// Accessibility features read as plain outlined glass, apart from the picture and sound formats
+        private func outline(_ title: String, accessibilityLabel: String) -> some View {
             Text(title)
-                .font(.system(size: CinemaTheme.Badge.fontSize, weight: .heavy))
+                .font(.system(size: CinemaTheme.Badge.fontSize, weight: .bold, design: .rounded))
+                .foregroundStyle(CinemaTheme.Badge.tint)
                 .padding(.horizontal, CinemaTheme.Badge.horizontalPadding)
                 .frame(height: CinemaTheme.Badge.height)
-        }
-
-        /// A filled tag with the title cut out, as used for Apple TV app badges
-        private func knockout(_ title: String, accessibilityLabel: String? = nil) -> some View {
-            knockoutText(title)
-                .hidden()
-                .background {
-                    RoundedRectangle(cornerRadius: CinemaTheme.Badge.cornerRadius, style: .continuous)
-                        .fill(CinemaTheme.Badge.tint)
-                        .inverseMask {
-                            knockoutText(title)
-                        }
-                }
-                .lineLimit(1)
-                .accessibilityElement()
-                .accessibilityLabel(accessibilityLabel ?? title)
-        }
-
-        /// An outlined tag, used by the Apple TV app for accessibility features
-        private func outline(_ title: String, accessibilityLabel: String) -> some View {
-            knockoutText(title)
-                .foregroundStyle(CinemaTheme.Badge.tint)
+                .glassEffect(.regular, in: Capsule())
                 .overlay {
-                    RoundedRectangle(cornerRadius: CinemaTheme.Badge.cornerRadius, style: .continuous)
-                        .strokeBorder(CinemaTheme.Badge.tint, lineWidth: CinemaTheme.Badge.outlineWidth)
+                    Capsule()
+                        .strokeBorder(CinemaTheme.Colors.secondaryText, lineWidth: CinemaTheme.Badge.outlineWidth)
                 }
                 .lineLimit(1)
                 .accessibilityElement()
@@ -275,21 +262,21 @@ extension CinemaFormatBadges {
         var body: some View {
             switch badge {
             case .uhd:
-                knockout(L10n.fourK)
+                pill(.resolution, L10n.fourK)
             case .hd:
-                knockout(L10n.hd)
+                pill(.resolution, L10n.hd)
             case .dolbyVision:
-                logo(.dolbyVision, title: L10n.dolbyVision, height: CinemaTheme.Badge.stackedLogoHeight)
+                pill(.vision, L10n.dolbyVision)
             case let .hdr(title):
-                knockout(title)
+                pill(.range, title)
             case .dolbyAtmos:
-                logo(.dolbyAtmos, title: L10n.dolbyAtmos, height: CinemaTheme.Badge.stackedLogoHeight)
+                pill(.spatial, L10n.dolbyAtmos)
             case .dolbyDigital:
-                logo(.dolbyDigital, title: L10n.dolbyDigital, height: CinemaTheme.Badge.wideLogoHeight)
+                pill(.sound, L10n.dolbyDigital)
             case let .audioFormat(title):
-                knockout(title)
+                pill(title == L10n.dtsX ? .spatial : .sound, title)
             case let .surround(title):
-                knockout(title)
+                pill(.channels, title)
             case .closedCaptions:
                 outline(L10n.cc, accessibilityLabel: L10n.closedCaptions)
             case .sdh:
