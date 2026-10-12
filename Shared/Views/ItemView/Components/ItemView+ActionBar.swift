@@ -21,13 +21,17 @@ extension ItemView {
         private var buttonConfiguration = ItemActionButtons.Configuration()
 
         let alignment: HorizontalAlignment
+        /// Places the play button beside the action buttons, as in the Apple TV app
+        let isHorizontal: Bool
 
         init(
             provider: ItemContentGroupProvider,
-            alignment: HorizontalAlignment = .center
+            alignment: HorizontalAlignment = .center,
+            isHorizontal: Bool = false
         ) {
             self.provider = provider
             self.alignment = alignment
+            self.isHorizontal = isHorizontal
         }
 
         var body: some View {
@@ -35,10 +39,15 @@ extension ItemView {
             let defaultFocusedButton = provider.item.presentPlayButton ?
                 ItemView.Component.play : visible.first?.id ?? ItemView.Component.menu
 
-            VStack(alignment: alignment, spacing: UIDevice.isTV ? 24 : 8) {
+            let layout = isHorizontal ?
+                AnyLayout(HStackLayout(spacing: UIDevice.isTV ? 24 : 8)) :
+                AnyLayout(VStackLayout(alignment: alignment, spacing: UIDevice.isTV ? 24 : 8))
+
+            layout {
                 if provider.item.presentPlayButton {
                     PlayButton(provider: provider)
                         .coordinatedFocus(ItemView.Component.play, selection: $focusedButton)
+                        .frame(width: isHorizontal ? (UIDevice.isTV ? 360 : 160) : nil)
                         .frame(height: UIDevice.isTV ? 75 : 44)
                 }
 
@@ -49,6 +58,7 @@ extension ItemView {
                     menuButtons: menu,
                     focusedButton: $focusedButton
                 )
+                .fixedSize(horizontal: isHorizontal, vertical: false)
             }
             .focusSection()
             .defaultFocus(

@@ -65,8 +65,8 @@ enum CinemaTheme {
         static let contentBottomPadding: CGFloat = 36
         static let logoMaxWidth: CGFloat = 620
         static let logoMaxHeight: CGFloat = 200
-        static let synopsisMaxWidth: CGFloat = 900
-        static let synopsisLineLimit = 3
+        static let synopsisMaxWidth: CGFloat = 920
+        static let synopsisLineLimit = 2
         static let progressWidth: CGFloat = 360
         static let backdropMaxWidth: CGFloat = 1920
         static let backdropFadeStart: CGFloat = 0.6
@@ -74,6 +74,11 @@ enum CinemaTheme {
         static let maximumItems = 8
         static let rotationInterval: Duration = .seconds(8)
         static let crossfade: Animation = .easeInOut(duration: 0.8)
+        /// The outgoing title fades out before the next fades in, so text never overlaps
+        static let detailsTransition: AnyTransition = .asymmetric(
+            insertion: .opacity.animation(.easeOut(duration: 0.35).delay(0.3)),
+            removal: .opacity.animation(.easeIn(duration: 0.25))
+        )
         static let zoomScale: CGFloat = 1.08
         static let zoomDuration: TimeInterval = 20
 
@@ -128,19 +133,21 @@ enum CinemaTheme {
 
     enum Badge {
 
-        static let height: CGFloat = 30
-        static let cornerRadius: CGFloat = 6
-        static let fontSize: CGFloat = 19
-        static let horizontalPadding: CGFloat = 8
-        static let spacing: CGFloat = 12
-        /// Between the year and runtime, ratings, age rating and format badges
-        static let groupSpacing: CGFloat = 22
-        static let iconSpacing: CGFloat = 6
-        static let outlineWidth: CGFloat = 2
-        static let star = Color(red: 1, green: 0.8, blue: 0.2)
-        static let stackedLogoHeight: CGFloat = 38
-        static let wideLogoHeight: CGFloat = 28
-        static let tint = Color.white.opacity(0.85)
+        static let height: CGFloat = 34
+        static let cornerRadius: CGFloat = 7
+        static let fontSize: CGFloat = 22
+        static let horizontalPadding: CGFloat = 10
+        static let spacing: CGFloat = 10
+        /// Between the year and runtime, the content rating and the format badges
+        static let groupSpacing: CGFloat = 18
+        static let iconSpacing: CGFloat = 8
+        static let outlineWidth: CGFloat = 2.5
+        static let ratingSize: CGFloat = 26
+        /// Green circle behind the content-rating check, as in the Apple TV app
+        static let rating = Color(red: 0.2, green: 0.78, blue: 0.38)
+        static let stackedLogoHeight: CGFloat = 44
+        static let wideLogoHeight: CGFloat = 30
+        static let tint = Color.white.opacity(0.92)
     }
 
     // MARK: - Card
@@ -173,6 +180,27 @@ enum CinemaTheme {
             startPoint: .top,
             endPoint: .bottom
         )
+    }
+
+    // MARK: - Details
+
+    enum Details {
+
+        static let spacing: CGFloat = 16
+        static let titleSpacing: CGFloat = 12
+        static let actionsTopPadding: CGFloat = 12
+    }
+
+    // MARK: - Credits
+
+    enum Credits {
+
+        static let font = Font.callout
+        static let maxWidth: CGFloat = 620
+        static let castLimit = 3
+        static let directorLimit = 2
+        static let titleSpacing: CGFloat = 10
+        static let lineSpacing: CGFloat = 6
     }
 
     // MARK: - Top 10

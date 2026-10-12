@@ -36,40 +36,9 @@ struct CinemaCard: View {
         RoundedRectangle(cornerRadius: CinemaTheme.Card.cornerRadius)
     }
 
-    /// Netflix's "Recently added" and "New Episodes" labels for fresh content
-    private func newContentLabel(for item: BaseItemDto) -> String? {
-        let cutoff = Date.now.addingTimeInterval(-CinemaTheme.NewContent.window)
-
-        func isRecent(_ date: Date?) -> Bool {
-            date.map { $0 > cutoff } ?? false
-        }
-
-        switch item.type {
-        case .series:
-            if isRecent(item.dateCreated) {
-                return L10n.recentlyAdded
-            }
-            if isRecent(item.dateLastMediaAdded) {
-                return L10n.newEpisodes
-            }
-
-        case .episode:
-            if isRecent(item.dateCreated) {
-                return L10n.newEpisode
-            }
-
-        default:
-            if isRecent(item.dateCreated) {
-                return L10n.recentlyAdded
-            }
-        }
-
-        return nil
-    }
-
     @ViewBuilder
     private func newContentBadge(for item: BaseItemDto) -> some View {
-        if let label = newContentLabel(for: item) {
+        if let label = item.cinemaNewContentLabel {
             Text(label)
                 .font(.system(size: CinemaTheme.NewContent.fontSize, weight: .bold))
                 .foregroundStyle(CinemaTheme.Colors.primaryText)
@@ -183,15 +152,13 @@ struct CinemaCard: View {
                 HStack(spacing: CinemaTheme.Badge.spacing) {
                     CinemaTopTenBadge(item: item, scale: CinemaTheme.TopTen.inlineBadgeScale)
 
-                    if let label = newContentLabel(for: item) {
+                    if let label = item.cinemaNewContentLabel {
                         Text(label)
                             .font(CinemaTheme.Typography.metadata)
                             .foregroundStyle(CinemaTheme.Colors.accent)
                             .lineLimit(1)
                     }
                 }
-
-                CinemaBadges(item: item)
 
                 if let overview = item.overview, overview.isNotEmpty {
                     Text(overview)
@@ -200,6 +167,8 @@ struct CinemaCard: View {
                         .lineLimit(CinemaTheme.Card.synopsisLineLimit)
                         .multilineTextAlignment(.leading)
                 }
+
+                CinemaBadges(item: item, formats: .summary, fitsContainer: true)
 
                 progressBar(for: item)
             }

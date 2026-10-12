@@ -101,19 +101,79 @@ struct CinemaPlaybackSummary: View {
         }
     }
 
+    private func codecTitle(_ codec: String?) -> String? {
+        switch codec?.lowercased() {
+        case "hevc", "h265": "HEVC"
+        case "h264", "avc": "H.264"
+        case "av1": "AV1"
+        case "eac3": "Dolby Digital Plus"
+        case "ac3": "Dolby Digital"
+        case "truehd", "mlp": "TrueHD"
+        case "dts", "dca": "DTS"
+        case let .some(codec):
+            codec.uppercased()
+        case nil:
+            nil
+        }
+    }
+
+    /// Resolution, codec and bitrate. Skips release-group names that Jellyfin puts in `displayTitle`.
     private var videoDescription: String? {
         guard let videoStream else { return nil }
 
-        return [
-            videoStream.displayTitle,
+        let resolution: String? = if videoStream.is4kVideo {
+            L10n.fourK
+        } else if let height = videoStream.height, height > 0 {
+            "\(height)p"
+        } else {
+            nil
+        }
+
+        let range = videoStream.videoRangeType?.displayTitle
+        let parts = [
+            resolution,
+            codecTitle(videoStream.codec),
+            range == L10n.sdr ? nil : range,
             videoStream.bitRate.map { $0.formatted(.bitRate) },
         ]
             .compactMap(\.self)
-            .joined(separator: " · ")
+
+        if parts.isNotEmpty {
+            return parts.joined(separator: " · ")
+        }
+
+        return videoStream.displayTitle
+    }
+
+    private var audioLanguage: String? {
+        guard let code = audioStream?.language, code.isNotEmpty, code.lowercased() != "und" else { return nil }
+
+        return Locale.current.localizedString(forLanguageCode: code) ?? code
+    }
+
+    private var audioFormat: String? {
+        guard let audioStream else { return nil }
+
+        let text = [audioStream.profile, audioStream.displayTitle, audioStream.title].compactMap(\.self)
+        if text.contains(where: { $0.localizedCaseInsensitiveContains("atmos") }) {
+            return L10n.dolbyAtmos
+        }
+        return codecTitle(audioStream.codec)
     }
 
     private var audioDescription: String? {
-        guard let source = audioStream?.displayTitle else { return nil }
+        guard audioStream != nil else { return nil }
+
+        let source = [
+            audioLanguage,
+            audioFormat,
+            audioStream?.channelLayout,
+            audioStream?.bitRate.map { $0.formatted(.bitRate) },
+        ]
+            .compactMap(\.self)
+            .joined(separator: " · ")
+
+        guard source.isNotEmpty else { return audioStream?.displayTitle }
         guard method == .audioConverted || method == .transcode else { return source }
 
         let codec: String?
@@ -156,7 +216,9 @@ struct CinemaPlaybackSummary: View {
 
                 Text(value)
                     .foregroundStyle(CinemaTheme.Colors.primaryText)
-                    .lineLimit(2)
+                    .lineLimit(3)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
     }
@@ -173,7 +235,7 @@ struct CinemaPlaybackSummary: View {
                 CinemaFormatBadges(
                     streams: [videoStream, audioStream].compactMap(\.self),
                     availableStreams: playbackItem.map { $0.audioStreams + $0.subtitleStreams },
-                    content: .all
+                    content: .summary
                 )
             }
 

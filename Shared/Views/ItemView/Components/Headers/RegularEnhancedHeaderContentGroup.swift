@@ -43,7 +43,7 @@ extension ItemView {
             #endif
 
             private var logoHeight: CGFloat {
-                UIDevice.isTV ? 100 : 70
+                UIDevice.isTV ? 150 : 70
             }
 
             @ViewBuilder
@@ -77,10 +77,64 @@ extension ItemView {
                 .accessibilityRemoveTraits(.isImage)
             }
 
+            #if os(tvOS)
+            @ViewBuilder
+            private var synopsis: some View {
+                if let overview = provider.item.overview, overview.isNotEmpty {
+                    Text(overview)
+                        .font(CinemaTheme.Typography.heroSynopsis)
+                        .foregroundStyle(CinemaTheme.Colors.secondaryText)
+                        .lineLimit(CinemaTheme.Hero.synopsisLineLimit)
+                        .multilineTextAlignment(.leading)
+                        .frame(maxWidth: CinemaTheme.Hero.synopsisMaxWidth, alignment: .leading)
+                }
+            }
+            #endif
+
             @ViewBuilder
             private var overlay: some View {
+                #if os(tvOS)
                 HStack(alignment: .bottom, spacing: EdgeInsets.edgePadding) {
-                    VStack(alignment: .center, spacing: UIDevice.isTV ? 30 : 5) {
+                    VStack(alignment: .leading, spacing: CinemaTheme.Details.spacing) {
+                        VStack(alignment: .leading, spacing: CinemaTheme.Details.titleSpacing) {
+                            CinemaNewContentTag(item: provider.item)
+
+                            if let parentID = provider.item.parentRootID, let parentTitle = provider.item.parentTitle {
+                                ParentButton(title: parentTitle, id: parentID)
+                            }
+
+                            logo
+                        }
+
+                        if provider.item.type == .episode {
+                            Text(provider.item.displayTitle)
+                                .font(CinemaTheme.Typography.metadata)
+                                .foregroundStyle(CinemaTheme.Colors.primaryText)
+                                .lineLimit(1)
+                        }
+
+                        CinemaContentLine(item: provider.item)
+
+                        synopsis
+
+                        CinemaBadges(
+                            item: provider.item,
+                            mediaStreams: provider.mediaPlayerItemProvider?.mediaSource?.mediaStreams,
+                            formats: .summary
+                        )
+
+                        ItemView.ActionBar(provider: provider, isHorizontal: true)
+                            .padding(.top, CinemaTheme.Details.actionsTopPadding)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .bottomLeading)
+
+                    CinemaCreditsSummary(item: provider.item)
+                        .frame(maxWidth: CinemaTheme.Credits.maxWidth, alignment: .leading)
+                }
+                .focusSection()
+                #else
+                HStack(alignment: .bottom, spacing: EdgeInsets.edgePadding) {
+                    VStack(alignment: .center, spacing: 5) {
                         VStack(alignment: .leading) {
                             if let parentID = provider.item.parentRootID, let parentTitle = provider.item.parentTitle {
                                 ParentButton(title: parentTitle, id: parentID)
@@ -92,19 +146,11 @@ extension ItemView {
 
                         ItemView.ActionBar(provider: provider)
                     }
-                    .frame(width: UIDevice.isTV ? 450 : 300)
+                    .frame(width: 300)
 
                     VStack(alignment: .leading, spacing: 10) {
                         ItemView.Description(item: provider.item)
 
-                        #if os(tvOS)
-                        CinemaBadges(
-                            item: provider.item,
-                            mediaStreams: provider.mediaPlayerItemProvider?.mediaSource?.mediaStreams,
-                            formats: .summary,
-                            showsRatings: true
-                        )
-                        #else
                         HStack(alignment: .top) {
                             ItemView.AttributesHStack(
                                 attributes: attributes,
@@ -116,25 +162,21 @@ extension ItemView {
                             MetadataHStack(item: provider.item)
                         }
                         .foregroundStyle(.secondary)
-                        #endif
                     }
                     .frame(maxWidth: .infinity)
                 }
-                #if os(tvOS)
-                .focusSection()
-                #else
-                    .edgePadding(.bottom)
-                    .background(
-                        alignment: .bottom,
-                        extendedBy: .init(horizontal: EdgeInsets.edgePadding)
-                    ) {
-                        Rectangle()
-                            .fill(Material.ultraThin)
-                            .mask(gradient: .eased(.easeOut)) {
-                                (location: 0, opacity: 0)
-                                (location: 1, opacity: 1)
-                            }
-                    }
+                .edgePadding(.bottom)
+                .background(
+                    alignment: .bottom,
+                    extendedBy: .init(horizontal: EdgeInsets.edgePadding)
+                ) {
+                    Rectangle()
+                        .fill(Material.ultraThin)
+                        .mask(gradient: .eased(.easeOut)) {
+                            (location: 0, opacity: 0)
+                            (location: 1, opacity: 1)
+                        }
+                }
                 #endif
             }
 

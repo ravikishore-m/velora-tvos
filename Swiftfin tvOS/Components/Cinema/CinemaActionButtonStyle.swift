@@ -48,8 +48,10 @@ struct CinemaActionButtonStyle: ButtonStyle {
             .foregroundStyle(foregroundColor)
             .symbolRenderingMode(.monochrome)
             .labelStyle(.titleAndIcon)
-            .padding(.horizontal, 44)
-            .padding(.vertical, 20)
+            .lineLimit(1)
+            .fixedSize(horizontal: true, vertical: true)
+            .padding(.horizontal, 36)
+            .padding(.vertical, 16)
             .background(
                 isHighlighted ? backgroundColor : .clear,
                 in: Capsule()

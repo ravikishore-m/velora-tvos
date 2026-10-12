@@ -198,6 +198,8 @@ struct CinemaHeroBanner: View {
     @ViewBuilder
     private func details(for item: BaseItemDto) -> some View {
         VStack(alignment: .leading, spacing: CinemaTheme.Spacing.metadata) {
+            CinemaNewContentTag(item: item)
+
             title(for: item)
                 .padding(.bottom, CinemaTheme.Spacing.metadata)
 
@@ -208,7 +210,7 @@ struct CinemaHeroBanner: View {
                     .lineLimit(1)
             }
 
-            CinemaBadges(item: item, formats: .summary, showsRatings: true)
+            CinemaContentLine(item: item)
 
             if let overview = item.overview, overview.isNotEmpty {
                 Text(overview)
@@ -218,6 +220,8 @@ struct CinemaHeroBanner: View {
                     .multilineTextAlignment(.leading)
                     .frame(maxWidth: CinemaTheme.Hero.synopsisMaxWidth, alignment: .leading)
             }
+
+            CinemaBadges(item: item, formats: .summary)
 
             progress(for: item)
         }
@@ -249,6 +253,7 @@ struct CinemaHeroBanner: View {
             .focused($focusedAction, equals: .moreInfo)
         }
         .buttonStyle(.cinemaAction)
+        .fixedSize(horizontal: true, vertical: true)
         .focusSection()
         .onMoveCommand(perform: handleMove)
     }
@@ -278,11 +283,16 @@ struct CinemaHeroBanner: View {
             VStack(alignment: .leading, spacing: CinemaTheme.Spacing.heroContent) {
                 Spacer(minLength: 0)
 
-                details(for: item)
-                    .id(item.id)
-                    .transition(.opacity)
+                // Outgoing and incoming titles share one slot instead of stacking during the swap
+                ZStack(alignment: .bottomLeading) {
+                    details(for: item)
+                        .id(item.id)
+                        .transition(CinemaTheme.Hero.detailsTransition)
+                }
 
+                // Labels swap instantly so "Play" and "Resume" never blend together
                 actions(for: item)
+                    .animation(nil, value: item.id)
 
                 pageIndicator
             }
