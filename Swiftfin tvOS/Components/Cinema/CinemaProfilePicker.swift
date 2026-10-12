@@ -10,13 +10,13 @@ import Defaults
 import OrderedCollections
 import SwiftUI
 
-/// "Choose a profile" screen: the wordmark and a column of profiles on the left,
-/// with artwork from the library rotating behind. The Velora ident plays each time it opens,
-/// and the chosen profile glides to the centre with a spinner while the others fade away.
+/// "Who's watching?" screen: the Velora mark and a column of profiles on the left,
+/// with artwork from the library rotating behind. The profiles make their entrance as the
+/// launch ident fades, and the chosen profile glides to the centre with a spinner while the others fade away.
 struct CinemaProfilePicker: View {
 
-    @Environment(\.accessibilityReduceMotion)
-    private var reduceMotion
+    @ObservedObject
+    private var launch = VeloraLaunch.shared
 
     @Default(.cinemaFeaturedArtwork)
     private var featuredArtwork
@@ -41,8 +41,6 @@ struct CinemaProfilePicker: View {
     @State
     private var hasAppeared = false
     @State
-    private var isShowingIntro = true
-    @State
     private var chosenID: String?
     @State
     private var isPresentingServerChoice = false
@@ -64,7 +62,7 @@ struct CinemaProfilePicker: View {
     }
 
     private func choose(_ item: SelectUserView.UserItem) {
-        guard !isChoosing, !isShowingIntro else { return }
+        guard !isChoosing, launch.isRevealed else { return }
 
         withAnimation(CinemaTheme.Profile.chooseAnimation) {
             chosenID = item.user.id
@@ -218,12 +216,12 @@ struct CinemaProfilePicker: View {
                 .modifier(EntranceModifier(index: -2, isVisible: hasAppeared))
                 .opacity(isChoosing ? 0 : 1)
 
-            Text(isEditing ? L10n.manageProfiles : L10n.chooseProfile)
+            Text(isEditing ? L10n.manageProfiles : L10n.whosWatching)
                 .font(.title2.weight(.bold))
                 .foregroundStyle(CinemaTheme.Colors.primaryText)
                 .contentTransition(.opacity)
                 .accessibilityAddTraits(.isHeader)
-                .padding(.top, 28)
+                .padding(.top, 24)
                 .modifier(EntranceModifier(index: -1, isVisible: hasAppeared))
                 .opacity(isChoosing ? 0 : 1)
 
@@ -237,17 +235,6 @@ struct CinemaProfilePicker: View {
                 .opacity(isChoosing ? 0 : 1)
         }
         .frame(width: CinemaTheme.Profile.columnWidth, alignment: .leading)
-        .padding(CinemaTheme.Profile.panelPadding)
-        .background {
-            Color.clear
-                .glassEffect(
-                    .regular.tint(CinemaTheme.Brand.night.opacity(0.35)),
-                    in: RoundedRectangle(cornerRadius: CinemaTheme.Profile.panelCornerRadius, style: .continuous)
-                )
-                .opacity(hasAppeared && !isChoosing ? 1 : 0)
-                .animation(CinemaTheme.Profile.chooseAnimation, value: isChoosing)
-                .animation(.easeOut(duration: 0.6), value: hasAppeared)
-        }
         .frame(maxHeight: .infinity, alignment: .topLeading)
     }
 
@@ -289,33 +276,21 @@ struct CinemaProfilePicker: View {
             .edgePadding(.horizontal)
 
             chosenOverlay
-
-            if isShowingIntro {
-                VeloraIntro {
-                    hasAppeared = true
-                } onFinished: {
-                    isShowingIntro = false
-                }
-            }
         }
         .disabled(isChoosing)
         .defaultFocus($focusedID, userItems.first?.user.id, priority: .userInitiated)
         .onAppear {
-            guard reduceMotion, !hasAppeared else { return }
+            hasAppeared = launch.isRevealed
+        }
+        .onChange(of: launch.isRevealed) {
+            guard !isChoosing else { return }
 
-            isShowingIntro = false
-            hasAppeared = true
+            hasAppeared = launch.isRevealed
         }
         .onChange(of: hasError) {
             if hasError {
                 reset()
             }
-        }
-        .onReceive(Notifications[.applicationWillEnterForeground].publisher) {
-            guard !reduceMotion, !isChoosing else { return }
-
-            hasAppeared = false
-            isShowingIntro = true
         }
         .fullScreenCover(
             isPresented: Binding(
@@ -345,39 +320,45 @@ struct CinemaProfilePicker: View {
 
 // MARK: - Background
 
-/// The Velora aurora: red, garnet and ember light drifting over the black,
-/// shown behind the picker until the library artwork is known
+/// Deep red glow with faint concentric rings, shown behind the picker until the library artwork is known
 struct CinemaProfilesBackground: View {
 
     @State
-    private var isDrifting = false
+    private var isGlowing = false
 
     var body: some View {
         ZStack {
-            CinemaTheme.Brand.night
+            Color.black
 
-            ZStack {
-                Ellipse()
-                    .fill(CinemaTheme.Brand.red)
-                    .frame(width: 1300, height: 640)
-                    .offset(x: isDrifting ? -380 : -520, y: isDrifting ? -260 : -180)
+            RadialGradient(
+                colors: [
+                    Color(red: 0.42, green: 0.05, blue: 0.07),
+                    Color(red: 0.2, green: 0.02, blue: 0.04),
+                    .black,
+                ],
+                center: UnitPoint(x: 0.5, y: -0.2),
+                startRadius: 0,
+                endRadius: 1500
+            )
+            .opacity(isGlowing ? 1 : 0.75)
 
-                Ellipse()
-                    .fill(CinemaTheme.Brand.garnet)
-                    .frame(width: 1000, height: 480)
-                    .offset(x: isDrifting ? 520 : 380, y: isDrifting ? 300 : 360)
+            Canvas { context, size in
+                let center = CGPoint(x: size.width / 2, y: -size.height * 0.15)
 
-                Ellipse()
-                    .fill(CinemaTheme.Brand.ember)
-                    .frame(width: 800, height: 420)
-                    .offset(x: isDrifting ? 120 : -60, y: 40)
-                    .opacity(0.7)
+                for index in 1 ... 16 {
+                    let radius = CGFloat(index) * 140
+                    let rect = CGRect(x: center.x - radius, y: center.y - radius, width: radius * 2, height: radius * 2)
+
+                    context.stroke(
+                        Path(ellipseIn: rect),
+                        with: .color(.white.opacity(0.03)),
+                        lineWidth: 1.5
+                    )
+                }
             }
-            .blur(radius: 180)
-            .opacity(0.5)
 
             LinearGradient(
-                colors: [.clear, CinemaTheme.Brand.night.opacity(0.8)],
+                colors: [.clear, .black.opacity(0.85)],
                 startPoint: .center,
                 endPoint: .bottom
             )
@@ -385,8 +366,8 @@ struct CinemaProfilesBackground: View {
         .ignoresSafeArea()
         .accessibilityHidden(true)
         .onAppear {
-            withAnimation(.easeInOut(duration: 14).repeatForever(autoreverses: true)) {
-                isDrifting = true
+            withAnimation(.easeInOut(duration: 6).repeatForever(autoreverses: true)) {
+                isGlowing = true
             }
         }
     }
@@ -603,9 +584,7 @@ extension CinemaProfilePicker {
                         }
                     }
                     .overlay {
-                        shape
-                            .strokeBorder(CinemaTheme.Brand.diagonalGradient, lineWidth: CinemaTheme.Profile.focusRingWidth)
-                            .opacity(isFocused && !isHidden ? 1 : 0)
+                        shape.strokeBorder(.white, lineWidth: isFocused && !isHidden ? 5 : 0)
                     }
                     .scaleEffect(isFocused ? CinemaTheme.Profile.focusScale : 1)
                     .shadow(
@@ -656,9 +635,7 @@ extension CinemaProfilePicker {
                 }
                 .frame(width: CinemaTheme.Profile.size, height: CinemaTheme.Profile.size)
                 .overlay {
-                    shape
-                        .strokeBorder(CinemaTheme.Brand.diagonalGradient, lineWidth: CinemaTheme.Profile.focusRingWidth)
-                        .opacity(isFocused ? 1 : 0)
+                    shape.strokeBorder(.white, lineWidth: isFocused ? 5 : 0)
                 }
                 .scaleEffect(isFocused ? CinemaTheme.Profile.focusScale : 1)
 
@@ -676,7 +653,7 @@ extension CinemaProfilePicker {
         }
     }
 
-    /// Thin outlined capsule that fills with the Velora gradient on focus
+    /// Thin outlined capsule that fills white on focus, like the Manage Profiles button
     private struct OutlineButtonStyle: ButtonStyle {
 
         var isDestructive = false
@@ -696,16 +673,20 @@ extension CinemaProfilePicker {
         let configuration: ButtonStyleConfiguration
         let isDestructive: Bool
 
-        private var fill: AnyShapeStyle {
-            guard isFocused else { return AnyShapeStyle(Color.clear) }
+        private var fill: Color {
+            guard isFocused else { return .clear }
 
-            return isDestructive ? AnyShapeStyle(Color.red) : AnyShapeStyle(CinemaTheme.Brand.gradient)
+            return isDestructive ? CinemaTheme.Colors.accent : .white
+        }
+
+        private var foreground: Color {
+            isFocused && !isDestructive ? .black : .white
         }
 
         var body: some View {
             configuration.label
                 .font(.headline)
-                .foregroundStyle(CinemaTheme.Colors.primaryText)
+                .foregroundStyle(foreground)
                 .padding(.horizontal, 40)
                 .padding(.vertical, 18)
                 .background(Capsule().fill(fill))
@@ -719,7 +700,7 @@ extension CinemaProfilePicker {
         }
     }
 
-    /// Gradient ring spinner shown while the chosen profile signs in
+    /// Accent ring spinner shown while the chosen profile signs in
     private struct Spinner: View {
 
         @State
@@ -728,13 +709,7 @@ extension CinemaProfilePicker {
         var body: some View {
             Circle()
                 .trim(from: 0.05, to: 0.8)
-                .stroke(
-                    AngularGradient(
-                        colors: [CinemaTheme.Brand.red, CinemaTheme.Brand.ember, CinemaTheme.Brand.garnet],
-                        center: .center
-                    ),
-                    style: StrokeStyle(lineWidth: 8, lineCap: .round)
-                )
+                .stroke(CinemaTheme.Colors.accent, style: StrokeStyle(lineWidth: 8, lineCap: .round))
                 .frame(width: 84, height: 84)
                 .rotationEffect(.degrees(isRotating ? 360 : 0))
                 .onAppear {

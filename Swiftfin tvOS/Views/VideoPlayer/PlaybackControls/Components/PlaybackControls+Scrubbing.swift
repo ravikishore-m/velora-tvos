@@ -6,7 +6,6 @@
 // Copyright (c) 2026 Jellyfin & Jellyfin Contributors
 //
 
-import Defaults
 import Foundation
 import SwiftUI
 
@@ -16,6 +15,11 @@ extension VideoPlayer.PlaybackControls {
         case forward
         case backward
     }
+
+    /// Holding right fast-forwards with the picture still playing: 2x first, then 4x
+    static let fastForwardRates: [Double] = [2, 4]
+    /// How long each fast-forward rate is held before stepping up to the next
+    static let fastForwardStepDelay: TimeInterval = 1.5
 
     func startSpeedBoost() {
         guard !isSpeedBoosting, speedBoostTimer == nil else { return }
@@ -28,13 +32,31 @@ extension VideoPlayer.PlaybackControls {
                 isSpeedBoosting = true
                 viewState.originalPlaybackRate = manager.rate
 
-                let multiplier = Defaults[.VideoPlayer.Gesture.longPressSpeedMultiplier]
-                manager.setRate(rate: multiplier.rawValue)
+                if manager.playbackRequestStatus == .paused {
+                    manager.setPlaybackRequestStatus(status: .playing)
+                }
 
-                toaster.present(
-                    Text(multiplier.displayTitle),
-                    systemName: "forward.fill"
-                )
+                fastForward(step: 0)
+            }
+        }
+    }
+
+    private func fastForward(step: Int) {
+        guard isSpeedBoosting, Self.fastForwardRates.indices.contains(step) else { return }
+
+        let rate = Self.fastForwardRates[step]
+        viewState.fastForwardRate = rate
+        viewState.showProgress()
+        manager.setRate(rate: rate)
+
+        toaster.present(
+            Text(rate, format: .playbackRate),
+            systemName: "forward.fill"
+        )
+
+        speedBoostTimer = Timer.scheduledTimer(withTimeInterval: Self.fastForwardStepDelay, repeats: false) { [self] _ in
+            MainActor.assumeIsolated {
+                fastForward(step: step + 1)
             }
         }
     }
@@ -43,6 +65,7 @@ extension VideoPlayer.PlaybackControls {
         speedBoostTimer?.invalidate()
         speedBoostTimer = nil
         viewState.setInteraction(.speedBoost, active: false)
+        viewState.fastForwardRate = nil
 
         if isSpeedBoosting {
             if let originalRate = viewState.originalPlaybackRate {

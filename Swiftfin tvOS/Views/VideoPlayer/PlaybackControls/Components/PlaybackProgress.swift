@@ -156,7 +156,9 @@ extension VideoPlayer.PlaybackControls {
 
         @ViewBuilder
         private var previewImage: some View {
-            if isScrubbing, let previewImageProvider = manager.playbackItem?.previewImageProvider {
+            if isScrubbing || viewState.fastForwardRate != nil,
+               let previewImageProvider = manager.playbackItem?.previewImageProvider
+            {
                 PreviewImageView(previewImageProvider: previewImageProvider)
                     .aspectRatio(videoSizeAspectRatio, contentMode: .fit)
                     .frame(height: previewImageHeight)

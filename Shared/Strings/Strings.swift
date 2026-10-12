@@ -1974,6 +1974,8 @@ internal enum L10n {
   internal static let timestamp = L10n.tr("Localizable", "timestamp", fallback: "Timestamp")
   /// Title
   internal static let title = L10n.tr("Localizable", "title", fallback: "Title")
+  /// TOP
+  internal static let topBadge = L10n.tr("Localizable", "topBadge", fallback: "TOP")
   /// Top 10
   internal static let topTen = L10n.tr("Localizable", "topTen", fallback: "Top 10")
   /// Top 10 Movies on %@

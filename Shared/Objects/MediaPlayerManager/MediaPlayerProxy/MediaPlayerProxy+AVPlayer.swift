@@ -86,7 +86,14 @@ class AVMediaPlayerProxy: NSObject,
     }
 
     func play() {
-        player.rate = Float(manager?.rate ?? 1.0)
+        player.rate = playableRate(manager?.rate ?? 1.0)
+    }
+
+    /// Items that can't fast-forward, such as streams without I-frames, only play up to 2x
+    private func playableRate(_ rate: Double) -> Float {
+        guard rate > 2, player.currentItem?.canPlayFastForward != true else { return Float(rate) }
+
+        return 2
     }
 
     func pause() {
@@ -125,7 +132,7 @@ class AVMediaPlayerProxy: NSObject,
         // `play()` applies the rate when playback resumes while setting one during a pause forces a resume
         guard player.rate != 0 else { return }
 
-        player.rate = Float(rate)
+        player.rate = playableRate(rate)
     }
 
     func setSeconds(_ seconds: Duration) {

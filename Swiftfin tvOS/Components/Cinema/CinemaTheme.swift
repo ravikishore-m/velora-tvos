@@ -22,6 +22,7 @@ enum CinemaTheme {
         static let tertiaryText = Color.white.opacity(0.5)
 
         static let track = Color.white.opacity(0.18)
+        static let actionBackground = Color.white.opacity(0.18)
 
         static let placeholder = Color.white.opacity(0.08)
         /// Velora red, used for focus, progress and highlights
@@ -240,15 +241,19 @@ enum CinemaTheme {
     /// Glass format pills, each led by a Velora glyph
     enum Badge {
 
-        static let height: CGFloat = 42
-        static let fontSize: CGFloat = 20
+        static let height: CGFloat = 34
+        static let cornerRadius: CGFloat = 7
+        static let fontSize: CGFloat = 22
         static let glyphSize: CGFloat = 24
-        static let horizontalPadding: CGFloat = 16
-        static let spacing: CGFloat = 12
+        static let horizontalPadding: CGFloat = 10
+        static let spacing: CGFloat = 10
         /// Between the year and runtime, the content rating and the format badges
         static let groupSpacing: CGFloat = 18
-        static let iconSpacing: CGFloat = 10
-        static let outlineWidth: CGFloat = 2
+        static let iconSpacing: CGFloat = 8
+        static let outlineWidth: CGFloat = 2.5
+        static let ratingSize: CGFloat = 26
+        /// Green circle behind the content-rating check, as in the Apple TV app
+        static let rating = Color(red: 0.2, green: 0.78, blue: 0.38)
         static let stackedLogoHeight: CGFloat = 44
         static let wideLogoHeight: CGFloat = 30
         static let tint = Color.white.opacity(0.92)
@@ -306,19 +311,23 @@ enum CinemaTheme {
         static let lineSpacing: CGFloat = 6
     }
 
-    // MARK: - Rank
+    // MARK: - Top 10
 
     /// Chart positions sit on the artwork in a glass tile instead of beside it
-    enum Rank {
+    enum TopTen {
 
-        static let tileSize: CGFloat = 72
-        static let tileCornerRadius: CGFloat = 20
-        static let numberSize: CGFloat = 40
-        static let inset: CGFloat = 12
+        static let numberSize: CGFloat = 300
+        static let numberTracking: CGFloat = -28
+        /// How far the poster tucks over its rank number
+        static let numberOverlap: CGFloat = 34
+        static let outlineWidth: CGFloat = 3
+        static let outlineColor = Color.white.opacity(0.7)
+        static let numberFill = Colors.background
 
-        static let badgeFontSize: CGFloat = 15
-        static let badgeHorizontalPadding: CGFloat = 12
-        static let badgeHeight: CGFloat = 30
+        static let badgeWidth: CGFloat = 46
+        static let badgeHeight: CGFloat = 56
+        static let badgeLabelSize: CGFloat = 13
+        static let badgeNumberSize: CGFloat = 25
     }
 
     // MARK: - New Content
@@ -330,6 +339,7 @@ enum CinemaTheme {
         static let fontSize: CGFloat = 16
         static let horizontalPadding: CGFloat = 14
         static let verticalPadding: CGFloat = 6
+        static let cornerRadius: CGFloat = 4
         static let dotSize: CGFloat = 9
         static let inset: CGFloat = 12
     }

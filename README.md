@@ -17,8 +17,8 @@
 
 ### Profiles
 - **Who's watching, every time.** Velora asks who's watching each time it opens or returns from the background.
-- **Launch ident.** A red glow rises out of black, the two arms of the Velora mark cut in and meet at the point, and a glint crosses it before the profiles appear.
-- **Profile column on glass.** The Velora mark heads a glass panel of profiles over artwork from your own library. The chosen profile glides to the centre while it signs in.
+- **Launch ident.** Every time Velora launches or comes back from the background, a red glow rises out of black, the two arms of the Velora mark cut in and meet at the point, and a glint crosses it before the profiles appear.
+- **Who's watching?** The Velora mark heads a column of profiles on the left, over artwork from your own library. The chosen profile glides to the centre while it signs in.
 - **32 avatars.** There are 16 original Velora characters: otter, koala, axolotl, sloth, hedgehog, raccoon, narwhal, capybara, chameleon, bunny, octopus, lion cub, frog, bee, unicorn and whale. The 16 classic characters are kept as well. Long-press a profile to choose one.
 - **Sign in with your phone.** Use Quick Connect by scanning a QR code, or sign in with the remote.
 
@@ -34,21 +34,22 @@
   - Language rows such as Indian Movies, South Indian Cinema, Telugu Movies and Made in Korea. These only include films made in that region, so a Hollywood film with a dubbed Hindi track stays out of the Indian rows.
   - A category row only appears when your server has at least four titles for it.
 - **Posters that open up.** The focused poster expands into a wide card with the title's logo and progress.
-- **Chart positions.** A title's position appears in a glass tile on its artwork, and titles in a chart get a small Top 10 pill in other rows.
+- **Chart positions.** Top 10 rows show a large outlined rank number beside each poster, and titles in a chart get a red TOP 10 tag in other rows.
 
 <sub>Jellyfin has no server-wide popularity data, so the Top 10 charts rank recent titles by community and critic ratings.</sub>
 
 ### Details
 - **Metadata line.** Year, runtime and the content rating, followed by the title's formats:
-  - picture: the Dolby Vision logo, and glass pills for 4K/HD, HDR10, HDR10+ and HLG;
-  - sound: the Dolby Atmos and Dolby Digital logos, and glass pills for DTS, DTS-HD, DTS:X, TrueHD, 5.1 and 7.1;
-  - accessibility: CC, SDH and AD.
+  - picture: 4K or HD tags, the Dolby Vision logo, and HDR10, HDR10+ and HLG tags;
+  - sound: the Dolby Atmos and Dolby Digital logos, and DTS, DTS-HD, DTS:X, TrueHD, 5.1 and 7.1 tags;
+  - accessibility: outlined CC, SDH and AD tags, Apple TV style.
 - **Info panel.** Information, Languages and Accessibility on a glass panel, plus cast and director credits.
 
 ### Playback
 - **Three players.** VLC is the default. Apple's AVPlayer and MPV are also available.
 - **Automatic switch for 4K and HDR.** 4K and HDR titles chosen with VLC play through AVPlayer instead, for smooth hardware-decoded video. If the selected subtitles are image-based, VLC is kept.
 - **Remuxed HEVC.** HEVC in MKV is remuxed by the server rather than re-encoded.
+- **Fast-forward with the picture playing.** Hold right on the remote to fast-forward at 2x, and keep holding for 4x. The video keeps playing at that speed, preview frames show above the progress bar, and letting go returns to normal speed. A quick click still jumps ahead. AVPlayer stays at 2x for streams that can't play faster.
 - **Larger buffers.**
 
   | Player | Buffer |
@@ -60,7 +61,7 @@
 - **Playback info.** Shows the player in use and whether the stream is direct, remuxed or transcoded.
 
 ### Design
-- **Liquid Glass** on buttons, chips, badges, panels and the profile bar. Focused buttons fill with Velora red.
+- **Liquid Glass** on buttons, chips, panels and the profile bar. Focused buttons fill with Velora red.
 - **One palette.** Velora red `#E60A14`, garnet `#80030D` and ember `#FF573D` on a deep black. The default accent everywhere is Velora red, and you can change it in Settings.
 - **Gradient details.** Focus rings, progress bars and the player timeline use the brand gradient.
 

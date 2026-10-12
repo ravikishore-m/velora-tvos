@@ -293,6 +293,8 @@ extension VideoPlayer {
         }
 
         var originalPlaybackRate: Double?
+        /// The rate while the remote is fast-forwarding, so the progress bar can show preview frames
+        var fastForwardRate: Double?
 
         let centerOffsetBox: PublishedBox<CGFloat> = .init(initialValue: 0)
         let focusCoordinator: FocusCoordinator = .init()

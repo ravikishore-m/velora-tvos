@@ -9,7 +9,7 @@
 import JellyfinAPI
 import SwiftUI
 
-/// "Movie · Action · Drama", the line above the synopsis
+/// "Movie · Action · Drama", the line above the synopsis in the Apple TV app
 struct CinemaContentLine: View {
 
     let item: BaseItemDto
@@ -83,7 +83,7 @@ extension BaseItemDto {
     }
 }
 
-/// Details metadata line: "2024 · 46m", the rating, then the format pills
+/// Apple TV app metadata line: "2024 · 46m    ✓ 14+    4K    Dolby Vision    Dolby Atmos    CC  SDH  AD"
 struct CinemaBadges: View {
 
     let item: BaseItemDto
@@ -118,15 +118,19 @@ struct CinemaBadges: View {
     @ViewBuilder
     private var contentRating: some View {
         if let officialRating = item.officialRating, officialRating.isNotEmpty {
-            Text(officialRating)
-                .font(.system(size: CinemaTheme.Badge.fontSize, weight: .bold, design: .rounded))
-                .foregroundStyle(CinemaTheme.Colors.primaryText)
-                .padding(.horizontal, CinemaTheme.Badge.horizontalPadding)
-                .frame(height: CinemaTheme.Badge.height)
-                .glassEffect(.regular.tint(CinemaTheme.Colors.accent.opacity(0.35)), in: Capsule())
-                .accessibilityElement(children: .combine)
-                .accessibilityLabel(L10n.parentalRating)
-                .accessibilityValue(officialRating)
+            HStack(spacing: CinemaTheme.Badge.iconSpacing) {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: CinemaTheme.Badge.ratingSize, weight: .bold))
+                    .symbolRenderingMode(.palette)
+                    .foregroundStyle(.white, CinemaTheme.Badge.rating)
+                    .accessibilityHidden(true)
+
+                Text(officialRating)
+                    .foregroundStyle(CinemaTheme.Colors.primaryText)
+            }
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel(L10n.parentalRating)
+            .accessibilityValue(officialRating)
         }
     }
 

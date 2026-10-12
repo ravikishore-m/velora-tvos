@@ -31,8 +31,6 @@ struct CinemaCard: View {
     let entry: ItemEntry
     let isExpanded: Bool
     var showsTopTenBadge: Bool = true
-    /// Position in a chart row, shown in a glass tile on the artwork
-    var rank: Int?
 
     private var shape: RoundedRectangle {
         RoundedRectangle(cornerRadius: CinemaTheme.Card.cornerRadius)
@@ -41,8 +39,19 @@ struct CinemaCard: View {
     @ViewBuilder
     private func newContentBadge(for item: BaseItemDto) -> some View {
         if let label = item.cinemaNewContentLabel {
-            CinemaNewContentPill(label: label)
-                .padding(CinemaTheme.NewContent.inset)
+            Text(label)
+                .font(.system(size: CinemaTheme.NewContent.fontSize, weight: .bold))
+                .foregroundStyle(CinemaTheme.Colors.primaryText)
+                .lineLimit(1)
+                .padding(.horizontal, CinemaTheme.NewContent.horizontalPadding)
+                .padding(.vertical, CinemaTheme.NewContent.verticalPadding)
+                .background(CinemaTheme.Colors.accent)
+                .clipShape(
+                    UnevenRoundedRectangle(
+                        topLeadingRadius: CinemaTheme.NewContent.cornerRadius,
+                        topTrailingRadius: CinemaTheme.NewContent.cornerRadius
+                    )
+                )
         }
     }
 
@@ -65,10 +74,10 @@ struct CinemaCard: View {
             GeometryReader { proxy in
                 ZStack(alignment: .leading) {
                     Rectangle()
-                        .fill(CinemaTheme.Colors.track)
+                        .fill(CinemaTheme.Colors.actionBackground)
 
                     Rectangle()
-                        .fill(CinemaTheme.Brand.gradient)
+                        .fill(CinemaTheme.Colors.accent)
                         .frame(width: proxy.size.width * percentage)
                 }
             }
@@ -156,8 +165,8 @@ struct CinemaCard: View {
                 .opacity(isExpanded ? 1 : 0)
 
             poster
-                .overlay(alignment: .bottomLeading) {
-                    VStack(alignment: .leading, spacing: 0) {
+                .overlay(alignment: .bottom) {
+                    VStack(spacing: 0) {
                         newContentBadge(for: item)
                         progressBar(for: item)
                     }
@@ -165,7 +174,6 @@ struct CinemaCard: View {
                 .overlay(alignment: .topTrailing) {
                     if showsTopTenBadge {
                         CinemaTopTenBadge(item: item)
-                            .padding(CinemaTheme.Rank.inset)
                     }
                 }
                 .opacity(isExpanded ? 0 : 1)
@@ -173,11 +181,6 @@ struct CinemaCard: View {
             if isExpanded {
                 billboard(for: item)
                     .transition(.opacity.combined(with: .offset(y: 12)))
-            }
-
-            if let rank {
-                CinemaRankTag(rank: rank)
-                    .padding(CinemaTheme.Rank.inset)
             }
         }
         .frame(
@@ -189,8 +192,7 @@ struct CinemaCard: View {
         .clipShape(shape)
         .overlay {
             shape
-                .strokeBorder(CinemaTheme.Brand.diagonalGradient, lineWidth: 3)
-                .opacity(isExpanded ? 1 : 0)
+                .strokeBorder(CinemaTheme.Colors.primaryText.opacity(isExpanded ? 0.35 : 0), lineWidth: 2)
         }
         .shadow(
             color: .black.opacity(isExpanded ? 0.6 : 0),

@@ -219,10 +219,10 @@ struct VeloraIntro: View {
         try? await Task.sleep(for: .milliseconds(500))
 
         stage = .glint
-        withAnimation(.easeInOut(duration: 0.8)) {
+        withAnimation(.easeInOut(duration: 0.9)) {
             glintProgress = 1
         }
-        try? await Task.sleep(for: .milliseconds(1000))
+        try? await Task.sleep(for: .milliseconds(1400))
 
         withAnimation(.easeIn(duration: 0.6)) {
             stage = .exit

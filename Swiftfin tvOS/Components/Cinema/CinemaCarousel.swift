@@ -21,7 +21,7 @@ struct CinemaCarousel<Library: PagingLibrary>: View where Library.Element == Ite
 
         let entry: ItemEntry
         let isExpanded: Bool
-        let rank: Int?
+        let showsTopTenBadge: Bool
 
         var body: some View {
             Button {
@@ -30,8 +30,7 @@ struct CinemaCarousel<Library: PagingLibrary>: View where Library.Element == Ite
                 CinemaCard(
                     entry: entry,
                     isExpanded: isExpanded,
-                    showsTopTenBadge: rank == nil,
-                    rank: rank
+                    showsTopTenBadge: showsTopTenBadge
                 )
             }
             .buttonStyle(.cinemaCard)
@@ -54,7 +53,7 @@ struct CinemaCarousel<Library: PagingLibrary>: View where Library.Element == Ite
     var viewModel: PagingLibraryViewModel<Library>
 
     let title: String
-    /// Ranked rows show each title's position in a glass tile on its artwork
+    /// Ranked rows show large numbers beside each poster, chart style
     var rankingID: String?
 
     private var isRanked: Bool {
@@ -85,12 +84,24 @@ struct CinemaCarousel<Library: PagingLibrary>: View where Library.Element == Ite
 
     @ViewBuilder
     private func card(for entry: ItemEntry, rank: Int) -> some View {
-        CardButton(
+        let button = CardButton(
             entry: entry,
             isExpanded: focusedID == entry.id,
-            rank: isRanked ? rank : nil
+            showsTopTenBadge: !isRanked
         )
         .focused($focusedID, equals: entry.id)
+
+        Group {
+            if isRanked {
+                HStack(alignment: .bottom, spacing: -CinemaTheme.TopTen.numberOverlap) {
+                    CinemaRankNumber(rank: rank)
+
+                    button
+                }
+            } else {
+                button
+            }
+        }
         .id(entry.id)
         .onAppear {
             guard !isRanked else { return }

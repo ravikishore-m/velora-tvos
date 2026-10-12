@@ -24,6 +24,7 @@ struct SwiftfinApp: App {
                     RootView()
                 }
             }
+            .modifier(VeloraLaunchOverlay())
         }
     }
 }
